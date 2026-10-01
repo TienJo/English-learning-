@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英文學習工作台 & 智慧單字卡</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background: #f8fafc; color: #1e293b; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 20; height: 56px; }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    header h1 { margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .status-badge { font-size: 12px; background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 9999px; font-weight: 500; }
+
+    #app-layout { display: flex; flex: 1; height: calc(100vh - 56px); overflow: hidden; position: relative; }
+    .hidden { display: none !important; }
+
+    button { background: #2563eb; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-green { background: #059669; }
+    .btn-green:hover { background: #047857; }
+    .btn-purple { background: #7c3aed; }
+    .btn-purple:hover { background: #6d28d9; }
+    .btn-amber { background: #d97706; }
+    .btn-amber:hover { background: #b45309; }
+    .btn-gray { background: #64748b; }
+    .btn-gray:hover { background: #475569; }
+    .btn-danger { background: #ef4444; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-outline { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
+    .btn-outline:hover { background: #f1f5f9; color: #0f172a; }
+
+    /* 側邊欄樣式 */
+    aside#main-sidebar {
+      width: 270px;
+      min-width: 270px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+      z-index: 30;
+    }
+
+    body.in-study-mode aside#main-sidebar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      box-shadow: none;
+    }
+
+    body.in-study-mode.drawer-open aside#main-sidebar {
+      transform: translateX(0);
+      box-shadow: 10px 0 25px rgba(0, 0, 0, 0.1);
+    }
+
+    #sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(1px);
+      z-index: 25;
+      display: none;
+    }
+
+    body.in-study-mode.drawer-open #sidebar-overlay {
+      display: block;
+    }
+
+    .sidebar-header { padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .sidebar-header h2 { margin: 0; font-size: 15px; }
+    .project-list { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: 8px; }
+    .project-item { padding: 12px; border-radius: 8px; margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; border: 1px solid transparent; }
+    .project-item:hover { background: #f1f5f9; }
+    .project-item.active { background: #eff6ff; border-color: #bfdbfe; }
+    .project-title { font-size: 14px; font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+    .project-meta { font-size: 11px; color: #64748b; margin-top: 3px; }
+    .btn-del-project { background: transparent; color: #94a3b8; padding: 4px 6px; font-size: 16px; border-radius: 4px; }
+    .btn-del-project:hover { background: #fee2e2; color: #ef4444; }
+
+    main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; position: relative; width: 100%; }
+    .content-container { max-width: 1120px; width: 100%; margin: 0 auto; padding: 24px; }
+
+    .empty-state-card { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .empty-state-card h2 { margin-top: 0; color: #0f172a; font-size: 20px; }
+
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .dashboard-header h2 { margin: 0; font-size: 22px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    
+    .day-card { background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 145px; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
+    .day-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px -1px rgba(0,0,0,0.08); }
+    .card-day-tag { font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; margin-bottom: 6px; }
+    .card-title { font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.4; margin-bottom: 12px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+    
+    .day-card.completed { border-left: 4px solid #10b981; }
+    .day-card.completed .card-day-tag { color: #059669; }
+    .day-card.current { border: 2px solid #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .day-card.locked { background: #f8fafc; border-color: #e2e8f0; opacity: 0.65; filter: grayscale(80%); }
+    .day-card.locked:hover { transform: none; box-shadow: none; }
+    .day-card.locked .card-day-tag { color: #94a3b8; }
+    .day-card.locked .card-title { color: #64748b; }
+
+    /* 雙欄模式與視圖 Tab */
+    .study-layout { display: flex; height: 100%; width: 100%; gap: 18px; padding: 16px 20px; overflow: hidden; }
+    .lecture-panel { flex: 6; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    
+    .lecture-header { padding: 12px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; gap: 14px; }
+    .lecture-title-area { display: flex; flex-direction: column; justify-content: center; }
+    .tab-nav { display: flex; gap: 6px; border-bottom: 1px solid #e2e8f0; padding: 0 18px; background: #f8fafc; }
+    .tab-btn { background: transparent; color: #64748b; border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 10px 14px; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+    .tab-btn:hover { color: #0f172a; background: transparent; }
+    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; background: #ffffff; }
+
+    .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+    .tab-content.active { display: block; }
+    .lecture-content { line-height: 1.8; font-size: 15px; color: #334155; }
+    
+    .interactive-panel { flex: 4; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .interactive-header { padding: 14px 18px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; }
+    .chat-scroll-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
+    .chat-input-bar { padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 8px; }
+
+    .msg { padding: 10px 14px; border-radius: 8px; line-height: 1.5; max-width: 92%; font-size: 13.5px; word-break: break-word; }
+    .msg-bot { background: #ffffff; border: 1px solid #e2e8f0; align-self: flex-start; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .msg-user { background: #2563eb; color: #ffffff; align-self: flex-end; }
+    .msg-system { background: #fef3c7; color: #92400e; align-self: center; font-size: 12px; padding: 6px 12px; border-radius: 9999px; text-align: center; }
+
+    .lecture-content h1, .lecture-content h2, .lecture-content h3 { color: #0f172a; margin-top: 24px; margin-bottom: 10px; }
+    .lecture-content h2 { border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
+    .lecture-content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+    .lecture-content th, .lecture-content td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
+    .lecture-content th { background-color: #f1f5f9; font-weight: 600; }
+    .lecture-content blockquote { margin: 12px 0; padding: 8px 16px; border-left: 4px solid #2563eb; background: #f8fafc; color: #475569; }
+    .lecture-content code { background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+
+    .flashcards-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .flashcards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    
+    .flip-card { background-color: transparent; perspective: 1000px; height: 180px; cursor: pointer; }
+    .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    
+    .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #e2e8f0; }
+    .flip-card-front { background-color: #ffffff; }
+    .flip-card-back { background-color: #f8fafc; transform: rotateY(180deg); border-color: #bfdbfe; text-align: left; }
+
+    .fc-word { font-size: 20px; font-weight: 700; color: #1e3a8a; margin-top: 14px; }
+    .fc-phonetic { font-size: 13px; color: #64748b; font-family: sans-serif; margin-top: 4px; }
+    .fc-pos { font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; align-self: center; margin-top: 6px; }
+    .fc-meaning { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+    .fc-example { font-size: 12px; color: #475569; font-style: italic; line-height: 1.4; }
+    
+    .fc-status-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 9999px; }
+    .fc-status-0 { background: #fee2e2; color: #b91c1c; } /* 生疏 */
+    .fc-status-1 { background: #fef3c7; color: #92400e; } /* 熟悉 */
+    .fc-status-2 { background: #dcfce7; color: #15803d; } /* 精通 */
+
+    /* 沉浸式刷單字卡模式 (Modal) */
+    .study-card-box { width: 480px; max-width: 95%; height: 320px; perspective: 1200px; cursor: pointer; }
+    .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
+    .study-card-box.flipped .study-card-inner { transform: rotateY(180deg); }
+    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #e2e8f0; }
+    .study-card-front { background: #ffffff; }
+    .study-card-back { background: #ffffff; transform: rotateY(180deg); border-color: #93c5fd; }
+
+    .btn-icon { background: transparent; color: #475569; border: 1px solid #cbd5e1; padding: 6px 10px; font-size: 15px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+    .btn-icon:hover { background: #f1f5f9; color: #0f172a; }
+
+    .btn-hamburger { display: none; background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; border-radius: 6px; padding: 5px 9px; font-size: 16px; cursor: pointer; line-height: 1; align-items: center; justify-content: center; }
+    .btn-hamburger:hover { background: #e2e8f0; }
+
+    body.in-study-mode .btn-hamburger { display: inline-flex; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
+    .modal-box { background: white; padding: 24px; border-radius: 12px; width: 440px; max-width: 90%; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .modal-box h3 { margin-top: 0; margin-bottom: 12px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast-msg { background: #1e293b; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: toastFade 0.2s ease-out; }
+    .toast-error { background: #ef4444; }
+    .toast-success { background: #059669; }
+    @keyframes toastFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .typing-indicator { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; height: 24px; }
+    .typing-indicator span { width: 6px; height: 6px; background-color: #94a3b8; border-radius: 50%; animation: typing 1.4s infinite both; }
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+
+    #input-message { font-family: inherit; resize: vertical; min-height: 38px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <button id="btn-toggle-sidebar" class="btn-hamburger" title="切換學習專案">☰</button>
+      <h1>🇬🇧 英文學習工作台 & 智慧單字卡</h1>
+    </div>
+    <div id="header-right" class="hidden" style="display: flex; align-items: center; gap: 12px;">
+      <span class="status-badge" id="cloud-status">Google Drive 已連線</span>
+      <button id="btn-open-settings-modal" class="btn-icon" title="偏好設定">⚙️ 設定</button>
+    </div>
+  </header>
+
+  <div id="sidebar-overlay"></div>
+
+  <!-- 初始連線 Google Drive 卡片 -->
+  <div id="section-auth" style="max-width: 500px; margin: 60px auto; background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    <h2>連接 Google 雲端硬碟</h2>
+    <p style="font-size: 14px; color: #64748b; line-height: 1.5;">
+      登入 Google 帳號後，您的英文學習計畫、深度文法講義、智慧單字卡庫以及測驗記錄，都將自動安全同步於您的 Google Drive 專屬儲存區。
+    </p>
+
+    <div id="env-file-warning" class="hidden" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin: 14px 0; font-size: 13px; color: #991b1b; line-height: 1.5;">
+      <strong>⚠️ 偵測到直接以本機檔案 (file://) 開啟：</strong><br>
+      Google OAuth 安全規範禁止直接從本機檔案開啟登入。請透過本機伺服器開啟（例如 VS Code 的 <strong>Live Server</strong> 或 <code>npx serve</code>），以 <code>http://localhost:...</code> 瀏覽即可順利登入！
+    </div>
+
+    <div style="margin: 16px 0;">
+      <label style="font-size: 12px; font-weight: normal; color: #64748b; cursor: pointer;">
+        <input type="checkbox" id="chk-custom-client-id" style="width: auto; margin-right: 4px;"> 顯示自訂 Client ID
+      </label>
+      <div id="box-custom-client-id" class="hidden" style="margin-top: 8px;">
+        <input type="text" id="input-client-id" value="865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com" style="width: 100%; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+      </div>
+    </div>
+
+    <button id="btn-login" style="width: 100%; padding: 12px; font-size: 15px;">登入 Google 帳號</button>
+  </div>
+
+  <div id="app-layout" class="hidden">
+    <!-- 左側專案清單 -->
+    <aside id="main-sidebar">
+      <div class="sidebar-header">
+        <h2>英文計畫清單</h2>
+        <button id="btn-open-new-project-modal" style="padding: 4px 10px; font-size: 12px;">+ 新建計畫</button>
+      </div>
+      <ul id="project-list" class="project-list"></ul>
+    </aside>
+
+    <!-- 右側主要操作區 -->
+    <main>
+      <!-- 視圖 0: 當沒有任何專案時，直接顯示整頁新建表單 -->
+      <section id="view-empty-create" class="content-container hidden">
+        <div class="empty-state-card">
+          <h2>建立第一個英文學習計畫</h2>
+          <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px;">
+            目前尚未建立任何專案。請設定目標（如：多益核心文法、日常美語口語、學測長難句構），Gemini 3 Flash 將為你客製專屬的每日進度大綱與精選單字卡。
+          </p>
+
+          <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">學習目標 / 主題：</label>
+          <input type="text" id="input-empty-goal" placeholder="例如：TOEIC 750分必考文法、商務職場 Email 句型、出國生活口語" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; margin-bottom: 16px;">
+
+          <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">規劃天數：</label>
+          <input type="number" id="input-empty-days" value="14" min="1" max="90" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; margin-bottom: 20px;">
+
+          <button id="btn-empty-create" style="width: 100%; padding: 12px; font-size: 15px;">開始規劃大綱並進入學習</button>
+        </div>
+      </section>
+
+      <!-- 視圖 A: 專案日卡看板 -->
+      <section id="view-dashboard" class="content-container hidden">
+        <div class="dashboard-header">
+          <div>
+            <h2 id="view-project-title">載入中...</h2>
+            <span id="view-project-progress" style="font-size: 13px; color: #64748b;">計算進度中...</span>
+          </div>
+        </div>
+        <div id="day-cards-grid" class="cards-grid"></div>
+      </section>
+
+      <!-- 視圖 B: 雙欄式深度研讀與單字卡工作區 -->
+      <section id="view-study" class="study-layout hidden">
+        <!-- 左欄：教材與單字卡分頁 -->
+        <div class="lecture-panel">
+          <div class="lecture-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button id="btn-back-cards-left" class="btn-outline" style="padding: 6px 10px;" title="返回日程看板">
+                <span>← 返回看板</span>
+              </button>
+              <div class="lecture-title-area">
+                <span id="lecture-day-tag" style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase;">DAY 1</span>
+                <h2 id="study-day-title" style="margin: 2px 0 0; font-size: 16px; color: #0f172a; font-weight: 700;">教材標題</h2>
+              </div>
+            </div>
+            <div>
+              <button id="btn-start-flashcard-mode" class="btn-purple" style="font-size: 12px; padding: 6px 12px;">🎴 進入刷卡模式</button>
+            </div>
+          </div>
+
+          <!-- 分頁頁籤：深度講義 vs 單字卡庫 -->
+          <div class="tab-nav">
+            <button id="tab-btn-lecture" class="tab-btn active">📖 核心文法與解析講義</button>
+            <button id="tab-btn-vocab" class="tab-btn">🗂️ 今日單字卡庫 (<span id="vocab-count-badge">0</span>)</button>
+          </div>
+
+          <!-- 分頁 1：深度講義 -->
+          <div id="tab-pane-lecture" class="tab-content active">
+            <div id="lecture-content-box" class="lecture-content">
+              <p style="color: #94a3b8;">正在準備教材...</p>
+            </div>
+          </div>
+
+          <!-- 分頁 2：單字卡庫 -->
+          <div id="tab-pane-vocab" class="tab-content">
+            <div class="flashcards-toolbar">
+              <div style="display: flex; gap: 8px;">
+                <button id="btn-ai-gen-vocab" class="btn-purple" style="font-size: 12px;">✨ AI 自動自講義提取單字卡</button>
+                <button id="btn-add-custom-vocab" class="btn-outline" style="font-size: 12px;">+ 手動增卡</button>
+              </div>
+              <div style="font-size: 12px; color: #64748b;">
+                點擊卡片即可 3D 翻面，或點擊小喇叭聽純正發音 🔊
+              </div>
+            </div>
+            <div id="flashcards-container" class="flashcards-grid"></div>
+          </div>
+        </div>
+
+        <!-- 右欄：即時 AI 助教問答與 10+1 題測驗 -->
+        <div class="interactive-panel">
+          <div class="interactive-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>🤖 AI 英文助教 & 隨堂測驗 (Gemini 3 Flash)</span>
+            <div style="display: flex; align-items: center; gap: 6px; font-weight: normal; font-size: 12px; color: #64748b;">
+              <span>解析詳盡度:</span>
+              <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 70px; cursor: pointer;">
+              <span id="badge-detail-level" style="font-weight: 600; color: #2563eb; min-width: 28px;">適中</span>
+            </div>
+          </div>
+          <div id="chat-box" class="chat-scroll-area"></div>
+          <div class="chat-input-bar">
+            <div style="display: flex; gap: 6px; align-items: flex-end;">
+              <textarea id="input-message" rows="1" placeholder="問文法、請助教造句、或貼上答案批改... (Enter 鍵正常換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
+              <button id="btn-send-message" style="height: 38px;">發送</button>
+            </div>
+            <button id="btn-trigger-quiz" class="btn-green" style="width: 100%;">進行今日 10+1 題隨堂實戰測驗</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 刷單字卡沉浸式視窗 -->
+  <div id="modal-flashcard-player" class="modal-overlay hidden">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
+      <div style="display: flex; justify-content: space-between; width: 480px; max-width: 95%; color: #fff; font-size: 14px;">
+        <span id="fc-player-progress">卡片 1 / 10</span>
+        <button id="btn-close-fc-player" style="background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 4px 10px; border-radius: 6px;">✕ 退出刷卡</button>
+      </div>
+
+      <!-- 3D 沉浸式卡片 -->
+      <div id="player-card-box" class="study-card-box">
+        <div class="study-card-inner">
+          <div class="study-card-front">
+            <span style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">[ 點擊翻轉看中文釋義 ]</span>
+            <div id="player-front-word" style="font-size: 36px; font-weight: 800; color: #1e3a8a;">Word</div>
+            <div id="player-front-phonetic" style="font-size: 16px; color: #64748b; margin-top: 6px;">/wɜːd/</div>
+            <div id="player-front-pos" style="font-size: 12px; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; margin-top: 10px;">noun</div>
+            <button id="btn-player-speak-front" class="btn-outline" style="margin-top: 16px; font-size: 13px; border-radius: 9999px; padding: 6px 14px;">🔊 聆聽美式發音</button>
+          </div>
+          <div class="study-card-back">
+            <div id="player-back-meaning" style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">中文釋義</div>
+            <div id="player-back-example" style="font-size: 14px; color: #334155; line-height: 1.6; background: #f1f5f9; padding: 12px; border-radius: 8px; width: 100%;">例句展示</div>
+            <span style="font-size: 12px; color: #94a3b8; margin-top: 12px;">[ 點擊可翻回正面 ]</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 記憶熟練度操作列 -->
+      <div style="display: flex; gap: 12px; width: 480px; max-width: 95%; justify-content: center;">
+        <button id="btn-fc-rate-0" class="btn-danger" style="flex: 1; padding: 10px;">❌ 遺忘生疏</button>
+        <button id="btn-fc-rate-1" class="btn-amber" style="flex: 1; padding: 10px;">🤔 有點模糊</button>
+        <button id="btn-fc-rate-2" class="btn-green" style="flex: 1; padding: 10px;">✅ 熟練記住</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手動新增單字彈跳視窗 -->
+  <div id="modal-add-vocab" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>新增自訂單字卡</h3>
+      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">英文單字 / 片語：</label>
+      <input type="text" id="input-new-word" placeholder="例如：procrastinate" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <div style="flex: 1;">
+          <label style="font-size: 12px; font-weight: 600; display: block;">音標 (選填)：</label>
+          <input type="text" id="input-new-phonetic" placeholder="/prəˈkræstɪneɪt/" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 12px; font-weight: 600; display: block;">詞性：</label>
+          <input type="text" id="input-new-pos" placeholder="v. / n. / adj." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+        </div>
+      </div>
+
+      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">中文釋義：</label>
+      <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+
+      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">實用例句：</label>
+      <textarea id="input-new-example" rows="2" placeholder="Don't procrastinate; start studying today." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-family: inherit; font-size: 13px;"></textarea>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-add-vocab" class="btn-gray">取消</button>
+        <button id="btn-confirm-add-vocab">新增卡片</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 彈跳視窗：API Key 設定 -->
+  <div id="modal-key-setup" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>設定 Gemini API Key</h3>
+      <p style="font-size: 13px; color: #64748b; line-height: 1.4;">
+        初次使用請輸入 Gemini API Key。金鑰將安全儲存於個人 Google Drive 專屬設定中，往後打開自動連線。
+      </p>
+      <input type="password" id="input-gemini-key" placeholder="AIzaSy..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin: 12px 0;">
+      <div class="modal-actions">
+        <button id="btn-save-key">儲存至雲端並繼續</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 彈跳視窗：模型偏好設定 -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0;">系統與模型設定</h3>
+        <button id="btn-close-settings-x" style="background: transparent; color: #94a3b8; font-size: 18px; padding: 2px 6px; border-radius: 4px;">✕</button>
+      </div>
+      <p style="font-size: 13px; color: #64748b; line-height: 1.4; margin-bottom: 16px;">
+        自訂生成英文講義與日常助教問答的模型（測驗批改預設以 Gemini 3 Flash 提供深度解析）。
+      </p>
+
+      <div style="margin-bottom: 14px;">
+        <label for="select-lecture-model" style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
+          英文講義與單字提取模型：
+        </label>
+        <select id="select-lecture-model" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
+          <option value="gemini-3-flash-preview">Gemini 3 Flash (推薦・深度英語教學)</option>
+          <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (極速反應)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label for="select-chat-model" style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
+          日常助教互動模型：
+        </label>
+        <select id="select-chat-model" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
+          <option value="gemini-3-flash-preview">Gemini 3 Flash (推薦・智慧診斷)</option>
+          <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (快速問答)</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-save-settings">儲存並套用</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 彈跳視窗：新增專案 -->
+  <div id="modal-new-project" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>新增英文學習計畫</h3>
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-top: 10px;">專案目標 / 主題：</label>
+      <input type="text" id="input-new-goal" placeholder="例如：TOEIC 閱讀高頻語法突破、美劇生活道地片語" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+
+      <label style="font-size: 13px; font-weight: 600; display: block; margin-top: 12px;">規劃天數：</label>
+      <input type="number" id="input-new-days" value="14" min="1" max="90" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+
+      <div class="modal-actions">
+        <button id="btn-cancel-new-project" class="btn-gray">取消</button>
+        <button id="btn-confirm-create-project">開始規劃大綱</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 確認對話框 -->
+  <div id="modal-confirm" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 id="confirm-modal-title">請確認</h3>
+      <p id="confirm-modal-msg" style="font-size: 14px; color: #475569; line-height: 1.5; margin: 12px 0;"></p>
+      <div class="modal-actions">
+        <button id="btn-confirm-cancel" class="btn-gray">取消</button>
+        <button id="btn-confirm-ok" class="btn-danger">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module">
+  import { GoogleGenAI } from "https://esm.run/@google/genai";
+
+  const FLASH_MODEL = "gemini-3-flash-preview";
+  const DEFAULT_LECTURE_MODEL = FLASH_MODEL;
+  const DEFAULT_CHAT_MODEL = FLASH_MODEL;
+
+  const MODEL_DISPLAY_NAMES = {
+    "gemini-3-flash-preview": "Gemini 3 Flash",
+    "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite"
+  };
+  
+  const DEFAULT_CLIENT_ID = "865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com";
+  const DRIVE_FILE_NAME = "english_learning_master_projects.json";
+  const SCOPES = "https://www.googleapis.com/auth/drive.file";
+
+  const state = {
+    geminiKey: "",
+    accessToken: null,
+    driveFileId: null,
+    appData: {
+      geminiKey: "",
+      activeProjectId: null,
+      settings: {
+        lectureModel: DEFAULT_LECTURE_MODEL,
+        chatModel: DEFAULT_CHAT_MODEL,
+        detailLevel: 2
+      },
+      projects: {}
+    },
+    activeDayIndex: null,
+    chatInstance: null,
+    currentStudyIndex: 0 // 單字刷卡模式索引
+  };
+
+  // DOM 元素引用
+  const sectionAuth = document.getElementById("section-auth");
+  const appLayout = document.getElementById("app-layout");
+  const headerRight = document.getElementById("header-right");
+  const btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
+  const sidebarOverlay = document.getElementById("sidebar-overlay");
+  const btnOpenSettings = document.getElementById("btn-open-settings-modal");
+  const modalSettings = document.getElementById("modal-settings");
+  const btnCloseSettingsX = document.getElementById("btn-close-settings-x");
+  const btnSaveSettings = document.getElementById("btn-save-settings");
+  const selectLectureModel = document.getElementById("select-lecture-model");
+  const selectChatModel = document.getElementById("select-chat-model");
+  const btnLogin = document.getElementById("btn-login");
+  const chkCustomClientId = document.getElementById("chk-custom-client-id");
+  const boxCustomClientId = document.getElementById("box-custom-client-id");
+  const inputClientId = document.getElementById("input-client-id");
+
+  const modalKeySetup = document.getElementById("modal-key-setup");
+  const inputGeminiKey = document.getElementById("input-gemini-key");
+  const btnSaveKey = document.getElementById("btn-save-key");
+
+  const modalNewProject = document.getElementById("modal-new-project");
+  const btnOpenNewProject = document.getElementById("btn-open-new-project-modal");
+  const btnCancelNewProject = document.getElementById("btn-cancel-new-project");
+  const btnConfirmCreateProject = document.getElementById("btn-confirm-create-project");
+  const inputNewGoal = document.getElementById("input-new-goal");
+  const inputNewDays = document.getElementById("input-new-days");
+
+  const viewEmptyCreate = document.getElementById("view-empty-create");
+  const inputEmptyGoal = document.getElementById("input-empty-goal");
+  const inputEmptyDays = document.getElementById("input-empty-days");
+  const btnEmptyCreate = document.getElementById("btn-empty-create");
+
+  const projectListElem = document.getElementById("project-list");
+  const viewDashboard = document.getElementById("view-dashboard");
+  const viewStudy = document.getElementById("view-study");
+  const viewProjectTitle = document.getElementById("view-project-title");
+  const viewProjectProgress = document.getElementById("view-project-progress");
+  const dayCardsGrid = document.getElementById("day-cards-grid");
+
+  const studyDayTitle = document.getElementById("study-day-title");
+  const lectureDayTag = document.getElementById("lecture-day-tag");
+  const lectureContentBox = document.getElementById("lecture-content-box");
+  const chatBox = document.getElementById("chat-box");
+  const inputMessage = document.getElementById("input-message");
+  const btnSendMessage = document.getElementById("btn-send-message");
+  const btnTriggerQuiz = document.getElementById("btn-trigger-quiz");
+  const btnBackCardsLeft = document.getElementById("btn-back-cards-left");
+  const sliderDetailLevel = document.getElementById("slider-detail-level");
+  const badgeDetailLevel = document.getElementById("badge-detail-level");
+
+  // 單字卡相關 DOM
+  const tabBtnLecture = document.getElementById("tab-btn-lecture");
+  const tabBtnVocab = document.getElementById("tab-btn-vocab");
+  const tabPaneLecture = document.getElementById("tab-pane-lecture");
+  const tabPaneVocab = document.getElementById("tab-pane-vocab");
+  const flashcardsContainer = document.getElementById("flashcards-container");
+  const vocabCountBadge = document.getElementById("vocab-count-badge");
+  const btnAiGenVocab = document.getElementById("btn-ai-gen-vocab");
+  const btnAddCustomVocab = document.getElementById("btn-add-custom-vocab");
+  const btnStartFlashcardMode = document.getElementById("btn-start-flashcard-mode");
+
+  const modalAddVocab = document.getElementById("modal-add-vocab");
+  const inputNewWord = document.getElementById("input-new-word");
+  const inputNewPhonetic = document.getElementById("input-new-phonetic");
+  const inputNewPos = document.getElementById("input-new-pos");
+  const inputNewMeaning = document.getElementById("input-new-meaning");
+  const inputNewExample = document.getElementById("input-new-example");
+  const btnCancelAddVocab = document.getElementById("btn-cancel-add-vocab");
+  const btnConfirmAddVocab = document.getElementById("btn-confirm-add-vocab");
+
+  // 刷卡播放器 DOM
+  const modalFlashcardPlayer = document.getElementById("modal-flashcard-player");
+  const btnCloseFcPlayer = document.getElementById("btn-close-fc-player");
+  const playerCardBox = document.getElementById("player-card-box");
+  const playerFrontWord = document.getElementById("player-front-word");
+  const playerFrontPhonetic = document.getElementById("player-front-phonetic");
+  const playerFrontPos = document.getElementById("player-front-pos");
+  const btnPlayerSpeakFront = document.getElementById("btn-player-speak-front");
+  const playerBackMeaning = document.getElementById("player-back-meaning");
+  const playerBackExample = document.getElementById("player-back-example");
+  const fcPlayerProgress = document.getElementById("fc-player-progress");
+  const btnFcRate0 = document.getElementById("btn-fc-rate-0");
+  const btnFcRate1 = document.getElementById("btn-fc-rate-1");
+  const btnFcRate2 = document.getElementById("btn-fc-rate-2");
+
+  const modalConfirm = document.getElementById("modal-confirm");
+  const confirmModalTitle = document.getElementById("confirm-modal-title");
+  const confirmModalMsg = document.getElementById("confirm-modal-msg");
+  const btnConfirmCancel = document.getElementById("btn-confirm-cancel");
+  const btnConfirmOk = document.getElementById("btn-confirm-ok");
+  const toastContainer = document.getElementById("toast-container");
+
+  let confirmCallback = null;
+
+  function showToast(text, type = "info") {
+    const el = document.createElement("div");
+    el.className = `toast-msg ${type === "error" ? "toast-error" : (type === "success" ? "toast-success" : "")}`;
+    el.textContent = text;
+    toastContainer.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+
+  function showConfirm(title, message, onConfirm, okColor = "btn-danger") {
+    confirmModalTitle.textContent = title;
+    confirmModalMsg.textContent = message;
+    btnConfirmOk.className = okColor;
+    confirmCallback = onConfirm;
+    modalConfirm.classList.remove("hidden");
+  }
+
+  btnConfirmCancel.addEventListener("click", () => {
+    modalConfirm.classList.add("hidden");
+    confirmCallback = null;
+  });
+
+  btnConfirmOk.addEventListener("click", () => {
+    modalConfirm.classList.add("hidden");
+    if (confirmCallback) {
+      confirmCallback();
+      confirmCallback = null;
+    }
+  });
+
+  function speakEnglish(text) {
+    if (!('speechSynthesis' in window)) {
+      showToast("您的瀏覽器不支援語音合成朗讀", "error");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  chkCustomClientId.addEventListener("change", (e) => {
+    boxCustomClientId.classList.toggle("hidden", !e.target.checked);
+  });
+  btnLogin.addEventListener("click", handleGoogleAuth);
+  btnSaveKey.addEventListener("click", handleSaveApiKey);
+  btnOpenNewProject.addEventListener("click", () => {
+    closeSidebarDrawer();
+    modalNewProject.classList.remove("hidden");
+  });
+  btnCancelNewProject.addEventListener("click", () => modalNewProject.classList.add("hidden"));
+  btnConfirmCreateProject.addEventListener("click", () => executeCreateProject(inputNewGoal.value, inputNewDays.value, btnConfirmCreateProject, modalNewProject));
+  btnEmptyCreate.addEventListener("click", () => executeCreateProject(inputEmptyGoal.value, inputEmptyDays.value, btnEmptyCreate, null));
+  btnBackCardsLeft.addEventListener("click", showCardsDashboard);
+
+  btnSendMessage.addEventListener("click", handleSendMessage);
+  btnTriggerQuiz.addEventListener("click", handleStartInChatQuiz);
+
+  btnToggleSidebar.addEventListener("click", () => {
+    document.body.classList.toggle("drawer-open");
+  });
+  sidebarOverlay.addEventListener("click", closeSidebarDrawer);
+
+  function closeSidebarDrawer() {
+    document.body.classList.remove("drawer-open");
+  }
+
+  tabBtnLecture.addEventListener("click", () => {
+    tabBtnLecture.classList.add("active");
+    tabBtnVocab.classList.remove("active");
+    tabPaneLecture.classList.add("active");
+    tabPaneVocab.classList.remove("active");
+  });
+
+  tabBtnVocab.addEventListener("click", () => {
+    tabBtnVocab.classList.add("active");
+    tabBtnLecture.classList.remove("active");
+    tabPaneVocab.classList.add("active");
+    tabPaneLecture.classList.remove("active");
+    renderFlashcardsList();
+  });
+
+  const DETAIL_NAMES = { 1: "簡答", 2: "適中", 3: "詳盡" };
+
+  function updateDetailBadge(val) {
+    if (badgeDetailLevel) badgeDetailLevel.textContent = DETAIL_NAMES[val] || "適中";
+  }
+
+  if (sliderDetailLevel) {
+    sliderDetailLevel.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      updateDetailBadge(val);
+      if (!state.appData.settings) state.appData.settings = {};
+      state.appData.settings.detailLevel = val;
+      saveProgressToDrive();
+    });
+  }
+
+  btnOpenSettings.addEventListener("click", () => {
+    selectLectureModel.value = getActiveLectureModel();
+    selectChatModel.value = getActiveChatModel();
+    modalSettings.classList.remove("hidden");
+  });
+
+  btnCloseSettingsX.addEventListener("click", () => modalSettings.classList.add("hidden"));
+
+  btnSaveSettings.addEventListener("click", async () => {
+    if (!state.appData.settings) state.appData.settings = {};
+    state.appData.settings.lectureModel = selectLectureModel.value;
+    state.appData.settings.chatModel = selectChatModel.value;
+    btnSaveSettings.disabled = true;
+    btnSaveSettings.textContent = "儲存中...";
+    await saveProgressToDrive();
+    btnSaveSettings.disabled = false;
+    btnSaveSettings.textContent = "儲存並套用";
+    modalSettings.classList.add("hidden");
+    showToast("模型設定已更新並同步至雲端", "success");
+  });
+
+  function getActiveLectureModel() {
+    return state.appData.settings?.lectureModel || DEFAULT_LECTURE_MODEL;
+  }
+
+  function getActiveChatModel() {
+    return state.appData.settings?.chatModel || DEFAULT_CHAT_MODEL;
+  }
+
+  function getModelLabel(modelId) {
+    return MODEL_DISPLAY_NAMES[modelId] || modelId;
+  }
+
+  if (window.location.protocol === "file:") {
+    const envWarning = document.getElementById("env-file-warning");
+    if (envWarning) envWarning.classList.remove("hidden");
+  }
+
+  function handleGoogleAuth() {
+    if (window.location.protocol === "file:") {
+      showToast("Google OAuth 禁止在 file:// 協定運行，請用 Live Server 開啟網頁！", "error");
+      return;
+    }
+
+    const clientId = inputClientId.value.trim() || DEFAULT_CLIENT_ID;
+
+    if (typeof google === "undefined" || !google.accounts || !google.accounts.oauth2) {
+      showToast("Google 驗證模組載入中，請稍候重試。", "error");
+      return;
+    }
+
+    btnLogin.disabled = true;
+    btnLogin.textContent = "驗證中...";
+
+    const authTimeout = setTimeout(() => {
+      if (btnLogin.disabled) {
+        btnLogin.disabled = false;
+        btnLogin.textContent = "登入 Google 帳號";
+        showToast("登入已超時。請確認瀏覽器未封鎖彈出式視窗！", "error");
+      }
+    }, 10000);
+
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: SCOPES,
+        error_callback: (err) => {
+          clearTimeout(authTimeout);
+          console.error("GIS Error:", err);
+          showToast(`驗證錯誤: ${err.message || err.type || "請檢查授權來源"}`, "error");
+          btnLogin.disabled = false;
+          btnLogin.textContent = "登入 Google 帳號";
+        },
+        callback: async (resp) => {
+          clearTimeout(authTimeout);
+          if (resp.error) {
+            showToast("授權失敗：" + resp.error, "error");
+            btnLogin.disabled = false;
+            btnLogin.textContent = "登入 Google 帳號";
+            return;
+          }
+          state.accessToken = resp.access_token;
+          await syncDataFromDrive();
+        }
+      });
+
+      client.requestAccessToken();
+    } catch (err) {
+      clearTimeout(authTimeout);
+      console.error("Init Token Client Exception:", err);
+      showToast("啟動登入失敗：" + err.message, "error");
+      btnLogin.disabled = false;
+      btnLogin.textContent = "登入 Google 帳號";
+    }
+  }
+
+  async function syncDataFromDrive() {
+    try {
+      const q = encodeURIComponent(`name = '${DRIVE_FILE_NAME}' and trashed = false`);
+      const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}`, {
+        headers: { Authorization: `Bearer ${state.accessToken}` }
+      });
+      const data = await searchRes.json();
+
+      if (data.files && data.files.length > 0) {
+        state.driveFileId = data.files[0].id;
+        const fileContentRes = await fetch(`https://www.googleapis.com/drive/v3/files/${state.driveFileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${state.accessToken}` }
+        });
+        state.appData = await fileContentRes.json();
+        if (!state.appData.settings) {
+          state.appData.settings = {
+            lectureModel: DEFAULT_LECTURE_MODEL,
+            chatModel: DEFAULT_CHAT_MODEL,
+            detailLevel: 2
+          };
+        }
+      } else {
+        state.appData = {
+          geminiKey: "",
+          activeProjectId: null,
+          settings: {
+            lectureModel: DEFAULT_LECTURE_MODEL,
+            chatModel: DEFAULT_CHAT_MODEL,
+            detailLevel: 2
+          },
+          projects: {}
+        };
+        const metadata = { name: DRIVE_FILE_NAME, mimeType: "application/json" };
+        const form = new FormData();
+        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+        form.append("file", new Blob([JSON.stringify(state.appData)], { type: "application/json" }));
+
+        const createRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${state.accessToken}` },
+          body: form
+        });
+        const created = await createRes.json();
+        state.driveFileId = created.id;
+      }
+
+      sectionAuth.classList.add("hidden");
+      headerRight.classList.remove("hidden");
+      appLayout.classList.remove("hidden");
+
+      selectLectureModel.value = getActiveLectureModel();
+      selectChatModel.value = getActiveChatModel();
+
+      const currentDetail = state.appData.settings?.detailLevel || 2;
+      if (sliderDetailLevel) sliderDetailLevel.value = currentDetail;
+      updateDetailBadge(currentDetail);
+
+      if (state.appData.geminiKey) {
+        state.geminiKey = state.appData.geminiKey;
+        initAppFlow();
+      } else {
+        modalKeySetup.classList.remove("hidden");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("存取 Google 雲端失敗，請確認已在 GCP 將此網址加入授權來源。", "error");
+      btnLogin.disabled = false;
+      btnLogin.textContent = "登入 Google 帳號";
+    }
+  }
+
+  async function saveProgressToDrive() {
+    if (!state.driveFileId) return;
+    try {
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${state.driveFileId}?uploadType=media`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${state.accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(state.appData)
+      });
+    } catch (err) {
+      console.error("雲端同步失敗：", err);
+    }
+  }
+
+  async function handleSaveApiKey() {
+    const key = inputGeminiKey.value.trim();
+    if (!key) {
+      showToast("請輸入 API Key", "error");
+      return;
+    }
+    state.geminiKey = key;
+    state.appData.geminiKey = key;
+    await saveProgressToDrive();
+    modalKeySetup.classList.add("hidden");
+    showToast("API Key 儲存成功！", "success");
+    initAppFlow();
+  }
+
+  function initAppFlow() {
+    const projectKeys = Object.keys(state.appData.projects || {});
+    renderSidebar();
+
+    if (projectKeys.length === 0) {
+      document.body.classList.remove("in-study-mode", "drawer-open");
+      viewStudy.classList.add("hidden");
+      viewDashboard.classList.add("hidden");
+      modalNewProject.classList.add("hidden");
+      viewEmptyCreate.classList.remove("hidden");
+    } else {
+      viewEmptyCreate.classList.add("hidden");
+      if (!state.appData.activeProjectId || !state.appData.projects[state.appData.activeProjectId]) {
+        state.appData.activeProjectId = projectKeys[0];
+      }
+      renderSidebar();
+      showCardsDashboard();
+    }
+  }
+
+  async function executeCreateProject(goalText, daysValue, triggerBtn, modalToHide) {
+    const goal = (goalText || "").trim();
+    const days = daysValue;
+
+    if (!goal) {
+      showToast("請填寫英文專案目標", "error");
+      return;
+    }
+
+    const currentLectureModel = getActiveLectureModel();
+    const originalText = triggerBtn.textContent;
+    triggerBtn.disabled = true;
+    triggerBtn.textContent = `規劃大綱中 (${getModelLabel(currentLectureModel)})...`;
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: state.geminiKey });
+      const prompt = `你是一位精通應用語言學與英文教學的專家。請根據學習目標「${goal}」規劃 ${days} 天的每日英文學習進度大綱。
+要求：
+1. 每日主題必須聚焦具體的英語語法時態、句構（如：分詞構句、關係代名詞、假設語氣）、高頻介系詞片語、語篇銜接詞或核心口語句型。
+2. 輸出格式必須是純 JSON 字串陣列，例如：["Day 1: 主題名稱", "Day 2: 主題名稱", ...]，不要有任何多餘的引言或代碼圍欄。`;
+
+      const res = await ai.models.generateContent({
+        model: currentLectureModel,
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+
+      const plan = JSON.parse(res.text.trim());
+      const newId = "proj_" + Date.now();
+
+      state.appData.projects[newId] = {
+        id: newId,
+        goal: goal,
+        totalDays: parseInt(days, 10),
+        plan: plan,
+        currentDayIndex: 0,
+        history: {}
+      };
+
+      state.appData.activeProjectId = newId;
+      await saveProgressToDrive();
+
+      if (modalToHide) modalToHide.classList.add("hidden");
+      inputNewGoal.value = "";
+      inputEmptyGoal.value = "";
+
+      triggerBtn.disabled = false;
+      triggerBtn.textContent = originalText;
+      showToast(`英文學習計畫「${goal}」規劃完成！`, "success");
+      initAppFlow();
+    } catch (e) {
+      console.error(e);
+      showToast("大綱生成失敗：" + e.message, "error");
+      triggerBtn.disabled = false;
+      triggerBtn.textContent = originalText;
+    }
+  }
+
+  function handleDeleteProject(id, e) {
+    e.stopPropagation();
+    const proj = state.appData.projects[id];
+    showConfirm("刪除專案確認", `確定要刪除「${proj.goal}」專案嗎？相關教材與單字卡將一併移除。`, async () => {
+      delete state.appData.projects[id];
+      const remaining = Object.keys(state.appData.projects);
+      state.appData.activeProjectId = remaining.length > 0 ? remaining[0] : null;
+      await saveProgressToDrive();
+      showToast("專案已刪除", "info");
+      initAppFlow();
+    });
+  }
+
+  function renderSidebar() {
+    projectListElem.innerHTML = "";
+    const projects = state.appData.projects || {};
+
+    Object.values(projects).forEach((proj) => {
+      const li = document.createElement("li");
+      li.className = `project-item ${proj.id === state.appData.activeProjectId ? 'active' : ''}`;
+
+      const completedCount = Object.values(proj.history || {}).filter(h => h.completed).length;
+
+      li.innerHTML = `
+        <div>
+          <div class="project-title" title="${proj.goal}">${proj.goal}</div>
+          <div class="project-meta">${completedCount}/${proj.plan.length} 天 (${Math.round((completedCount/proj.plan.length)*100)}%)</div>
+        </div>
+        <button class="btn-del-project" title="刪除此專案">✕</button>
+      `;
+
+      li.addEventListener("click", () => {
+        state.appData.activeProjectId = proj.id;
+        saveProgressToDrive();
+        renderSidebar();
+        closeSidebarDrawer();
+        showCardsDashboard();
+      });
+
+      li.querySelector(".btn-del-project").addEventListener("click", (e) => handleDeleteProject(proj.id, e));
+      projectListElem.appendChild(li);
+    });
+  }
+
+  function showCardsDashboard() {
+    document.body.classList.remove("in-study-mode", "drawer-open");
+    viewStudy.classList.add("hidden");
+    viewEmptyCreate.classList.add("hidden");
+    viewDashboard.classList.remove("hidden");
+
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    if (!currentProj) {
+      initAppFlow();
+      return;
+    }
+
+    viewProjectTitle.textContent = currentProj.goal;
+    dayCardsGrid.innerHTML = "";
+
+    const history = currentProj.history || {};
+    const currentActiveIndex = currentProj.currentDayIndex || 0;
+    let completedCount = 0;
+
+    currentProj.plan.forEach((title, idx) => {
+      const isCompleted = history[idx]?.completed;
+      if (isCompleted) completedCount++;
+
+      const isCurrent = idx === currentActiveIndex;
+      const isLocked = idx > currentActiveIndex && !isCompleted;
+      const vocabCount = (history[idx]?.flashcards || []).length;
+
+      const card = document.createElement("div");
+      card.className = `day-card ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
+
+      card.innerHTML = `
+        <div>
+          <div class="card-day-tag">Day ${idx + 1} ${isCompleted ? '✓' : ''}</div>
+          <div class="card-title">${title}</div>
+          <div style="font-size: 11.5px; color: #64748b; margin-top: 4px;">🗂️ ${vocabCount} 個單字卡</div>
+        </div>
+        <div class="card-footer">
+          <span style="font-size: 12px; color: ${isLocked ? '#94a3b8' : '#64748b'};">
+            ${isCompleted ? '已熟練' : (isCurrent ? '當前單元' : (isLocked ? '尚未解鎖' : '進行中'))}
+          </span>
+          <button type="button" class="${isCompleted ? 'btn-gray' : ''}" id="btn-card-action-${idx}">
+            ${isCompleted ? '複習' : (isLocked ? '提前解鎖' : '開始學習')}
+          </button>
+        </div>
+      `;
+
+      card.querySelector(`#btn-card-action-${idx}`).addEventListener("click", () => {
+        if (isLocked) {
+          showConfirm("解鎖單元確認", "這天為後續進度單元。建議循序漸進，確定要提前進入學習嗎？", () => {
+            startDayStudy(idx);
+          }, "btn-green");
+        } else {
+          startDayStudy(idx);
+        }
+      });
+
+      dayCardsGrid.appendChild(card);
+    });
+
+    viewProjectProgress.textContent = `完成度：${completedCount} / ${currentProj.plan.length} 天 (${Math.round((completedCount/currentProj.plan.length)*100)}%)`;
+  }
+
+  function renderMarkdownContent(targetElem, text) {
+    if (!text) {
+      targetElem.innerHTML = "";
+      return;
+    }
+    targetElem.innerHTML = marked.parse(text);
+    if (window.renderMathInElement) {
+      window.renderMathInElement(targetElem, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    }
+  }
+
+  async function startDayStudy(dayIdx) {
+    state.activeDayIndex = dayIdx;
+    document.body.classList.add("in-study-mode");
+    closeSidebarDrawer();
+
+    viewDashboard.classList.add("hidden");
+    viewEmptyCreate.classList.add("hidden");
+    viewStudy.classList.remove("hidden");
+
+    // 預設切換回講義頁籤
+    tabBtnLecture.click();
+
+    chatBox.innerHTML = "";
+    inputMessage.value = "";
+    inputMessage.rows = 1;
+
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const projectGoal = currentProj.goal || "英文學習";
+    const title = currentProj.plan[dayIdx];
+    studyDayTitle.textContent = title;
+    lectureDayTag.textContent = `DAY ${dayIdx + 1}`;
+
+    if (!currentProj.history) currentProj.history = {};
+    if (!currentProj.history[dayIdx]) {
+      currentProj.history[dayIdx] = {
+        lessonContent: "",
+        completed: false,
+        chatHistory: [],
+        flashcards: []
+      };
+    } else {
+      if (!currentProj.history[dayIdx].chatHistory) currentProj.history[dayIdx].chatHistory = [];
+      if (!currentProj.history[dayIdx].flashcards) currentProj.history[dayIdx].flashcards = [];
+    }
+
+    updateVocabBadgeCount();
+
+    const ai = new GoogleGenAI({ apiKey: state.geminiKey });
+    let cachedContent = currentProj.history[dayIdx]?.lessonContent;
+
+    const currentLectureModel = getActiveLectureModel();
+
+    if (!cachedContent) {
+      lectureContentBox.innerHTML = `<div style="text-align:center; padding: 40px; color: #64748b;">
+        <p style="font-weight:600; font-size:16px;">正在透過 ${getModelLabel(currentLectureModel)} 編寫英文講義...</p>
+        <p style="font-size:13px;">為專案【${projectGoal}】客製化語法架構表、道地語塊解析與避免中式英文（Chinglish）指南，請稍候片刻。</p>
+      </div>`;
+
+      const lecturePrompt = `你是一位世界級英語語言學家與頂級英文名師。
+學生參與的學習專案總目標為：【${projectGoal}】。
+請針對今日核心英文主題「${title}」撰寫一份完整、嚴謹且深入淺出的專業教學講義。
+
+【核心導向要求】：
+講義中的所有語境例句、高頻用法、常見中式思維盲點，必須緊扣專案目標【${projectGoal}】。
+
+格式嚴格要求：
+1. 一律使用乾淨清晰的標準 Markdown 格式。
+2. 句構公式使用清晰行內標籤（例如：\`Subject + modal verb (could/would) + have + V-ed\`），避免混亂代碼。
+3. 嚴格包含以下五大核心板塊：
+
+# 【${title}】深度英文解析講義
+> 學習目標導向：【${projectGoal}】
+
+## 一、 核心文法概念與公式架構
+- 詳解本語法結構的原由、本質意義與核心公式。
+- 請使用 **Markdown 表格** 整理主詞、時態變化、助動詞或搭配詞形態對照表。
+
+## 二、 句型深層邏輯與語義剖析
+- 拆解長句結構（主句、子句、修飾語修飾關係）。
+- 剖析英語母語者在不同語氣（委婉、肯定、假設、正式度、客氣商務等）時的選詞差別。
+
+## 三、 中式英文（Chinglish）避坑專區
+- 列出 2~3 個中文母語者最容易按中文直譯造出的錯誤句子與道地英文對照。
+- 說明背後思維邏輯差異。
+
+## 四、 實戰情境例句（貼合【${projectGoal}】）
+提供 4 個貼近【${projectGoal}】的高質感道地例句：
+1. **英文例句**
+2. **道地中文翻譯**
+3. **語境與搭配詞解析**（指出重點動詞片語、Collocation 或正式程度）
+
+## 五、 一句話直覺反射口訣
+- 用一句好記的口訣或公式總結今日規則。`;
+
+      try {
+        const res = await ai.models.generateContent({
+          model: currentLectureModel,
+          contents: lecturePrompt
+        });
+
+        cachedContent = res.text;
+        currentProj.history[dayIdx].lessonContent = cachedContent;
+        await saveProgressToDrive();
+
+        // 初次生成講義時，自動觸發一次單字提取
+        triggerAiExtractVocab(cachedContent);
+      } catch (e) {
+        lectureContentBox.innerHTML = `<p style="color: #ef4444;">教材載入失敗：${e.message}</p>`;
+        return;
+      }
+    }
+
+    renderMarkdownContent(lectureContentBox, cachedContent);
+    renderFlashcardsList();
+
+    // 對話還原與 Gemini 助教實例化
+    const savedChat = currentProj.history[dayIdx].chatHistory || [];
+    const geminiChatHistory = [];
+
+    if (savedChat.length === 0) {
+      const defaultWelcome = `已載入【${title}】英文深度講義！您可以隨時在右側發問、請助教造句，或切換至「今日單字卡庫」刷卡，準備好後點擊下方按鈕啟動 **10+1 題隨堂測驗**（由 ${getModelLabel(FLASH_MODEL)} 出題與批改）！`;
+      appendChatMessage("system", defaultWelcome, true);
+    } else {
+      savedChat.forEach(msg => {
+        appendChatMessage(msg.type, msg.content, false);
+        if (msg.type === "user") {
+          geminiChatHistory.push({ role: "user", parts: [{ text: msg.content }] });
+        } else if (msg.type === "bot") {
+          geminiChatHistory.push({ role: "model", parts: [{ text: msg.content }] });
+        }
+      });
+    }
+
+    state.chatInstance = ai.chats.create({
+      model: FLASH_MODEL,
+      history: geminiChatHistory,
+      config: {
+        systemInstruction: `你是親切、專業、富有耐心且精通現代英語語言學的資深外籍英文名師助教。
+學生目前英文學習目標為：【${projectGoal}】。
+學生正在學習今日單元「${title}」，今日教材內容如下：
+
+${cachedContent}
+
+【核心職責與規範】：
+1. 日常問答：根據專案大方向【${projectGoal}】與教材，用流暢、地道且鼓勵性的繁體中文回答，清楚指出句型搭配詞（Collocations）與語感差異。
+2. 測驗批改與詳解：
+   - 當學生提交隨堂測驗答案時，逐題明確標示【正解】或【訂正】。
+   - 針對學生答錯的題目，指出中式英文盲點、時態邏輯或介系詞混淆原因，並提供正確道地範例。
+   - 給予總得分評語，並特別針對第 11 題 Bonus 困難題提供進階思維剖析。
+3. 口氣：具啟發性、條理清晰，直接切入核心。`
+      }
+    });
+  }
+
+  async function handleSendMessage() {
+    const text = inputMessage.value.trim();
+    if (!text || !state.chatInstance) return;
+
+    appendChatMessage("user", text, true);
+    inputMessage.value = "";
+    inputMessage.rows = 1;
+
+    const typingId = "typing-" + Date.now();
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "msg msg-bot";
+    typingDiv.id = typingId;
+    typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+    chatBox.appendChild(typingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const detailLevel = state.appData.settings?.detailLevel || 2;
+    let detailConstraint = "";
+    if (detailLevel === 1) {
+      detailConstraint = "\n\n【回答風格限制：簡答模式】請直截了當回答（批改請直接給出正誤與核心簡短解析）。";
+    } else if (detailLevel === 3) {
+      detailConstraint = "\n\n【回答風格限制：詳盡模式】請給予極為深入的文法原理剖析、英語母語者語感、介系詞搭配細節與多個生活應用句。";
+    } else {
+      detailConstraint = "\n\n【回答風格限制：適中模式】請以條理清晰、重點突出的方式回答。";
+    }
+
+    try {
+      const res = await state.chatInstance.sendMessage({ message: text + detailConstraint });
+      document.getElementById(typingId)?.remove();
+      appendChatMessage("bot", res.text, true);
+    } catch (err) {
+      document.getElementById(typingId)?.remove();
+      appendChatMessage("system", "回覆取得失敗：" + err.message, true);
+    }
+  }
+
+  function appendChatMessage(type, content, shouldPersist = true) {
+    const div = document.createElement("div");
+    div.className = `msg msg-${type}`;
+    if (type === "system") {
+      div.textContent = content;
+    } else {
+      renderMarkdownContent(div, content);
+    }
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    if (shouldPersist && state.activeDayIndex !== null) {
+      const currentProj = state.appData.projects[state.appData.activeProjectId];
+      if (currentProj && currentProj.history && currentProj.history[state.activeDayIndex]) {
+        if (!currentProj.history[state.activeDayIndex].chatHistory) {
+          currentProj.history[state.activeDayIndex].chatHistory = [];
+        }
+        currentProj.history[state.activeDayIndex].chatHistory.push({ type, content });
+        saveProgressToDrive();
+      }
+    }
+  }
+
+  async function handleStartInChatQuiz() {
+    if (!state.chatInstance) return;
+
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const projectGoal = currentProj.goal || "英文學習";
+    const title = currentProj.plan[state.activeDayIndex];
+
+    btnTriggerQuiz.disabled = true;
+    btnTriggerQuiz.textContent = "Gemini 3 Flash 正在精心設計 10+1 題測驗...";
+
+    const typingId = "typing-" + Date.now();
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "msg msg-bot";
+    typingDiv.id = typingId;
+    typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+    chatBox.appendChild(typingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const quizCommandPrompt = `【系統指令：請直接在此為學生出題，共嚴格要求 10 題 + 1 題 Bonus 困難題】
+請針對今日英文主題「${title}」（學習主題：${projectGoal}）出題。
+
+題型配置要求（共 11 題）：
+- 題 1 ~ 題 3：【英文語法選擇題】（4 選 1，考驗核心動詞時態、助動詞、接續或主被動）。
+- 題 4 ~ 題 6：【介系詞與時態填空題】（提供英文情境句，在 ( ) 處挖空，要求填入適當介系詞或動詞正確變化形態）。
+- 題 7 ~ 題 8：【重組與語塊構句題】（給予 4 個英文語塊，請學生排列成文法正確的句子）。
+- 題 9 ~ 題 10：【中式英文病句糾錯 / 實戰中翻英】（針對【${projectGoal}】常見錯誤進行挑錯或改寫）。
+- 題 11：【🔥 Bonus 困難挑戰題】（設計深度語感辨析題，如細微詞義區分、倒裝句、虛擬語氣等高階陷阱題，標為 Bonus 題）。
+
+排版要求：
+1. 嚴格按 1. 到 10. 與 Bonus. 依序列出，題目生動實用。
+2. 結尾親切提示學生：「已在下方輸入框預填好題號，填寫後點擊【發送】即可獲得完整批改！」。
+3. 嚴禁在這次回覆中給予答案或解析！`;
+
+    try {
+      const res = await state.chatInstance.sendMessage({ message: quizCommandPrompt });
+      document.getElementById(typingId)?.remove();
+      appendChatMessage("bot", res.text, true);
+
+      inputMessage.rows = 11;
+      inputMessage.value = 
+`1. 
+2. 
+3. 
+4. 
+5. 
+6. 
+7. 
+8. 
+9. 
+10. 
+Bonus. `;
+      inputMessage.focus();
+      inputMessage.setSelectionRange(3, 3);
+
+      if (currentProj.history[state.activeDayIndex]) {
+        currentProj.history[state.activeDayIndex].completed = true;
+        if (state.activeDayIndex === currentProj.currentDayIndex && currentProj.currentDayIndex + 1 < currentProj.plan.length) {
+          currentProj.currentDayIndex += 1;
+        }
+        await saveProgressToDrive();
+        renderSidebar();
+      }
+    } catch (err) {
+      document.getElementById(typingId)?.remove();
+      appendChatMessage("system", "測驗出題失敗：" + err.message, true);
+    } finally {
+      btnTriggerQuiz.disabled = false;
+      btnTriggerQuiz.textContent = "進行今日 10+1 題隨堂實戰測驗";
+    }
+  }
+
+  function updateVocabBadgeCount() {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+    vocabCountBadge.textContent = cards.length;
+  }
+
+  btnAiGenVocab.addEventListener("click", () => {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const content = currentProj?.history?.[state.activeDayIndex]?.lessonContent;
+    if (!content) {
+      showToast("尚未生成講義，請先稍後講義加載完畢", "error");
+      return;
+    }
+    triggerAiExtractVocab(content);
+  });
+
+  async function triggerAiExtractVocab(lessonContent) {
+    btnAiGenVocab.disabled = true;
+    btnAiGenVocab.textContent = "✨ AI 提煉單字卡中...";
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: state.geminiKey });
+      const prompt = `你是一位英文教學詞彙專家。請從以下這份英文教學講義中，精選出 6~10 個最關鍵的核心單字或片語（Idioms/Phrasal Verbs）。
+講義內容：
+${lessonContent}
+
+請嚴格輸出純 JSON 陣列格式，陣列每個物件包含以下欄位：
+- "word": 單字或片語 (String)
+- "phonetic": 國際音標 (String，例如 "/ɪnˈhæns/")
+- "pos": 詞性 (String，例如 "v." 或 "phr.")
+- "meaning": 精確道地的中文釋義 (String)
+- "example": 實用例句 (String)
+
+範例格式：
+[
+  { "word": "procrastinate", "phonetic": "/prəˈkræstɪneɪt/", "pos": "v.", "meaning": "拖延、耽擱", "example": "Don't procrastinate on your assignment." }
+]`;
+
+      const res = await ai.models.generateContent({
+        model: getActiveLectureModel(),
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+
+      const extracted = JSON.parse(res.text.trim());
+      const currentProj = state.appData.projects[state.appData.activeProjectId];
+      if (!currentProj.history[state.activeDayIndex].flashcards) {
+        currentProj.history[state.activeDayIndex].flashcards = [];
+      }
+
+      const existingCards = currentProj.history[state.activeDayIndex].flashcards;
+      const existingWords = new Set(existingCards.map(c => c.word.toLowerCase()));
+
+      extracted.forEach(item => {
+        if (!existingWords.has(item.word.toLowerCase())) {
+          existingCards.push({
+            id: "card_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+            word: item.word,
+            phonetic: item.phonetic || "",
+            pos: item.pos || "",
+            meaning: item.meaning,
+            example: item.example,
+            status: 0 // 0: 生疏, 1: 模糊, 2: 熟練
+          });
+        }
+      });
+
+      await saveProgressToDrive();
+      updateVocabBadgeCount();
+      renderFlashcardsList();
+      showToast(`已成功提煉 ${extracted.length} 個英文單字卡！`, "success");
+    } catch (e) {
+      console.error(e);
+      showToast("單字提取失敗：" + e.message, "error");
+    } finally {
+      btnAiGenVocab.disabled = false;
+      btnAiGenVocab.textContent = "✨ AI 自動自講義提取單字卡";
+    }
+  }
+
+  function renderFlashcardsList() {
+    flashcardsContainer.innerHTML = "";
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+
+    if (cards.length === 0) {
+      flashcardsContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #fff; border-radius: 8px; border: 1px dashed #cbd5e1;">
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 12px;">目前這天還沒有單字卡喔！</p>
+          <button onclick="document.getElementById('btn-ai-gen-vocab').click()" class="btn-purple" style="font-size: 13px;">點此讓 AI 一鍵自課文提煉核心單字</button>
+        </div>`;
+      return;
+    }
+
+    cards.forEach((card, index) => {
+      const cardDiv = document.createElement("div");
+      cardDiv.className = "flip-card";
+
+      const statusLabels = { 0: "生疏", 1: "模糊", 2: "熟練" };
+      const statusClass = `fc-status-${card.status || 0}`;
+
+      cardDiv.innerHTML = `
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <span class="fc-status-badge ${statusClass}">${statusLabels[card.status || 0]}</span>
+              <button class="btn-speak-item" title="聆聽發音" style="background: transparent; color: #2563eb; padding: 2px 6px; font-size: 15px;">🔊</button>
+            </div>
+            <div>
+              <div class="fc-word">${card.word}</div>
+              <div class="fc-phonetic">${card.phonetic}</div>
+              <span class="fc-pos">${card.pos}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8;">
+              <span>點擊翻轉看釋義 ↺</span>
+              <button class="btn-del-card" title="刪除此卡" style="background: transparent; color: #cbd5e1; font-size: 14px; padding: 2px;">✕</button>
+            </div>
+          </div>
+          <div class="flip-card-back">
+            <div>
+              <div class="fc-meaning">${card.meaning}</div>
+              <div class="fc-example">${card.example}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
+              <span style="font-size: 11px; color: #64748b;">標記熟練度:</span>
+              <div style="display: flex; gap: 4px;">
+                <button class="btn-mark-status" data-status="0" style="padding: 2px 6px; font-size: 11px; background: #fee2e2; color: #b91c1c;">生</button>
+                <button class="btn-mark-status" data-status="1" style="padding: 2px 6px; font-size: 11px; background: #fef3c7; color: #92400e;">半</button>
+                <button class="btn-mark-status" data-status="2" style="padding: 2px 6px; font-size: 11px; background: #dcfce7; color: #15803d;">熟</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      cardDiv.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        cardDiv.classList.toggle("flipped");
+      });
+
+      cardDiv.querySelector(".btn-speak-item").addEventListener("click", (e) => {
+        e.stopPropagation();
+        speakEnglish(card.word);
+      });
+
+      cardDiv.querySelector(".btn-del-card").addEventListener("click", (e) => {
+        e.stopPropagation();
+        showConfirm("刪除單字卡", `確定要刪除單字「${card.word}」嗎？`, () => {
+          cards.splice(index, 1);
+          saveProgressToDrive();
+          updateVocabBadgeCount();
+          renderFlashcardsList();
+        });
+      });
+
+      cardDiv.querySelectorAll(".btn-mark-status").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const newStatus = parseInt(btn.dataset.status, 10);
+          card.status = newStatus;
+          saveProgressToDrive();
+          renderFlashcardsList();
+        });
+      });
+
+      flashcardsContainer.appendChild(cardDiv);
+    });
+  }
+
+  btnAddCustomVocab.addEventListener("click", () => {
+    inputNewWord.value = "";
+    inputNewPhonetic.value = "";
+    inputNewPos.value = "";
+    inputNewMeaning.value = "";
+    inputNewExample.value = "";
+    modalAddVocab.classList.remove("hidden");
+  });
+
+  btnCancelAddVocab.addEventListener("click", () => modalAddVocab.classList.add("hidden"));
+
+  btnConfirmAddVocab.addEventListener("click", async () => {
+    const word = inputNewWord.value.trim();
+    const meaning = inputNewMeaning.value.trim();
+    if (!word || !meaning) {
+      showToast("請至少填寫單字與中文釋義", "error");
+      return;
+    }
+
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    if (!currentProj.history[state.activeDayIndex].flashcards) {
+      currentProj.history[state.activeDayIndex].flashcards = [];
+    }
+
+    currentProj.history[state.activeDayIndex].flashcards.push({
+      id: "card_" + Date.now(),
+      word: word,
+      phonetic: inputNewPhonetic.value.trim(),
+      pos: inputNewPos.value.trim(),
+      meaning: meaning,
+      example: inputNewExample.value.trim() || `Remember the word "${word}".`,
+      status: 0
+    });
+
+    await saveProgressToDrive();
+    updateVocabBadgeCount();
+    renderFlashcardsList();
+    modalAddVocab.classList.add("hidden");
+    showToast(`單字「${word}」已成功新增！`, "success");
+  });
+
+  btnStartFlashcardMode.addEventListener("click", () => {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+
+    if (cards.length === 0) {
+      showToast("今日尚無單字卡，請先點擊「AI 自動提取單字」！", "error");
+      return;
+    }
+
+    state.currentStudyIndex = 0;
+    openPlayerModal();
+  });
+
+  function openPlayerModal() {
+    modalFlashcardPlayer.classList.remove("hidden");
+    renderPlayerCard();
+  }
+
+  btnCloseFcPlayer.addEventListener("click", () => {
+    modalFlashcardPlayer.classList.add("hidden");
+    renderFlashcardsList();
+  });
+
+  playerCardBox.addEventListener("click", () => {
+    playerCardBox.classList.toggle("flipped");
+  });
+
+  btnPlayerSpeakFront.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+    const card = cards[state.currentStudyIndex];
+    if (card) speakEnglish(card.word);
+  });
+
+  function renderPlayerCard() {
+    playerCardBox.classList.remove("flipped");
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+
+    if (state.currentStudyIndex >= cards.length) {
+      showToast("🎉 太棒了！您已完成今日所有單字卡複習！", "success");
+      modalFlashcardPlayer.classList.add("hidden");
+      renderFlashcardsList();
+      return;
+    }
+
+    const card = cards[state.currentStudyIndex];
+    fcPlayerProgress.textContent = `卡片 ${state.currentStudyIndex + 1} / ${cards.length}`;
+    playerFrontWord.textContent = card.word;
+    playerFrontPhonetic.textContent = card.phonetic || "";
+    playerFrontPos.textContent = card.pos || "word";
+    playerBackMeaning.textContent = card.meaning;
+    playerBackExample.textContent = card.example || "No example provided.";
+  }
+
+  function advancePlayerCard(status) {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+    if (cards[state.currentStudyIndex]) {
+      cards[state.currentStudyIndex].status = status;
+      saveProgressToDrive();
+    }
+    state.currentStudyIndex += 1;
+    renderPlayerCard();
+  }
+
+  btnFcRate0.addEventListener("click", () => advancePlayerCard(0));
+  btnFcRate1.addEventListener("click", () => advancePlayerCard(1));
+  btnFcRate2.addEventListener("click", () => advancePlayerCard(2));
+  </script>
+</body>
+</html>
