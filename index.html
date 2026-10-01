@@ -226,27 +226,44 @@
   <div id="sidebar-overlay"></div>
 
   <!-- 初始連線 Google Drive 卡片 -->
-  <div id="section-auth" style="max-width: 500px; margin: 60px auto; background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-    <h2>連接 Google 雲端硬碟</h2>
-    <p style="font-size: 14px; color: #64748b; line-height: 1.5;">
-      登入 Google 帳號後，您的英文學習計畫、深度文法講義、智慧單字卡庫以及測驗記錄，都將自動安全同步於您的 Google Drive 專屬儲存區。
+  <div id="section-auth" style="max-width: 520px; margin: 50px auto; background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    <h2>歡迎使用英文學習工作台</h2>
+    <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px;">
+      您可以選擇直接開始使用（資料自動儲存於本機瀏覽器），或登入 Google 雲端硬碟實現跨裝置同步。
     </p>
 
-    <div id="env-file-warning" class="hidden" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin: 14px 0; font-size: 13px; color: #991b1b; line-height: 1.5;">
-      <strong>⚠️ 偵測到直接以本機檔案 (file://) 開啟：</strong><br>
-      Google OAuth 安全規範禁止直接從本機檔案開啟登入。請透過本機伺服器開啟（例如 VS Code 的 <strong>Live Server</strong> 或 <code>npx serve</code>），以 <code>http://localhost:...</code> 瀏覽即可順利登入！
+    <!-- 方案一：免登入快速開始 (推薦) -->
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+      <div style="font-weight: 700; color: #166534; font-size: 15px; margin-bottom: 6px;">⚡ 免登入直接學習（最推薦・免設定）</div>
+      <p style="font-size: 13px; color: #15803d; line-height: 1.5; margin: 0 0 12px 0;">
+        立即開始規劃英文計畫、生成豐富例句講義、刷單字卡與 AI 口說對話，學習進度將自動安全保存於您的瀏覽器中！
+      </p>
+      <button id="btn-use-local" class="btn-green" style="width: 100%; padding: 11px; font-size: 14px;">🚀 免登入，直接開始學習</button>
     </div>
 
-    <div style="margin: 16px 0;">
-      <label style="font-size: 12px; font-weight: normal; color: #64748b; cursor: pointer;">
-        <input type="checkbox" id="chk-custom-client-id" style="width: auto; margin-right: 4px;"> 顯示自訂 Client ID
-      </label>
-      <div id="box-custom-client-id" class="hidden" style="margin-top: 8px;">
-        <input type="text" id="input-client-id" value="865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com" style="width: 100%; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px;">
+    <!-- 方案二：Google Drive 連線 -->
+    <div style="border-top: 1px solid #e2e8f0; padding-top: 18px;">
+      <div style="font-weight: 600; color: #334155; font-size: 14px; margin-bottom: 6px;">☁️ 或連線 Google 雲端硬碟同步</div>
+      <p style="font-size: 12.5px; color: #64748b; line-height: 1.4; margin-bottom: 12px;">
+        需確保當前網址已加入 Google Cloud Client ID 的授權來源名單中。
+      </p>
+
+      <div id="env-file-warning" class="hidden" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin: 10px 0; font-size: 12px; color: #991b1b; line-height: 1.4;">
+        <strong>⚠️ 偵測到直接以本機檔案 (file://) 開啟：</strong><br>
+        Google 禁止以本地檔案協定登入。請直接點擊上方<strong>「免登入直接學習」</strong>即可順暢使用！
       </div>
-    </div>
 
-    <button id="btn-login" style="width: 100%; padding: 12px; font-size: 15px;">登入 Google 帳號</button>
+      <div style="margin: 12px 0;">
+        <label style="font-size: 12px; font-weight: normal; color: #64748b; cursor: pointer;">
+          <input type="checkbox" id="chk-custom-client-id" style="width: auto; margin-right: 4px;"> 顯示自訂 Client ID
+        </label>
+        <div id="box-custom-client-id" class="hidden" style="margin-top: 8px;">
+          <input type="text" id="input-client-id" value="865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com" style="width: 100%; padding: 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+      </div>
+
+      <button id="btn-login" class="btn-outline" style="width: 100%; padding: 10px; font-size: 13.5px;">登入 Google 帳號同步</button>
+    </div>
   </div>
 
   <div id="app-layout" class="hidden">
@@ -583,12 +600,14 @@
   
   const DEFAULT_CLIENT_ID = "865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com";
   const DRIVE_FILE_NAME = "english_learning_master_projects.json";
+  const LOCAL_STORAGE_KEY = "english_learning_master_data";
   const SCOPES = "https://www.googleapis.com/auth/drive.file";
 
   const state = {
     geminiKey: "",
     accessToken: null,
     driveFileId: null,
+    isLocalMode: false,
     appData: {
       geminiKey: "",
       activeProjectId: null,
@@ -611,6 +630,8 @@
   const sectionAuth = document.getElementById("section-auth");
   const appLayout = document.getElementById("app-layout");
   const headerRight = document.getElementById("header-right");
+  const cloudStatus = document.getElementById("cloud-status");
+  const btnUseLocal = document.getElementById("btn-use-local");
   const btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
   const sidebarOverlay = document.getElementById("sidebar-overlay");
   const btnOpenSettings = document.getElementById("btn-open-settings-modal");
@@ -1034,6 +1055,7 @@
     boxCustomClientId.classList.toggle("hidden", !e.target.checked);
   });
   btnLogin.addEventListener("click", handleGoogleAuth);
+  btnUseLocal.addEventListener("click", handleUseLocalMode);
   btnSaveKey.addEventListener("click", handleSaveApiKey);
   btnOpenNewProject.addEventListener("click", () => {
     closeSidebarDrawer();
@@ -1127,14 +1149,14 @@
 
   function handleGoogleAuth() {
     if (window.location.protocol === "file:") {
-      showToast("Google OAuth 禁止在 file:// 協定運行，請用 Live Server 開啟網頁！", "error");
+      showToast("Google OAuth 禁止在 file:// 協定運行，建議直接點擊「免登入直接學習」！", "error");
       return;
     }
 
     const clientId = inputClientId.value.trim() || DEFAULT_CLIENT_ID;
 
     if (typeof google === "undefined" || !google.accounts || !google.accounts.oauth2) {
-      showToast("Google 驗證模組載入中，請稍候重試。", "error");
+      showToast("Google 驗證模組載入中，若無法載入建議點擊「免登入直接學習」！", "error");
       return;
     }
 
@@ -1144,8 +1166,8 @@
     const authTimeout = setTimeout(() => {
       if (btnLogin.disabled) {
         btnLogin.disabled = false;
-        btnLogin.textContent = "登入 Google 帳號";
-        showToast("登入已超時。請確認瀏覽器未封鎖彈出式視窗！", "error");
+        btnLogin.textContent = "登入 Google 帳號同步";
+        showToast("登入已超時。若有網域驗證限制，可直接點上方「免登入直接學習」！", "error");
       }
     }, 10000);
 
@@ -1156,18 +1178,19 @@
         error_callback: (err) => {
           clearTimeout(authTimeout);
           console.error("GIS Error:", err);
-          showToast(`驗證錯誤: ${err.message || err.type || "請檢查授權來源"}`, "error");
+          showToast(`Google 驗證未授權此網域，建議點擊「免登入直接學習」！`, "error");
           btnLogin.disabled = false;
-          btnLogin.textContent = "登入 Google 帳號";
+          btnLogin.textContent = "登入 Google 帳號同步";
         },
         callback: async (resp) => {
           clearTimeout(authTimeout);
           if (resp.error) {
-            showToast("授權失敗：" + resp.error, "error");
+            showToast("授權失敗：" + resp.error + "，建議使用免登入模式", "error");
             btnLogin.disabled = false;
-            btnLogin.textContent = "登入 Google 帳號";
+            btnLogin.textContent = "登入 Google 帳號同步";
             return;
           }
+          state.isLocalMode = false;
           state.accessToken = resp.access_token;
           await syncDataFromDrive();
         }
@@ -1177,9 +1200,56 @@
     } catch (err) {
       clearTimeout(authTimeout);
       console.error("Init Token Client Exception:", err);
-      showToast("啟動登入失敗：" + err.message, "error");
+      showToast("啟動登入失敗，請直接點擊「免登入直接學習」！", "error");
       btnLogin.disabled = false;
-      btnLogin.textContent = "登入 Google 帳號";
+      btnLogin.textContent = "登入 Google 帳號同步";
+    }
+  }
+
+  function handleUseLocalMode() {
+    state.isLocalMode = true;
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        state.appData = JSON.parse(saved);
+      } else {
+        state.appData = {
+          geminiKey: "",
+          activeProjectId: null,
+          settings: {
+            lectureModel: DEFAULT_LECTURE_MODEL,
+            chatModel: DEFAULT_CHAT_MODEL,
+            detailLevel: 2
+          },
+          projects: {}
+        };
+      }
+    } catch (e) {
+      console.warn("LocalStorage load error:", e);
+    }
+
+    sectionAuth.classList.add("hidden");
+    headerRight.classList.remove("hidden");
+    appLayout.classList.remove("hidden");
+
+    if (cloudStatus) {
+      cloudStatus.textContent = "本機儲存模式 (免登入)";
+      cloudStatus.style.background = "#e0f2fe";
+      cloudStatus.style.color = "#0284c7";
+    }
+
+    selectLectureModel.value = getActiveLectureModel();
+    selectChatModel.value = getActiveChatModel();
+
+    const currentDetail = state.appData.settings?.detailLevel || 2;
+    if (sliderDetailLevel) sliderDetailLevel.value = currentDetail;
+    updateDetailBadge(currentDetail);
+
+    if (state.appData.geminiKey) {
+      state.geminiKey = state.appData.geminiKey;
+      initAppFlow();
+    } else {
+      modalKeySetup.classList.remove("hidden");
     }
   }
 
@@ -1233,6 +1303,12 @@
       headerRight.classList.remove("hidden");
       appLayout.classList.remove("hidden");
 
+      if (cloudStatus) {
+        cloudStatus.textContent = "Google Drive 已連線";
+        cloudStatus.style.background = "#ecfdf5";
+        cloudStatus.style.color = "#059669";
+      }
+
       selectLectureModel.value = getActiveLectureModel();
       selectChatModel.value = getActiveChatModel();
 
@@ -1248,14 +1324,21 @@
       }
     } catch (err) {
       console.error(err);
-      showToast("存取 Google 雲端失敗，請確認已在 GCP 將此網址加入授權來源。", "error");
-      btnLogin.disabled = false;
-      btnLogin.textContent = "登入 Google 帳號";
+      showToast("存取 Google 雲端失敗，已為您自動切換至本機儲存模式！", "info");
+      handleUseLocalMode();
     }
   }
 
   async function saveProgressToDrive() {
-    if (!state.driveFileId) return;
+    if (state.isLocalMode || !state.driveFileId) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.appData));
+      } catch (err) {
+        console.warn("LocalStorage save error:", err);
+      }
+      return;
+    }
+
     try {
       await fetch(`https://www.googleapis.com/upload/drive/v3/files/${state.driveFileId}?uploadType=media`, {
         method: "PATCH",
@@ -1265,8 +1348,10 @@
         },
         body: JSON.stringify(state.appData)
       });
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.appData));
     } catch (err) {
-      console.error("雲端同步失敗：", err);
+      console.error("雲端同步失敗，已轉存本機：", err);
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.appData));
     }
   }
 
@@ -2064,6 +2149,9 @@ ${lessonContent}
     inputNewCollocations.value = "";
     inputNewMeaning.value = "";
     inputNewExample.value = "";
+    inputNewExampleZh.value = "";
+    inputNewExample2.value = "";
+    inputNewExample2Zh.value = "";
     modalAddVocab.classList.remove("hidden");
   });
 
@@ -2102,6 +2190,18 @@ ${lessonContent}
     modalAddVocab.classList.add("hidden");
     showToast(`單字「${word}」已成功新增！`, "success");
   });
+
+  btnStartFlashcardMode.addEventListener("click", () => {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+    if (cards.length === 0) {
+      showToast("目前尚無單字卡，請先點擊提煉或新增單字卡！", "info");
+      return;
+    }
+    state.currentStudyIndex = 0;
+    openPlayerModal();
+  });
+
   btnPlayerSpeakEx1.addEventListener("click", (e) => {
     e.stopPropagation();
     const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
@@ -2158,10 +2258,6 @@ ${lessonContent}
     }
   }
 
-    state.currentStudyIndex = 0;
-    openPlayerModal();
-  });
-
   function openPlayerModal() {
     modalFlashcardPlayer.classList.remove("hidden");
     renderPlayerCard();
@@ -2187,35 +2283,6 @@ ${lessonContent}
     const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
     if (card) speakEnglish(card.word, 1.0);
   });
-
-  btnPlayerSpeakExample.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
-    if (card && card.example) speakEnglish(card.example, state.speechRate);
-  });
-
-  function renderPlayerCard() {
-    playerCardBox.classList.remove("flipped");
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
-
-    if (state.currentStudyIndex >= cards.length) {
-      showToast("🎉 太棒了！您已完成今日所有單字與語塊卡複習！", "success");
-      modalFlashcardPlayer.classList.add("hidden");
-      renderFlashcardsList();
-      return;
-    }
-
-    const card = cards[state.currentStudyIndex];
-    fcPlayerProgress.textContent = `卡片 ${state.currentStudyIndex + 1} / ${cards.length}`;
-    playerFrontWord.textContent = card.word;
-    playerFrontPhonetic.textContent = card.phonetic || "";
-    playerFrontPos.textContent = card.pos || "word";
-    playerFrontCollocations.textContent = card.collocations ? `🔗 高頻搭配語塊：${card.collocations}` : "💡 試著大聲將這個單字唸出三次！";
-    playerBackMeaning.textContent = card.meaning;
-    playerBackCollocations.textContent = card.collocations ? `口語語塊：${card.collocations}` : "";
-    playerBackExample.textContent = card.example || "No example provided.";
-  }
 
   function advancePlayerCard(status) {
     const currentProj = state.appData.projects[state.appData.activeProjectId];
