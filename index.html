@@ -362,8 +362,15 @@
               <button id="btn-trigger-roleplay" class="btn-purple" style="flex: 1; font-size: 11.5px; padding: 6px;">🎭 啟動 5 句情境口說對話 (Roleplay)</button>
               <button id="btn-trigger-speaking-drill" class="btn-amber" style="flex: 1; font-size: 11.5px; padding: 6px;">⚡ 快速口語反射造句訓練</button>
             </div>
+            <div id="recording-active-bar" class="hidden" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #dc2626;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulseMic 1s infinite;"></span>
+                <strong>持續錄音中</strong>：想講多久就講多久，停頓不會被切斷！
+              </span>
+              <button id="btn-stop-recording-banner" style="background: #ef4444; color: white; padding: 2px 10px; font-size: 11px; border-radius: 4px;">⏹️ 說完了，停止錄音</button>
+            </div>
             <div style="display: flex; gap: 6px; align-items: flex-end;">
-              <button id="btn-voice-input" class="btn-outline" title="按住或點擊說英文語音輸入" style="height: 38px; width: 42px; padding: 0; font-size: 18px;">🎙️</button>
+              <button id="btn-voice-input" class="btn-outline" title="點擊開始持續錄音（說完手動按停止）" style="height: 38px; width: 42px; padding: 0; font-size: 18px;">🎙️</button>
               <textarea id="input-message" rows="1" placeholder="問文法、點左側麥克風直接開口說英文練習... (Enter 換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
               <button id="btn-send-message" style="height: 38px;">發送</button>
             </div>
@@ -628,6 +635,12 @@
   const btnTriggerSpeakingDrill = document.getElementById("btn-trigger-speaking-drill");
   const btnSpeedSlow = document.getElementById("btn-speed-slow");
   const btnSpeedNormal = document.getElementById("btn-speed-normal");
+  const recordingActiveBar = document.getElementById("recording-active-bar");
+  const btnStopRecordingBanner = document.getElementById("btn-stop-recording-banner");
+
+  let baseTextBeforeRecording = "";
+  let finalTranscript = "";
+  let manualStopRequested = false;
 
   // 單字卡相關 DOM
   const tabBtnLecture = document.getElementById("tab-btn-lecture");
@@ -743,51 +756,119 @@
     }
 
     state.recognition = new SpeechRecognition();
-    state.recognition.continuous = false;
-    state.recognition.interimResults = false;
+    state.recognition.continuous = true;
+    state.recognition.interimResults = true;
     state.recognition.lang = "en-US";
 
     state.recognition.onstart = () => {
       state.isRecording = true;
+      manualStopRequested = false;
       btnVoiceInput.classList.add("mic-recording");
-      showToast("🎙️ 正在聆聽您的英文語音，請說...", "info");
+      btnVoiceInput.textContent = "⏹️️";
+      btnVoiceInput.title = "點擊停止錄音並完成輸入";
+      if (recordingActiveBar) recordingActiveBar.classList.remove("hidden");
+      inputMessage.placeholder = "🔴 正在持續錄音中... 盡情開口說英文，說完請點擊 ⏹️ 停止";
+      showToast("🎙️️ 持續錄音已啟動！說話停頓不會被中斷，說完請點擊 ⏹️ 停止", "info");
     };
 
     state.recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      inputMessage.value = inputMessage.value ? `${inputMessage.value} ${transcript}` : transcript;
-      inputMessage.focus();
-      showToast(`識別成功：「${transcript}」`, "success");
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      inputMessage.value = (baseTextBeforeRecording + finalTranscript + interim).trimStart();
+      inputMessage.scrollTop = inputMessage.scrollHeight;
     };
 
     state.recognition.onerror = (event) => {
-      console.error("Speech Rec Error:", event.error);
-      showToast("語音辨識中斷：" + (event.error === 'not-allowed' ? "未授權麥克風" : event.error), "error");
+      console.warn("Speech Rec Notice:", event.error);
+      if (event.error === 'no-speech') {
+        // 短暫沒說話時不中斷，保持錄音狀態
+        return;
+      }
+      if (event.error === 'not-allowed') {
+        showToast("未取得麥克風權限，請在瀏覽器設定中允許使用麥克風！", "error");
+        stopRecordingManually();
+      }
     };
 
     state.recognition.onend = () => {
+      // 關鍵：如果使用者尚未手動按下停止按鈕，瀏覽器短暫靜音超時會自動重新啟動，確保不中斷
+      if (state.isRecording && !manualStopRequested) {
+        try {
+          state.recognition.start();
+          return;
+        } catch (e) {
+          console.debug("Recognition auto-restart guard:", e);
+        }
+      }
+      // 確定由使用者停止時，恢復按鈕正常狀態
       state.isRecording = false;
       btnVoiceInput.classList.remove("mic-recording");
+      btnVoiceInput.textContent = "🎙️";
+      btnVoiceInput.title = "點擊開始持續錄音（說完手動按停止）";
+      if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
+      inputMessage.placeholder = "問文法、點左側麥克風直接開口說英文練習... (Enter 換行)";
     };
+  }
+
+  function startRecordingManually() {
+    if (!state.recognition) {
+      showToast("您的瀏覽器不支援語音輸入功能，請使用 Chrome 或 Edge 瀏覽器！", "error");
+      return;
+    }
+    baseTextBeforeRecording = inputMessage.value ? inputMessage.value.trim() + " " : "";
+    finalTranscript = "";
+    manualStopRequested = false;
+    try {
+      state.recognition.start();
+    } catch (e) {
+      console.warn("Restarting recognition session...", e);
+      try {
+        state.recognition.stop();
+        setTimeout(() => state.recognition.start(), 200);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+
+  function stopRecordingManually() {
+    manualStopRequested = true;
+    state.isRecording = false;
+    if (state.recognition) {
+      try {
+        state.recognition.stop();
+      } catch (e) {
+        console.debug("Recognition stop error:", e);
+      }
+    }
+    btnVoiceInput.classList.remove("mic-recording");
+    btnVoiceInput.textContent = "🎙️";
+    btnVoiceInput.title = "點擊開始持續錄音（說完手動按停止）";
+    if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
+    inputMessage.placeholder = "問文法、點左側麥克風直接開口說英文練習... (Enter 換行)";
+    inputMessage.focus();
+    showToast("✅ 錄音完成！英文內容已填入輸入框，點擊「發送」即可送出給助教", "success");
   }
 
   initSpeechRecognition();
 
   btnVoiceInput.addEventListener("click", () => {
-    if (!state.recognition) {
-      showToast("您的瀏覽器不支援語音輸入功能，請使用 Chrome 或 Edge 瀏覽器！", "error");
-      return;
-    }
     if (state.isRecording) {
-      state.recognition.stop();
+      stopRecordingManually();
     } else {
-      try {
-        state.recognition.start();
-      } catch (e) {
-        state.recognition.stop();
-      }
+      startRecordingManually();
     }
   });
+
+  if (btnStopRecordingBanner) {
+    btnStopRecordingBanner.addEventListener("click", stopRecordingManually);
+  }
 
   btnTriggerRoleplay.addEventListener("click", handleStartRoleplay);
   btnTriggerSpeakingDrill.addEventListener("click", handleStartOralReflexDrill);
