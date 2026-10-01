@@ -147,7 +147,7 @@
     .flashcards-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .flashcards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
     
-    .flip-card { background-color: transparent; perspective: 1000px; height: 180px; cursor: pointer; }
+    .flip-card { background-color: transparent; perspective: 1000px; height: 210px; cursor: pointer; }
     .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
     .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
     
@@ -155,9 +155,10 @@
     .flip-card-front { background-color: #ffffff; }
     .flip-card-back { background-color: #f8fafc; transform: rotateY(180deg); border-color: #bfdbfe; text-align: left; }
 
-    .fc-word { font-size: 20px; font-weight: 700; color: #1e3a8a; margin-top: 14px; }
-    .fc-phonetic { font-size: 13px; color: #64748b; font-family: sans-serif; margin-top: 4px; }
-    .fc-pos { font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; align-self: center; margin-top: 6px; }
+    .fc-word { font-size: 20px; font-weight: 700; color: #1e3a8a; margin-top: 10px; }
+    .fc-phonetic { font-size: 13px; color: #64748b; font-family: sans-serif; margin-top: 2px; }
+    .fc-pos { font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; align-self: center; margin-top: 4px; }
+    .fc-chunks { font-size: 11.5px; color: #0284c7; background: #e0f2fe; padding: 3px 6px; border-radius: 4px; margin-top: 6px; line-height: 1.3; }
     .fc-meaning { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
     .fc-example { font-size: 12px; color: #475569; font-style: italic; line-height: 1.4; }
     
@@ -167,12 +168,15 @@
     .fc-status-2 { background: #dcfce7; color: #15803d; } /* 精通 */
 
     /* 沉浸式刷單字卡模式 (Modal) */
-    .study-card-box { width: 480px; max-width: 95%; height: 320px; perspective: 1200px; cursor: pointer; }
+    .study-card-box { width: 500px; max-width: 95%; height: 350px; perspective: 1200px; cursor: pointer; }
     .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
     .study-card-box.flipped .study-card-inner { transform: rotateY(180deg); }
-    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #e2e8f0; }
+    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #e2e8f0; }
     .study-card-front { background: #ffffff; }
     .study-card-back { background: #ffffff; transform: rotateY(180deg); border-color: #93c5fd; }
+
+    .mic-recording { background-color: #ef4444 !important; animation: pulseMic 1.2s infinite; }
+    @keyframes pulseMic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); box-shadow: 0 0 12px rgba(239,68,68,0.5); } }
 
     .btn-icon { background: transparent; color: #475569; border: 1px solid #cbd5e1; padding: 6px 10px; font-size: 15px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .btn-icon:hover { background: #f1f5f9; color: #0f172a; }
@@ -305,11 +309,19 @@
           <!-- 分頁頁籤：深度講義 vs 單字卡庫 -->
           <div class="tab-nav">
             <button id="tab-btn-lecture" class="tab-btn active">📖 核心文法與解析講義</button>
-            <button id="tab-btn-vocab" class="tab-btn">🗂️ 今日單字卡庫 (<span id="vocab-count-badge">0</span>)</button>
+            <button id="tab-btn-vocab" class="tab-btn">🗂️ 今日高頻單字與語塊卡 (<span id="vocab-count-badge">0</span>)</button>
           </div>
 
           <!-- 分頁 1：深度講義 -->
           <div id="tab-pane-lecture" class="tab-content active">
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 12.5px; color: #166534; font-weight: 600;">🎙️ 口語跟讀與發音輔助：反覆跟讀例句以培養英語語感與流暢度</span>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="font-size: 11px; color: #15803d;">語速：</span>
+                <button id="btn-speed-slow" class="btn-outline" style="padding: 2px 8px; font-size: 11px;">0.8x 慢速清晰</button>
+                <button id="btn-speed-normal" class="btn-green" style="padding: 2px 8px; font-size: 11px;">1.0x 母語語速</button>
+              </div>
+            </div>
             <div id="lecture-content-box" class="lecture-content">
               <p style="color: #94a3b8;">正在準備教材...</p>
             </div>
@@ -318,22 +330,25 @@
           <!-- 分頁 2：單字卡庫 -->
           <div id="tab-pane-vocab" class="tab-content">
             <div class="flashcards-toolbar">
-              <div style="display: flex; gap: 8px;">
-                <button id="btn-ai-gen-vocab" class="btn-purple" style="font-size: 12px;">✨ AI 自動自講義提取單字卡</button>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="btn-ai-gen-vocab" class="btn-purple" style="font-size: 12px;">✨ AI 自動自講義提取高頻單字與口語搭配詞</button>
                 <button id="btn-add-custom-vocab" class="btn-outline" style="font-size: 12px;">+ 手動增卡</button>
               </div>
               <div style="font-size: 12px; color: #64748b;">
-                點擊卡片即可 3D 翻面，或點擊小喇叭聽純正發音 🔊
+                掌握「動詞+介系詞語塊」，比單背單字開口流暢 3 倍！
               </div>
             </div>
             <div id="flashcards-container" class="flashcards-grid"></div>
           </div>
         </div>
 
-        <!-- 右欄：即時 AI 助教問答與 10+1 題測驗 -->
+        <!-- 右欄：即時 AI 助教問答與口說實戰對話 -->
         <div class="interactive-panel">
           <div class="interactive-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <span>🤖 AI 英文助教 & 隨堂測驗 (Gemini 3 Flash)</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>🤖 口語實戰助教 & 隨堂評測</span>
+              <span id="speech-support-badge" style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">語音對話支援</span>
+            </div>
             <div style="display: flex; align-items: center; gap: 6px; font-weight: normal; font-size: 12px; color: #64748b;">
               <span>解析詳盡度:</span>
               <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 70px; cursor: pointer;">
@@ -342,8 +357,14 @@
           </div>
           <div id="chat-box" class="chat-scroll-area"></div>
           <div class="chat-input-bar">
+            <!-- 口說情境模擬捷徑列 -->
+            <div style="display: flex; gap: 6px;">
+              <button id="btn-trigger-roleplay" class="btn-purple" style="flex: 1; font-size: 11.5px; padding: 6px;">🎭 啟動 5 句情境口說對話 (Roleplay)</button>
+              <button id="btn-trigger-speaking-drill" class="btn-amber" style="flex: 1; font-size: 11.5px; padding: 6px;">⚡ 快速口語反射造句訓練</button>
+            </div>
             <div style="display: flex; gap: 6px; align-items: flex-end;">
-              <textarea id="input-message" rows="1" placeholder="問文法、請助教造句、或貼上答案批改... (Enter 鍵正常換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
+              <button id="btn-voice-input" class="btn-outline" title="按住或點擊說英文語音輸入" style="height: 38px; width: 42px; padding: 0; font-size: 18px;">🎙️</button>
+              <textarea id="input-message" rows="1" placeholder="問文法、點左側麥克風直接開口說英文練習... (Enter 換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
               <button id="btn-send-message" style="height: 38px;">發送</button>
             </div>
             <button id="btn-trigger-quiz" class="btn-green" style="width: 100%;">進行今日 10+1 題隨堂實戰測驗</button>
@@ -356,7 +377,7 @@
   <!-- 刷單字卡沉浸式視窗 -->
   <div id="modal-flashcard-player" class="modal-overlay hidden">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
-      <div style="display: flex; justify-content: space-between; width: 480px; max-width: 95%; color: #fff; font-size: 14px;">
+      <div style="display: flex; justify-content: space-between; width: 500px; max-width: 95%; color: #fff; font-size: 14px;">
         <span id="fc-player-progress">卡片 1 / 10</span>
         <button id="btn-close-fc-player" style="background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 4px 10px; border-radius: 6px;">✕ 退出刷卡</button>
       </div>
@@ -365,22 +386,30 @@
       <div id="player-card-box" class="study-card-box">
         <div class="study-card-inner">
           <div class="study-card-front">
-            <span style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">[ 點擊翻轉看中文釋義 ]</span>
-            <div id="player-front-word" style="font-size: 36px; font-weight: 800; color: #1e3a8a;">Word</div>
-            <div id="player-front-phonetic" style="font-size: 16px; color: #64748b; margin-top: 6px;">/wɜːd/</div>
-            <div id="player-front-pos" style="font-size: 12px; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; margin-top: 10px;">noun</div>
-            <button id="btn-player-speak-front" class="btn-outline" style="margin-top: 16px; font-size: 13px; border-radius: 9999px; padding: 6px 14px;">🔊 聆聽美式發音</button>
+            <span style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">[ 點擊翻轉看中文釋義與口語搭配詞 ]</span>
+            <div id="player-front-word" style="font-size: 34px; font-weight: 800; color: #1e3a8a;">Word</div>
+            <div id="player-front-phonetic" style="font-size: 15px; color: #64748b; margin-top: 4px;">/wɜːd/</div>
+            <div id="player-front-pos" style="font-size: 12px; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; margin-top: 8px;">noun</div>
+            <div id="player-front-collocations" style="font-size: 13px; color: #0284c7; background: #f0f9ff; border: 1px dashed #bae6fd; padding: 6px 12px; border-radius: 6px; margin-top: 12px; max-width: 90%;">
+              口語必備語塊：載入中...
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+              <button id="btn-player-speak-slow" class="btn-outline" style="font-size: 12px; border-radius: 9999px; padding: 5px 12px;">🐢 慢速朗讀</button>
+              <button id="btn-player-speak-front" class="btn-outline" style="font-size: 12px; border-radius: 9999px; padding: 5px 14px;">🔊 母語發音</button>
+            </div>
           </div>
           <div class="study-card-back">
-            <div id="player-back-meaning" style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">中文釋義</div>
-            <div id="player-back-example" style="font-size: 14px; color: #334155; line-height: 1.6; background: #f1f5f9; padding: 12px; border-radius: 8px; width: 100%;">例句展示</div>
-            <span style="font-size: 12px; color: #94a3b8; margin-top: 12px;">[ 點擊可翻回正面 ]</span>
+            <div id="player-back-meaning" style="font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 10px;">中文釋義</div>
+            <div id="player-back-collocations" style="font-size: 13px; color: #1d4ed8; font-weight: 600; margin-bottom: 8px; text-align: left; width: 100%;">高頻搭售詞：-</div>
+            <div id="player-back-example" style="font-size: 13.5px; color: #334155; line-height: 1.5; background: #f1f5f9; padding: 12px; border-radius: 8px; width: 100%; text-align: left;">例句展示</div>
+            <button id="btn-player-speak-example" class="btn-outline" style="margin-top: 10px; font-size: 11.5px; padding: 4px 10px;">🔊 朗讀整句例句 (跟讀 Shadowing)</button>
+            <span style="font-size: 11px; color: #94a3b8; margin-top: 10px;">[ 點擊可翻回正面 ]</span>
           </div>
         </div>
       </div>
 
       <!-- 記憶熟練度操作列 -->
-      <div style="display: flex; gap: 12px; width: 480px; max-width: 95%; justify-content: center;">
+      <div style="display: flex; gap: 12px; width: 500px; max-width: 95%; justify-content: center;">
         <button id="btn-fc-rate-0" class="btn-danger" style="flex: 1; padding: 10px;">❌ 遺忘生疏</button>
         <button id="btn-fc-rate-1" class="btn-amber" style="flex: 1; padding: 10px;">🤔 有點模糊</button>
         <button id="btn-fc-rate-2" class="btn-green" style="flex: 1; padding: 10px;">✅ 熟練記住</button>
@@ -391,7 +420,7 @@
   <!-- 手動新增單字彈跳視窗 -->
   <div id="modal-add-vocab" class="modal-overlay hidden">
     <div class="modal-box">
-      <h3>新增自訂單字卡</h3>
+      <h3>新增自訂單字與語塊卡</h3>
       <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">英文單字 / 片語：</label>
       <input type="text" id="input-new-word" placeholder="例如：procrastinate" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
 
@@ -406,11 +435,14 @@
         </div>
       </div>
 
+      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">口語高頻搭配詞 (Collocations)：</label>
+      <input type="text" id="input-new-collocations" placeholder="例如：tend to procrastinate, procrastinate on doing sth" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+
       <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">中文釋義：</label>
       <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
 
-      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">實用例句：</label>
-      <textarea id="input-new-example" rows="2" placeholder="Don't procrastinate; start studying today." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-family: inherit; font-size: 13px;"></textarea>
+      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">實用語境例句：</label>
+      <textarea id="input-new-example" rows="2" placeholder="I used to procrastinate a lot before deadlines." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-family: inherit; font-size: 13px;"></textarea>
 
       <div class="modal-actions">
         <button id="btn-cancel-add-vocab" class="btn-gray">取消</button>
@@ -533,7 +565,10 @@
     },
     activeDayIndex: null,
     chatInstance: null,
-    currentStudyIndex: 0 // 單字刷卡模式索引
+    currentStudyIndex: 0,
+    speechRate: 1.0,
+    isRecording: false,
+    recognition: null
   };
 
   // DOM 元素引用
@@ -587,6 +622,13 @@
   const sliderDetailLevel = document.getElementById("slider-detail-level");
   const badgeDetailLevel = document.getElementById("badge-detail-level");
 
+  // 口說與語音控制 DOM
+  const btnVoiceInput = document.getElementById("btn-voice-input");
+  const btnTriggerRoleplay = document.getElementById("btn-trigger-roleplay");
+  const btnTriggerSpeakingDrill = document.getElementById("btn-trigger-speaking-drill");
+  const btnSpeedSlow = document.getElementById("btn-speed-slow");
+  const btnSpeedNormal = document.getElementById("btn-speed-normal");
+
   // 單字卡相關 DOM
   const tabBtnLecture = document.getElementById("tab-btn-lecture");
   const tabBtnVocab = document.getElementById("tab-btn-vocab");
@@ -602,6 +644,7 @@
   const inputNewWord = document.getElementById("input-new-word");
   const inputNewPhonetic = document.getElementById("input-new-phonetic");
   const inputNewPos = document.getElementById("input-new-pos");
+  const inputNewCollocations = document.getElementById("input-new-collocations");
   const inputNewMeaning = document.getElementById("input-new-meaning");
   const inputNewExample = document.getElementById("input-new-example");
   const btnCancelAddVocab = document.getElementById("btn-cancel-add-vocab");
@@ -614,9 +657,13 @@
   const playerFrontWord = document.getElementById("player-front-word");
   const playerFrontPhonetic = document.getElementById("player-front-phonetic");
   const playerFrontPos = document.getElementById("player-front-pos");
+  const playerFrontCollocations = document.getElementById("player-front-collocations");
+  const btnPlayerSpeakSlow = document.getElementById("btn-player-speak-slow");
   const btnPlayerSpeakFront = document.getElementById("btn-player-speak-front");
   const playerBackMeaning = document.getElementById("player-back-meaning");
+  const playerBackCollocations = document.getElementById("player-back-collocations");
   const playerBackExample = document.getElementById("player-back-example");
+  const btnPlayerSpeakExample = document.getElementById("btn-player-speak-example");
   const fcPlayerProgress = document.getElementById("fc-player-progress");
   const btnFcRate0 = document.getElementById("btn-fc-rate-0");
   const btnFcRate1 = document.getElementById("btn-fc-rate-1");
@@ -660,7 +707,7 @@
     }
   });
 
-  function speakEnglish(text) {
+  function speakEnglish(text, rate = state.speechRate) {
     if (!('speechSynthesis' in window)) {
       showToast("您的瀏覽器不支援語音合成朗讀", "error");
       return;
@@ -668,9 +715,82 @@
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
-    utterance.rate = 0.9;
+    utterance.rate = rate || 1.0;
+    utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
   }
+
+  btnSpeedSlow.addEventListener("click", () => {
+    state.speechRate = 0.8;
+    btnSpeedSlow.className = "btn-green";
+    btnSpeedNormal.className = "btn-outline";
+    showToast("已切換為 0.8x 慢速清晰跟讀模式", "info");
+  });
+
+  btnSpeedNormal.addEventListener("click", () => {
+    state.speechRate = 1.0;
+    btnSpeedNormal.className = "btn-green";
+    btnSpeedSlow.className = "btn-outline";
+    showToast("已切換為 1.0x 母語正常語速", "info");
+  });
+
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      btnVoiceInput.title = "目前瀏覽器不支援語音辨識 (建議使用 Chrome/Edge)";
+      btnVoiceInput.style.opacity = "0.5";
+      return;
+    }
+
+    state.recognition = new SpeechRecognition();
+    state.recognition.continuous = false;
+    state.recognition.interimResults = false;
+    state.recognition.lang = "en-US";
+
+    state.recognition.onstart = () => {
+      state.isRecording = true;
+      btnVoiceInput.classList.add("mic-recording");
+      showToast("🎙️ 正在聆聽您的英文語音，請說...", "info");
+    };
+
+    state.recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      inputMessage.value = inputMessage.value ? `${inputMessage.value} ${transcript}` : transcript;
+      inputMessage.focus();
+      showToast(`識別成功：「${transcript}」`, "success");
+    };
+
+    state.recognition.onerror = (event) => {
+      console.error("Speech Rec Error:", event.error);
+      showToast("語音辨識中斷：" + (event.error === 'not-allowed' ? "未授權麥克風" : event.error), "error");
+    };
+
+    state.recognition.onend = () => {
+      state.isRecording = false;
+      btnVoiceInput.classList.remove("mic-recording");
+    };
+  }
+
+  initSpeechRecognition();
+
+  btnVoiceInput.addEventListener("click", () => {
+    if (!state.recognition) {
+      showToast("您的瀏覽器不支援語音輸入功能，請使用 Chrome 或 Edge 瀏覽器！", "error");
+      return;
+    }
+    if (state.isRecording) {
+      state.recognition.stop();
+    } else {
+      try {
+        state.recognition.start();
+      } catch (e) {
+        state.recognition.stop();
+      }
+    }
+  });
+
+  btnTriggerRoleplay.addEventListener("click", handleStartRoleplay);
+  btnTriggerSpeakingDrill.addEventListener("click", handleStartOralReflexDrill);
 
   chkCustomClientId.addEventListener("change", (e) => {
     boxCustomClientId.classList.toggle("hidden", !e.target.checked);
@@ -962,9 +1082,9 @@
 
     try {
       const ai = new GoogleGenAI({ apiKey: state.geminiKey });
-      const prompt = `你是一位精通應用語言學與英文教學的專家。請根據學習目標「${goal}」規劃 ${days} 天的每日英文學習進度大綱。
+      const prompt = `你是一位精通現代應用語言學、二語習得（SLA）與英文口語表達名師。請根據學習目標「${goal}」規劃 ${days} 天的每日英文學習進度大綱。
 要求：
-1. 每日主題必須聚焦具體的英語語法時態、句構（如：分詞構句、關係代名詞、假設語氣）、高頻介系詞片語、語篇銜接詞或核心口語句型。
+1. 每日主題必須「文法架構＋口語高頻搭配詞（Collocations）＋口說實戰情境」三位一體，解決開口卡頓與詞彙貧乏問題。
 2. 輸出格式必須是純 JSON 字串陣列，例如：["Day 1: 主題名稱", "Day 2: 主題名稱", ...]，不要有任何多餘的引言或代碼圍欄。`;
 
       const res = await ai.models.generateContent({
@@ -1082,7 +1202,7 @@
         <div>
           <div class="card-day-tag">Day ${idx + 1} ${isCompleted ? '✓' : ''}</div>
           <div class="card-title">${title}</div>
-          <div style="font-size: 11.5px; color: #64748b; margin-top: 4px;">🗂️ ${vocabCount} 個單字卡</div>
+          <div style="font-size: 11.5px; color: #64748b; margin-top: 4px;">🗂️ ${vocabCount} 個單字與語塊卡</div>
         </div>
         <div class="card-footer">
           <span style="font-size: 12px; color: ${isLocked ? '#94a3b8' : '#64748b'};">
@@ -1127,6 +1247,22 @@
         throwOnError: false
       });
     }
+
+    targetElem.querySelectorAll("blockquote p, li").forEach(el => {
+      const textContent = el.textContent.trim();
+      if (/^[A-Za-z0-9\s,'".!?-]{8,}$/.test(textContent) && !el.querySelector(".inline-speaker")) {
+        const speakBtn = document.createElement("button");
+        speakBtn.className = "inline-speaker";
+        speakBtn.textContent = " 🔊";
+        speakBtn.title = "點擊跟讀朗讀";
+        speakBtn.style.cssText = "background:transparent; border:none; cursor:pointer; font-size:12px; padding:0 4px;";
+        speakBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          speakEnglish(textContent);
+        });
+        el.appendChild(speakBtn);
+      }
+    });
   }
 
   async function startDayStudy(dayIdx) {
@@ -1138,7 +1274,6 @@
     viewEmptyCreate.classList.add("hidden");
     viewStudy.classList.remove("hidden");
 
-    // 預設切換回講義頁籤
     tabBtnLecture.click();
 
     chatBox.innerHTML = "";
@@ -1174,43 +1309,43 @@
     if (!cachedContent) {
       lectureContentBox.innerHTML = `<div style="text-align:center; padding: 40px; color: #64748b;">
         <p style="font-weight:600; font-size:16px;">正在透過 ${getModelLabel(currentLectureModel)} 編寫英文講義...</p>
-        <p style="font-size:13px;">為專案【${projectGoal}】客製化語法架構表、道地語塊解析與避免中式英文（Chinglish）指南，請稍候片刻。</p>
+        <p style="font-size:13px;">為專案【${projectGoal}】專屬打造「口語語塊（Collocations）」、「跟讀實戰短句」與「中式思維避坑」，請稍候片刻。</p>
       </div>`;
 
-      const lecturePrompt = `你是一位世界級英語語言學家與頂級英文名師。
+      const lecturePrompt = `你是一位世界級英語應用語言學專家與口說流利度訓練名師。
 學生參與的學習專案總目標為：【${projectGoal}】。
 請針對今日核心英文主題「${title}」撰寫一份完整、嚴謹且深入淺出的專業教學講義。
 
 【核心導向要求】：
-講義中的所有語境例句、高頻用法、常見中式思維盲點，必須緊扣專案目標【${projectGoal}】。
+講義中的所有語境例句、高頻用法、常見中式思維盲點，必須緊扣專案目標【${projectGoal}】，並強烈強調「口說自然流暢（Spoken Fluency）」與「語塊搭配詞（Collocations）」，解決學生想說卻卡在喉嚨、詞彙貧乏的痛點。
 
 格式嚴格要求：
 1. 一律使用乾淨清晰的標準 Markdown 格式。
-2. 句構公式使用清晰行內標籤（例如：\`Subject + modal verb (could/would) + have + V-ed\`），避免混亂代碼。
-3. 嚴格包含以下五大核心板塊：
+2. 句構公式使用清晰行內標籤（例如：\`Subject + modal verb (could/would) + have + V-ed\`）。
+3. 嚴格包含以下六大核心板塊：
 
 # 【${title}】深度英文解析講義
-> 學習目標導向：【${projectGoal}】
+> 學習目標導向：【${projectGoal}】 ｜ 著重口說流暢與語塊擴充
 
-## 一、 核心文法概念與公式架構
+## 一、 核心文法概念與直覺架構
 - 詳解本語法結構的原由、本質意義與核心公式。
 - 請使用 **Markdown 表格** 整理主詞、時態變化、助動詞或搭配詞形態對照表。
 
-## 二、 句型深層邏輯與語義剖析
-- 拆解長句結構（主句、子句、修飾語修飾關係）。
-- 剖析英語母語者在不同語氣（委婉、肯定、假設、正式度、客氣商務等）時的選詞差別。
+## 二、 口說必備核心語塊（Collocations & Lexical Chunks）
+- 不要只背單詞！列出 4~6 個日常對話中最常連著說的高頻語塊（如動詞+介系詞搭配、成套句型）。
+- 標註出母語者的口語連音或強弱讀重點。
 
-## 三、 中式英文（Chinglish）避坑專區
-- 列出 2~3 個中文母語者最容易按中文直譯造出的錯誤句子與道地英文對照。
+## 三、 中式英文（Chinglish）口語避坑專區
+- 列出 2~3 個中文母語者最容易在開口時脫口而出的台式直譯句子 vs. 母語者道地自然說法（Natural native phrasing）。
 - 說明背後思維邏輯差異。
 
-## 四、 實戰情境例句（貼合【${projectGoal}】）
-提供 4 個貼近【${projectGoal}】的高質感道地例句：
-1. **英文例句**
-2. **道地中文翻譯**
-3. **語境與搭配詞解析**（指出重點動詞片語、Collocation 或正式程度）
+## 四、 實戰對話跟讀情境（Shadowing Practice）
+提供一段 4~6 句貼近【${projectGoal}】的精彩雙人對話（Speaker A & B），適合大聲朗讀跟讀，附帶中文翻譯與語氣解析。
 
-## 五、 一句話直覺反射口訣
+## 五、 實戰情境獨立金句（貼合【${projectGoal}】）
+提供 3 個高質感生活/職場金句，附中文意與搭配詞剖析。
+
+## 六、 一句話直覺反射口訣
 - 用一句好記的口訣或公式總結今日規則。`;
 
       try {
@@ -1223,7 +1358,6 @@
         currentProj.history[dayIdx].lessonContent = cachedContent;
         await saveProgressToDrive();
 
-        // 初次生成講義時，自動觸發一次單字提取
         triggerAiExtractVocab(cachedContent);
       } catch (e) {
         lectureContentBox.innerHTML = `<p style="color: #ef4444;">教材載入失敗：${e.message}</p>`;
@@ -1234,12 +1368,11 @@
     renderMarkdownContent(lectureContentBox, cachedContent);
     renderFlashcardsList();
 
-    // 對話還原與 Gemini 助教實例化
     const savedChat = currentProj.history[dayIdx].chatHistory || [];
     const geminiChatHistory = [];
 
     if (savedChat.length === 0) {
-      const defaultWelcome = `已載入【${title}】英文深度講義！您可以隨時在右側發問、請助教造句，或切換至「今日單字卡庫」刷卡，準備好後點擊下方按鈕啟動 **10+1 題隨堂測驗**（由 ${getModelLabel(FLASH_MODEL)} 出題與批改）！`;
+      const defaultWelcome = `已載入【${title}】深度講義！您可以點擊下方「🎙️ 麥克風」開口說英文發問、點擊「🎭 啟動情境口說對話」，或切換至單字卡庫複習語塊。準備好後點擊下方按鈕啟動 10+1 題隨堂測驗！`;
       appendChatMessage("system", defaultWelcome, true);
     } else {
       savedChat.forEach(msg => {
@@ -1256,19 +1389,22 @@
       model: FLASH_MODEL,
       history: geminiChatHistory,
       config: {
-        systemInstruction: `你是親切、專業、富有耐心且精通現代英語語言學的資深外籍英文名師助教。
-學生目前英文學習目標為：【${projectGoal}】。
+        systemInstruction: `你是親切、專業、富有耐心且精通口說流利度訓練的外籍英文名師助教。
+學生目前的學習目標為：【${projectGoal}】。學生最大痛點是「開口不順暢、單字量少、容易直譯中式英文」。
 學生正在學習今日單元「${title}」，今日教材內容如下：
 
 ${cachedContent}
 
-【核心職責與規範】：
-1. 日常問答：根據專案大方向【${projectGoal}】與教材，用流暢、地道且鼓勵性的繁體中文回答，清楚指出句型搭配詞（Collocations）與語感差異。
-2. 測驗批改與詳解：
-   - 當學生提交隨堂測驗答案時，逐題明確標示【正解】或【訂正】。
-   - 針對學生答錯的題目，指出中式英文盲點、時態邏輯或介系詞混淆原因，並提供正確道地範例。
-   - 給予總得分評語，並特別針對第 11 題 Bonus 困難題提供進階思維剖析。
-3. 口氣：具啟發性、條理清晰，直接切入核心。`
+【核心職責與指導規範】：
+1. 口說與對話陪伴：
+   - 當學生輸入英文（尤其是語音輸入）時，除了回答問題外，請特別讚美學生的開口勇氣，並附帶一個「道地升級版（Better Native Way to Say It）」，提供更精準的語塊或動詞搭配。
+2. 情境 Roleplay 模式：
+   - 扮演對話夥伴，每次只拋出 1~2 句話並給予適度追問，引導學生連續開口。
+3. 測驗批改與詳解：
+   - 逐題明確標示【正解】或【訂正】。
+   - 指出答錯題目背後的時態、語序或介系詞混淆原因，特別標記「口語中母語者會怎麼講」。
+   - 給予總得分評語，並特別針對第 11 題 Bonus 困難題提供進階語感剖析。
+4. 口氣親切鼓勵、條理清晰，引導學生開口大聲唸出！`
       }
     });
   }
@@ -1292,9 +1428,9 @@ ${cachedContent}
     const detailLevel = state.appData.settings?.detailLevel || 2;
     let detailConstraint = "";
     if (detailLevel === 1) {
-      detailConstraint = "\n\n【回答風格限制：簡答模式】請直截了當回答（批改請直接給出正誤與核心簡短解析）。";
+      detailConstraint = "\n\n【回答風格限制：簡答模式】請直截了當回答，若有更道地口語說法請一句話標註。";
     } else if (detailLevel === 3) {
-      detailConstraint = "\n\n【回答風格限制：詳盡模式】請給予極為深入的文法原理剖析、英語母語者語感、介系詞搭配細節與多個生活應用句。";
+      detailConstraint = "\n\n【回答風格限制：詳盡模式】請給予深入文法剖析、母語者口語語感、高頻語塊搭配詞與 2 個口說實例。";
     } else {
       detailConstraint = "\n\n【回答風格限制：適中模式】請以條理清晰、重點突出的方式回答。";
     }
@@ -1309,6 +1445,46 @@ ${cachedContent}
     }
   }
 
+  async function handleStartRoleplay() {
+    if (!state.chatInstance) return;
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const projectGoal = currentProj.goal || "英文學習";
+    const title = currentProj.plan[state.activeDayIndex];
+
+    const roleplayPrompt = `【系統指令：啟動今日口說情境 Roleplay 模擬】
+請根據今日文法「${title}」與主題「${projectGoal}」，為學生設計一個非常真實的生活或職場對話情境。
+要求：
+1. 說明情境角色設定（例如：我是外籍店員/主管/外國朋友，你是顧客/同事）。
+2. 用親切自然的英文開場說第一句（不要太長，1~2 句）。
+3. 提示學生可以用麥克風語音輸入回答，或參考給予的句型鷹架作答。
+4. 在學生每次回答後，給予一句【道地口語升級指引】，然後繼續推進對話。`;
+
+    appendChatMessage("system", "🎭 已啟動今日情境口說對話（Roleplay）！請使用麥克風開口說話回應助教！", true);
+    try {
+      const res = await state.chatInstance.sendMessage({ message: roleplayPrompt });
+      appendChatMessage("bot", res.text, true);
+    } catch (err) {
+      appendChatMessage("system", "情境對話啟動失敗：" + err.message, true);
+    }
+  }
+
+  async function handleStartOralReflexDrill() {
+    if (!state.chatInstance) return;
+    const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+
+    const drillPrompt = `【系統指令：啟動口語直覺反射快問快答（Oral Reflex Drill）】
+請針對今日英文主題「${title}」，給予學生 3 道「中文情境句」，要求學生不假思索在 5 秒內大聲開口說出對應的道地英文。
+請一次先給出第 1 題，並提示學生點擊麥克風用語音回答！待學生回答後，給予即時語音辨識反饋並進入下一題。`;
+
+    appendChatMessage("system", "⚡ 啟動口語直覺反射訓練！請看到情境後直接用語音麥克風唸出英文！", true);
+    try {
+      const res = await state.chatInstance.sendMessage({ message: drillPrompt });
+      appendChatMessage("bot", res.text, true);
+    } catch (err) {
+      appendChatMessage("system", "訓練啟動失敗：" + err.message, true);
+    }
+  }
+
   function appendChatMessage(type, content, shouldPersist = true) {
     const div = document.createElement("div");
     div.className = `msg msg-${type}`;
@@ -1316,6 +1492,19 @@ ${cachedContent}
       div.textContent = content;
     } else {
       renderMarkdownContent(div, content);
+      /* 如果是 AI 回覆，提供一個朗讀按鈕讓學生可以練習聽力與跟讀 */
+      if (type === "bot") {
+        const audioBtn = document.createElement("button");
+        audioBtn.textContent = "🔊 聆聽助教回覆發音";
+        audioBtn.className = "btn-outline";
+        audioBtn.style.cssText = "font-size: 11px; padding: 2px 8px; margin-top: 8px; display: inline-flex;";
+        audioBtn.addEventListener("click", () => {
+          // 清除 Markdown 符號只朗讀文字
+          const cleanText = content.replace(/[*_#`[\]()]/g, '');
+          speakEnglish(cleanText);
+        });
+        div.appendChild(audioBtn);
+      }
     }
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -1355,9 +1544,9 @@ ${cachedContent}
 
 題型配置要求（共 11 題）：
 - 題 1 ~ 題 3：【英文語法選擇題】（4 選 1，考驗核心動詞時態、助動詞、接續或主被動）。
-- 題 4 ~ 題 6：【介系詞與時態填空題】（提供英文情境句，在 ( ) 處挖空，要求填入適當介系詞或動詞正確變化形態）。
-- 題 7 ~ 題 8：【重組與語塊構句題】（給予 4 個英文語塊，請學生排列成文法正確的句子）。
-- 題 9 ~ 題 10：【中式英文病句糾錯 / 實戰中翻英】（針對【${projectGoal}】常見錯誤進行挑錯或改寫）。
+- 題 4 ~ 題 6：【介系詞與口語語塊填空題】（提供英文情境句，在 ( ) 處挖空，要求填入適當介系詞或動詞正確搭配）。
+- 題 7 ~ 題 8：【重組與語塊構句題】（給予 4 個英文語塊，請學生排列成自然流暢的口語句子）。
+- 題 9 ~ 題 10：【中式英文病句糾錯 / 實戰中翻英】（針對【${projectGoal}】常見錯誤進行挑錯或改寫為道地英語）。
 - 題 11：【🔥 Bonus 困難挑戰題】（設計深度語感辨析題，如細微詞義區分、倒裝句、虛擬語氣等高階陷阱題，標為 Bonus 題）。
 
 排版要求：
@@ -1421,11 +1610,13 @@ Bonus. `;
 
   async function triggerAiExtractVocab(lessonContent) {
     btnAiGenVocab.disabled = true;
-    btnAiGenVocab.textContent = "✨ AI 提煉單字卡中...";
+    btnAiGenVocab.textContent = "✨ AI 提煉單字與口語搭售語塊中...";
 
     try {
       const ai = new GoogleGenAI({ apiKey: state.geminiKey });
-      const prompt = `你是一位英文教學詞彙專家。請從以下這份英文教學講義中，精選出 6~10 個最關鍵的核心單字或片語（Idioms/Phrasal Verbs）。
+      const prompt = `你是一位英文二語習得（SLA）與詞彙學專家。請從以下這份英文教學講義中，精選出 6~10 個最關鍵的核心單字或片語（Idioms/Phrasal Verbs）。
+特別要求：務必為每個單字附上 2 個口說中最常出現的「高頻搭配詞/語塊（Collocations）」，例如單字如果是 "procrastinate"，語塊應提供 "procrastinate on", "tend to procrastinate"。
+
 講義內容：
 ${lessonContent}
 
@@ -1433,12 +1624,13 @@ ${lessonContent}
 - "word": 單字或片語 (String)
 - "phonetic": 國際音標 (String，例如 "/ɪnˈhæns/")
 - "pos": 詞性 (String，例如 "v." 或 "phr.")
+- "collocations": 高頻口語語塊搭配 (String，例如 "enhance the quality / enhance one's skills")
 - "meaning": 精確道地的中文釋義 (String)
-- "example": 實用例句 (String)
+- "example": 貼近日常或職場實戰的例句 (String)
 
 範例格式：
 [
-  { "word": "procrastinate", "phonetic": "/prəˈkræstɪneɪt/", "pos": "v.", "meaning": "拖延、耽擱", "example": "Don't procrastinate on your assignment." }
+  { "word": "procrastinate", "phonetic": "/prəˈkræstɪneɪt/", "pos": "v.", "collocations": "procrastinate on / stop procrastinating", "meaning": "拖延、耽擱", "example": "Don't procrastinate on your assignment." }
 ]`;
 
       const res = await ai.models.generateContent({
@@ -1463,9 +1655,10 @@ ${lessonContent}
             word: item.word,
             phonetic: item.phonetic || "",
             pos: item.pos || "",
+            collocations: item.collocations || "",
             meaning: item.meaning,
             example: item.example,
-            status: 0 // 0: 生疏, 1: 模糊, 2: 熟練
+            status: 0
           });
         }
       });
@@ -1473,13 +1666,13 @@ ${lessonContent}
       await saveProgressToDrive();
       updateVocabBadgeCount();
       renderFlashcardsList();
-      showToast(`已成功提煉 ${extracted.length} 個英文單字卡！`, "success");
+      showToast(`已成功提煉 ${extracted.length} 個英文單字與語塊卡！`, "success");
     } catch (e) {
       console.error(e);
       showToast("單字提取失敗：" + e.message, "error");
     } finally {
       btnAiGenVocab.disabled = false;
-      btnAiGenVocab.textContent = "✨ AI 自動自講義提取單字卡";
+      btnAiGenVocab.textContent = "✨ AI 自動自講義提取高頻單字與口語搭配詞";
     }
   }
 
@@ -1492,7 +1685,7 @@ ${lessonContent}
       flashcardsContainer.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #fff; border-radius: 8px; border: 1px dashed #cbd5e1;">
           <p style="color: #64748b; font-size: 14px; margin-bottom: 12px;">目前這天還沒有單字卡喔！</p>
-          <button onclick="document.getElementById('btn-ai-gen-vocab').click()" class="btn-purple" style="font-size: 13px;">點此讓 AI 一鍵自課文提煉核心單字</button>
+          <button onclick="document.getElementById('btn-ai-gen-vocab').click()" class="btn-purple" style="font-size: 13px;">點此讓 AI 一鍵自課文提煉核心單字與搭配詞</button>
         </div>`;
       return;
     }
@@ -1515,6 +1708,7 @@ ${lessonContent}
               <div class="fc-word">${card.word}</div>
               <div class="fc-phonetic">${card.phonetic}</div>
               <span class="fc-pos">${card.pos}</span>
+              ${card.collocations ? `<div class="fc-chunks">🔗 ${card.collocations}</div>` : ''}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8;">
               <span>點擊翻轉看釋義 ↺</span>
@@ -1527,7 +1721,7 @@ ${lessonContent}
               <div class="fc-example">${card.example}</div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
-              <span style="font-size: 11px; color: #64748b;">標記熟練度:</span>
+              <span style="font-size: 11px; color: #64748b;">熟練度:</span>
               <div style="display: flex; gap: 4px;">
                 <button class="btn-mark-status" data-status="0" style="padding: 2px 6px; font-size: 11px; background: #fee2e2; color: #b91c1c;">生</button>
                 <button class="btn-mark-status" data-status="1" style="padding: 2px 6px; font-size: 11px; background: #fef3c7; color: #92400e;">半</button>
@@ -1576,6 +1770,7 @@ ${lessonContent}
     inputNewWord.value = "";
     inputNewPhonetic.value = "";
     inputNewPos.value = "";
+    inputNewCollocations.value = "";
     inputNewMeaning.value = "";
     inputNewExample.value = "";
     modalAddVocab.classList.remove("hidden");
@@ -1601,8 +1796,9 @@ ${lessonContent}
       word: word,
       phonetic: inputNewPhonetic.value.trim(),
       pos: inputNewPos.value.trim(),
+      collocations: inputNewCollocations.value.trim(),
       meaning: meaning,
-      example: inputNewExample.value.trim() || `Remember the word "${word}".`,
+      example: inputNewExample.value.trim() || `Remember the phrase "${word}".`,
       status: 0
     });
 
@@ -1640,12 +1836,22 @@ ${lessonContent}
     playerCardBox.classList.toggle("flipped");
   });
 
+  btnPlayerSpeakSlow.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    if (card) speakEnglish(card.word, 0.75);
+  });
+
   btnPlayerSpeakFront.addEventListener("click", (e) => {
     e.stopPropagation();
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
-    const card = cards[state.currentStudyIndex];
-    if (card) speakEnglish(card.word);
+    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    if (card) speakEnglish(card.word, 1.0);
+  });
+
+  btnPlayerSpeakExample.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    if (card && card.example) speakEnglish(card.example, state.speechRate);
   });
 
   function renderPlayerCard() {
@@ -1654,7 +1860,7 @@ ${lessonContent}
     const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
 
     if (state.currentStudyIndex >= cards.length) {
-      showToast("🎉 太棒了！您已完成今日所有單字卡複習！", "success");
+      showToast("🎉 太棒了！您已完成今日所有單字與語塊卡複習！", "success");
       modalFlashcardPlayer.classList.add("hidden");
       renderFlashcardsList();
       return;
@@ -1665,7 +1871,9 @@ ${lessonContent}
     playerFrontWord.textContent = card.word;
     playerFrontPhonetic.textContent = card.phonetic || "";
     playerFrontPos.textContent = card.pos || "word";
+    playerFrontCollocations.textContent = card.collocations ? `🔗 高頻搭配語塊：${card.collocations}` : "💡 試著大聲將這個單字唸出三次！";
     playerBackMeaning.textContent = card.meaning;
+    playerBackCollocations.textContent = card.collocations ? `口語語塊：${card.collocations}` : "";
     playerBackExample.textContent = card.example || "No example provided.";
   }
 
