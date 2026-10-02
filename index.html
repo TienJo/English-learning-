@@ -298,10 +298,16 @@
 
       <!-- 視圖 A: 專案日卡看板 -->
       <section id="view-dashboard" class="content-container hidden">
-        <div class="dashboard-header">
+        <div class="dashboard-header" style="flex-wrap: wrap; gap: 12px;">
           <div>
             <h2 id="view-project-title">載入中...</h2>
             <span id="view-project-progress" style="font-size: 13px; color: #64748b;">計算進度中...</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button id="btn-project-flashcard-draw" class="btn-purple" style="font-size: 13.5px; padding: 8px 16px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25); display: inline-flex; align-items: center; gap: 6px;" title="隨機抽取本計畫所有單元累積的單字進行總複習">
+              <span>🎴 全計畫單字抽卡</span>
+              <span id="badge-project-total-vocab" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 9999px; font-size: 11.5px; font-weight: 700;">0 字</span>
+            </button>
           </div>
         </div>
         <div id="day-cards-grid" class="cards-grid"></div>
@@ -685,6 +691,11 @@
   const viewProjectTitle = document.getElementById("view-project-title");
   const viewProjectProgress = document.getElementById("view-project-progress");
   const dayCardsGrid = document.getElementById("day-cards-grid");
+  const btnProjectFlashcardDraw = document.getElementById("btn-project-flashcard-draw");
+  const badgeProjectTotalVocab = document.getElementById("badge-project-total-vocab");
+
+  let activePlayerDeck = [];
+  let playerMode = "day"; // "day" 或 "project_all"
 
   const studyDayTitle = document.getElementById("study-day-title");
   const lectureDayTag = document.getElementById("lecture-day-tag");
@@ -1529,6 +1540,12 @@
     const currentActiveIndex = currentProj.currentDayIndex || 0;
     let completedCount = 0;
 
+    // 計算並更新全計畫單字總數
+    const allProjCards = getAllProjectFlashcards(currentProj);
+    if (badgeProjectTotalVocab) {
+      badgeProjectTotalVocab.textContent = `${allProjCards.length} 字`;
+    }
+
     currentProj.plan.forEach((title, idx) => {
       const isCompleted = history[idx]?.completed;
       if (isCompleted) completedCount++;
@@ -1960,6 +1977,58 @@ Bonus. `;
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
     vocabCountBadge.textContent = cards.length;
+
+    // 同步更新全計畫單字總數標籤
+    const allCards = getAllProjectFlashcards(currentProj);
+    if (badgeProjectTotalVocab) {
+      badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
+    }
+  }
+
+  // 取得該計畫到目前為止所有單元累積的全部單字
+  function getAllProjectFlashcards(proj) {
+    if (!proj || !proj.history) return [];
+    const list = [];
+    const seen = new Set();
+    Object.keys(proj.history).sort((a, b) => parseInt(a) - parseInt(b)).forEach(dayKey => {
+      const dayHistory = proj.history[dayKey];
+      const dayNum = parseInt(dayKey, 10) + 1;
+      (dayHistory.flashcards || []).forEach(card => {
+        const uniqueKey = card.id || card.word.toLowerCase();
+        if (!seen.has(uniqueKey)) {
+          seen.add(uniqueKey);
+          list.push({ ...card, _originDay: dayNum, _ref: card });
+        }
+      });
+    });
+    return list;
+  }
+
+  // 洗牌演算法（隨機抽卡亂序）
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // 監聽：計畫看板右上角的「全計畫單字抽卡」
+  if (btnProjectFlashcardDraw) {
+    btnProjectFlashcardDraw.addEventListener("click", () => {
+      const currentProj = state.appData.projects[state.appData.activeProjectId];
+      const allCards = getAllProjectFlashcards(currentProj);
+      if (allCards.length === 0) {
+        showToast("目前本計畫尚未累積任何單字卡！請進入每日單元讓 AI 提煉或手動新增單字！", "info");
+        return;
+      }
+      activePlayerDeck = shuffleArray(allCards);
+      playerMode = "project_all";
+      state.currentStudyIndex = 0;
+      openPlayerModal();
+      showToast(`🎯 已隨機抽取本計畫 ${allCards.length} 個累積單字，開始抽卡複習！`, "success");
+    });
   }
 
   btnAiGenVocab.addEventListener("click", () => {
@@ -2327,25 +2396,27 @@ ${lessonContent}
       showToast("目前尚無單字卡，請先點擊提煉或新增單字卡！", "info");
       return;
     }
+    activePlayerDeck = cards.map(c => ({ ...c, _ref: c }));
+    playerMode = "day";
     state.currentStudyIndex = 0;
     openPlayerModal();
   });
 
   btnPlayerSpeakEx1.addEventListener("click", (e) => {
     e.stopPropagation();
-    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    const card = activePlayerDeck[state.currentStudyIndex];
     if (card && card.example) speakEnglishOnly(card.example, 0.8);
   });
 
   btnPlayerSpeakEx2.addEventListener("click", (e) => {
     e.stopPropagation();
-    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    const card = activePlayerDeck[state.currentStudyIndex];
     if (card && card.example2) speakEnglishOnly(card.example2, state.speechRate);
   });
 
   btnPlayerSpeakAllEx.addEventListener("click", (e) => {
     e.stopPropagation();
-    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    const card = activePlayerDeck[state.currentStudyIndex];
     if (!card) return;
     let full = card.example || "";
     if (card.example2) full += ". " + card.example2;
@@ -2354,18 +2425,22 @@ ${lessonContent}
 
   function renderPlayerCard() {
     playerCardBox.classList.remove("flipped");
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
 
-    if (state.currentStudyIndex >= cards.length) {
-      showToast("🎉 太棒了！您已完成今日所有單字與語塊卡複習！", "success");
+    if (state.currentStudyIndex >= activePlayerDeck.length) {
+      const congratsMsg = playerMode === "project_all" 
+        ? "🎉 太棒了！您已完成本計畫所有累積單字的抽卡總複習！" 
+        : "🎉 太棒了！您已完成今日所有單字與語塊卡複習！";
+      showToast(congratsMsg, "success");
       modalFlashcardPlayer.classList.add("hidden");
       renderFlashcardsList();
       return;
     }
 
-    const card = cards[state.currentStudyIndex];
-    fcPlayerProgress.textContent = `卡片 ${state.currentStudyIndex + 1} / ${cards.length}`;
+    const card = activePlayerDeck[state.currentStudyIndex];
+    const originTag = (playerMode === "project_all" && card._originDay) ? ` (Day ${card._originDay})` : "";
+    const modePrefix = playerMode === "project_all" ? "🎯 全計畫抽卡" : "單元卡片";
+    fcPlayerProgress.textContent = `${modePrefix} ${state.currentStudyIndex + 1} / ${activePlayerDeck.length}${originTag}`;
+    
     playerFrontWord.textContent = card.word;
     playerFrontPhonetic.textContent = card.phonetic || "";
     playerFrontPos.textContent = card.pos || "word";
@@ -2403,21 +2478,23 @@ ${lessonContent}
 
   btnPlayerSpeakSlow.addEventListener("click", (e) => {
     e.stopPropagation();
-    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    const card = activePlayerDeck[state.currentStudyIndex];
     if (card) speakEnglish(card.word, 0.75);
   });
 
   btnPlayerSpeakFront.addEventListener("click", (e) => {
     e.stopPropagation();
-    const card = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards?.[state.currentStudyIndex];
+    const card = activePlayerDeck[state.currentStudyIndex];
     if (card) speakEnglish(card.word, 1.0);
   });
 
   function advancePlayerCard(status) {
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
-    if (cards[state.currentStudyIndex]) {
-      cards[state.currentStudyIndex].status = status;
+    const card = activePlayerDeck[state.currentStudyIndex];
+    if (card) {
+      if (card._ref) {
+        card._ref.status = status;
+      }
+      card.status = status;
       saveProgressToDrive();
     }
     state.currentStudyIndex += 1;
