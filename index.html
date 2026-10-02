@@ -467,39 +467,57 @@
 
   <!-- 手動新增單字彈跳視窗 -->
   <div id="modal-add-vocab" class="modal-overlay hidden">
-    <div class="modal-box">
-      <h3>新增自訂單字與語塊卡</h3>
-      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">英文單字 / 片語：</label>
-      <input type="text" id="input-new-word" placeholder="例如：procrastinate" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+    <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 style="margin: 0;">新增自訂單字與語塊卡</h3>
+        <span style="font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">✨ 支援 AI 自動補全</span>
+      </div>
+      <p style="font-size: 12.5px; color: #64748b; line-height: 1.4; margin-top: 0; margin-bottom: 12px;">
+        輸入想學的英文單字或片語，點擊下方「AI 一鍵生成」按鈕，音標、詞性、口語語塊、中文意與雙例句將由 Gemini 自動為您補齊！
+      </p>
 
-      <div style="display: flex; gap: 8px; margin-top: 10px;">
-        <div style="flex: 1;">
-          <label style="font-size: 12px; font-weight: 600; display: block;">音標 (選填)：</label>
-          <input type="text" id="input-new-phonetic" placeholder="/prəˈkræstɪneɪt/" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
-        </div>
-        <div style="flex: 1;">
-          <label style="font-size: 12px; font-weight: 600; display: block;">詞性：</label>
-          <input type="text" id="input-new-pos" placeholder="v. / n. / adj." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
-        </div>
+      <label style="font-size: 12.5px; font-weight: 700; color: #1e293b; display: block; margin-top: 6px;">英文單字 / 片語（必填）：</label>
+      <div style="display: flex; gap: 6px; margin-top: 4px;">
+        <input type="text" id="input-new-word" placeholder="例如：procrastinate 或 touch base" style="flex: 1; padding: 9px 10px; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 14px; font-weight: 600; color: #1e3a8a;">
+        <button id="btn-ai-fill-single-vocab" type="button" class="btn-purple" style="white-space: nowrap; padding: 8px 12px; font-size: 12.5px;" title="讓 AI 自動填寫音標、詞性、語塊、中文與 2 個例句">
+          ✨ AI 補全
+        </button>
       </div>
 
-      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">口語高頻搭配詞 (Collocations)：</label>
-      <input type="text" id="input-new-collocations" placeholder="例如：tend to procrastinate, procrastinate on doing sth" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+      <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 11.5px; font-weight: 600; color: #64748b;">以下欄位可手動填寫，或由上方 AI 自動帶入：</span>
+        </div>
 
-      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">中文釋義：</label>
-      <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+        <div style="display: flex; gap: 8px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; font-weight: 600; display: block;">音標：</label>
+            <input type="text" id="input-new-phonetic" placeholder="/prəˈkræstɪneɪt/" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; font-weight: 600; display: block;">詞性：</label>
+            <input type="text" id="input-new-pos" placeholder="v. / phr. / adj." style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+          </div>
+        </div>
 
-      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 10px;">實用語境例句 1 (口語日常)：</label>
-      <input type="text" id="input-new-example" placeholder="英文例句：I used to procrastinate a lot before deadlines." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 13px;">
-      <input type="text" id="input-new-example-zh" placeholder="中文翻譯：我以前在截止日前總是很愛拖延。" style="width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">口語高頻搭配詞 (Collocations / 語塊)：</label>
+        <input type="text" id="input-new-collocations" placeholder="例如：procrastinate on doing sth" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
 
-      <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">實用語境例句 2 (進階實戰)：</label>
-      <input type="text" id="input-new-example2" placeholder="英文例句：Stop procrastinating and just make that phone call." style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 13px;">
-      <input type="text" id="input-new-example2-zh" placeholder="中文翻譯：別再拖延了，現在就把那通電話打了吧。" style="width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12px;">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">中文釋義：</label>
+        <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
 
-      <div class="modal-actions">
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">實用語境例句 1 (口語日常)：</label>
+        <input type="text" id="input-new-example" placeholder="英文：I used to procrastinate a lot before deadlines." style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+        <input type="text" id="input-new-example-zh" placeholder="中文：我以前在截止日前總是很愛拖延。" style="width: 100%; padding: 6px 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 3px; font-size: 11.5px; color: #475569;">
+
+        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">實用語境例句 2 (進階實戰)：</label>
+        <input type="text" id="input-new-example2" placeholder="英文：Stop procrastinating and just make that phone call." style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+        <input type="text" id="input-new-example2-zh" placeholder="中文：別再拖延了，現在就把那通電話打了吧。" style="width: 100%; padding: 6px 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 3px; font-size: 11.5px; color: #475569;">
+      </div>
+
+      <div class="modal-actions" style="margin-top: 14px;">
         <button id="btn-cancel-add-vocab" class="btn-gray">取消</button>
-        <button id="btn-confirm-add-vocab">新增卡片</button>
+        <button id="btn-confirm-add-vocab">確認加入單字庫</button>
       </div>
     </div>
   </div>
@@ -712,6 +730,7 @@
   const inputNewExample = document.getElementById("input-new-example");
   const btnCancelAddVocab = document.getElementById("btn-cancel-add-vocab");
   const btnConfirmAddVocab = document.getElementById("btn-confirm-add-vocab");
+  const btnAiFillSingleVocab = document.getElementById("btn-ai-fill-single-vocab");
 
   // 刷卡播放器 DOM
   const modalFlashcardPlayer = document.getElementById("modal-flashcard-player");
@@ -2153,16 +2172,126 @@ ${lessonContent}
     inputNewExample2.value = "";
     inputNewExample2Zh.value = "";
     modalAddVocab.classList.remove("hidden");
+    inputNewWord.focus();
   });
 
   btnCancelAddVocab.addEventListener("click", () => modalAddVocab.classList.add("hidden"));
 
+  /* 核心升級：AI 自動補全單字卡的所有欄位（音標、詞性、語塊、中文、2 個實戰例句） */
+  async function fetchVocabDetailsFromAi(wordToLookup) {
+    const ai = new GoogleGenAI({ apiKey: state.geminiKey });
+    const prompt = `你是一位精通英語詞彙學與二語口語習得的專家。請為英文單字或片語「${wordToLookup}」生成完整的學習卡資訊。
+要求：
+1. phonetic: 國際音標 (IPA)，如 "/prəˈkræstɪneɪt/"。
+2. pos: 詞性簡寫，如 "v.", "phr. v.", "adj.", "n." 等。
+3. collocations: 2~3 個口說高頻搭配語塊，用斜線分開（如 "tend to procrastinate / procrastinate on sth"）。
+4. meaning: 精確道地的繁體中文釋義。
+5. example: 日常生活或口語對話中的常用英文例句。
+6. example_zh: 例句 1 的繁體中文翻譯。
+7. example2: 職場、商務或進階口說場合的英文例句。
+8. example2_zh: 例句 2 的繁體中文翻譯。
+
+請嚴格輸出純 JSON 物件格式（無 markdown 圍欄）：
+{
+  "phonetic": "...",
+  "pos": "...",
+  "collocations": "...",
+  "meaning": "...",
+  "example": "...",
+  "example_zh": "...",
+  "example2": "...",
+  "example2_zh": "..."
+}`;
+
+    const res = await ai.models.generateContent({
+      model: getActiveLectureModel(),
+      contents: prompt,
+      config: { responseMimeType: "application/json" }
+    });
+
+    return JSON.parse(res.text.trim());
+  }
+
+  /* 監聽：點擊「AI 補全」按鈕 */
+  btnAiFillSingleVocab.addEventListener("click", async () => {
+    const word = inputNewWord.value.trim();
+    if (!word) {
+      showToast("請先在上方輸入框填寫英文單字或片語！", "error");
+      inputNewWord.focus();
+      return;
+    }
+
+    if (!state.geminiKey) {
+      showToast("尚未設定 Gemini API Key，請先於設定中配置！", "error");
+      return;
+    }
+
+    const origText = btnAiFillSingleVocab.textContent;
+    btnAiFillSingleVocab.disabled = true;
+    btnAiFillSingleVocab.textContent = "⏳ AI 查詢中...";
+
+    try {
+      const data = await fetchVocabDetailsFromAi(word);
+
+      inputNewPhonetic.value = data.phonetic || "";
+      inputNewPos.value = data.pos || "";
+      inputNewCollocations.value = data.collocations || "";
+      inputNewMeaning.value = data.meaning || "";
+      inputNewExample.value = data.example || "";
+      inputNewExampleZh.value = data.example_zh || "";
+      inputNewExample2.value = data.example2 || "";
+      inputNewExample2Zh.value = data.example2_zh || "";
+
+      showToast(`✨ 已成功補全「${word}」的音標、語塊與 2 組情境例句！`, "success");
+    } catch (err) {
+      console.error(err);
+      showToast("AI 補全失敗：" + err.message, "error");
+    } finally {
+      btnAiFillSingleVocab.disabled = false;
+      btnAiFillSingleVocab.textContent = origText;
+    }
+  });
+
   btnConfirmAddVocab.addEventListener("click", async () => {
     const word = inputNewWord.value.trim();
-    const meaning = inputNewMeaning.value.trim();
-    if (!word || !meaning) {
-      showToast("請至少填寫單字與中文釋義", "error");
+    if (!word) {
+      showToast("請輸入英文單字或片語", "error");
+      inputNewWord.focus();
       return;
+    }
+
+    let meaning = inputNewMeaning.value.trim();
+    let phonetic = inputNewPhonetic.value.trim();
+    let pos = inputNewPos.value.trim();
+    let collocations = inputNewCollocations.value.trim();
+    let example = inputNewExample.value.trim();
+    let exampleZh = inputNewExampleZh.value.trim();
+    let example2 = inputNewExample2.value.trim();
+    let example2Zh = inputNewExample2Zh.value.trim();
+
+    // 如果使用者只輸入了英文單字就直接點擊確認加入，自動觸發 AI 生成其餘資訊並直接入庫
+    if (!meaning) {
+      const origText = btnConfirmAddVocab.textContent;
+      btnConfirmAddVocab.disabled = true;
+      btnConfirmAddVocab.textContent = "⏳ AI 自動生成卡片資料中...";
+
+      try {
+        const data = await fetchVocabDetailsFromAi(word);
+        phonetic = data.phonetic || "";
+        pos = data.pos || "";
+        collocations = data.collocations || "";
+        meaning = data.meaning || "常見單字";
+        example = data.example || `Let's practice the word "${word}".`;
+        exampleZh = data.example_zh || "";
+        example2 = data.example2 || "";
+        example2Zh = data.example2_zh || "";
+      } catch (err) {
+        console.warn("Auto-fill fallback:", err);
+        meaning = meaning || "自訂字詞";
+      } finally {
+        btnConfirmAddVocab.disabled = false;
+        btnConfirmAddVocab.textContent = origText;
+      }
     }
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
@@ -2173,14 +2302,14 @@ ${lessonContent}
     currentProj.history[state.activeDayIndex].flashcards.push({
       id: "card_" + Date.now(),
       word: word,
-      phonetic: inputNewPhonetic.value.trim(),
-      pos: inputNewPos.value.trim(),
-      collocations: inputNewCollocations.value.trim(),
+      phonetic: phonetic,
+      pos: pos,
+      collocations: collocations,
       meaning: meaning,
-      example: inputNewExample.value.trim() || `Remember the phrase "${word}".`,
-      example_zh: inputNewExampleZh.value.trim() || "",
-      example2: inputNewExample2.value.trim() || "",
-      example2_zh: inputNewExample2Zh.value.trim() || "",
+      example: example || `Remember to practice "${word}".`,
+      example_zh: exampleZh,
+      example2: example2,
+      example2_zh: example2Zh,
       status: 0
     });
 
