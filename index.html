@@ -23,7 +23,7 @@
 
     button { background: #2563eb; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     button:hover { background: #1d4ed8; }
-    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; }
     .btn-green { background: #059669; }
     .btn-green:hover { background: #047857; }
     .btn-purple { background: #7c3aed; }
@@ -36,6 +36,28 @@
     .btn-danger:hover { background: #dc2626; }
     .btn-outline { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
     .btn-outline:hover { background: #f1f5f9; color: #0f172a; }
+
+    /* 精巧版測驗按鈕樣式 */
+    .btn-quiz-compact {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      font-size: 11.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .btn-quiz-compact:hover:not(:disabled) {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .btn-quiz-compact:disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
 
     /* 側邊欄樣式 */
     aside#main-sidebar {
@@ -127,7 +149,7 @@
     .lecture-content { line-height: 1.8; font-size: 15px; color: #334155; }
     
     .interactive-panel { flex: 4; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .interactive-header { padding: 14px 18px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; }
+    .interactive-header { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .chat-scroll-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
     .chat-input-bar { padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 8px; }
 
@@ -166,9 +188,9 @@
     .fc-example-box .ex-zh { color: #64748b; font-size: 11px; margin-top: 2px; }
     
     .fc-status-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 9999px; }
-    .fc-status-0 { background: #fee2e2; color: #b91c1c; } /* 生疏 */
-    .fc-status-1 { background: #fef3c7; color: #92400e; } /* 熟悉 */
-    .fc-status-2 { background: #dcfce7; color: #15803d; } /* 精通 */
+    .fc-status-0 { background: #fee2e2; color: #b91c1c; }
+    .fc-status-1 { background: #fef3c7; color: #92400e; }
+    .fc-status-2 { background: #dcfce7; color: #15803d; }
 
     /* 沉浸式刷單字卡模式 (Modal) */
     .study-card-box { width: 500px; max-width: 95%; height: 350px; perspective: 1200px; cursor: pointer; }
@@ -370,15 +392,19 @@
 
         <!-- 右欄：即時 AI 助教問答與口說實戰對話 -->
         <div class="interactive-panel">
-          <div class="interactive-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="interactive-header">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span>🤖 口語實戰助教 & 隨堂評測</span>
-              <span id="speech-support-badge" style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">語音對話支援</span>
+              <span id="speech-support-badge" style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">語音支援</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px; font-weight: normal; font-size: 12px; color: #64748b;">
-              <span>解析詳盡度:</span>
-              <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 70px; cursor: pointer;">
-              <span id="badge-detail-level" style="font-weight: 600; color: #2563eb; min-width: 28px;">適中</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <!-- 測驗按鈕縮小並置頂於標題列，答題時進入 disabled 狀態 -->
+              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">📝 進行 10+1 測驗</button>
+              <div style="display: flex; align-items: center; gap: 4px; font-weight: normal; font-size: 11.5px; color: #64748b;">
+                <span>詳盡度:</span>
+                <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 55px; cursor: pointer;">
+                <span id="badge-detail-level" style="font-weight: 600; color: #2563eb; min-width: 24px;">適中</span>
+              </div>
             </div>
           </div>
           <div id="chat-box" class="chat-scroll-area"></div>
@@ -395,12 +421,12 @@
               </span>
               <button id="btn-stop-recording-banner" style="background: #ef4444; color: white; padding: 2px 10px; font-size: 11px; border-radius: 4px;">⏹️ 說完了，停止錄音</button>
             </div>
+            <!-- 輸入列：送出按鈕作為唯一主要操作，不再受測驗按鈕干擾 -->
             <div style="display: flex; gap: 6px; align-items: flex-end;">
               <button id="btn-voice-input" class="btn-outline" title="點擊開始持續錄音（說完手動按停止）" style="height: 38px; width: 42px; padding: 0; font-size: 18px;">🎙️</button>
-              <textarea id="input-message" rows="1" placeholder="問文法、點左側麥克風直接開口說英文練習... (Enter 換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
-              <button id="btn-send-message" style="height: 38px;">發送</button>
+              <textarea id="input-message" rows="1" placeholder="問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
+              <button id="btn-send-message" style="height: 38px; min-width: 68px; font-size: 14px;">發送</button>
             </div>
-            <button id="btn-trigger-quiz" class="btn-green" style="width: 100%;">進行今日 10+1 題隨堂實戰測驗</button>
           </div>
         </div>
       </section>
@@ -647,7 +673,8 @@
     currentStudyIndex: 0,
     speechRate: 1.0,
     isRecording: false,
-    recognition: null
+    recognition: null,
+    isQuizInProgress: false
   };
 
   // DOM 元素引用
@@ -695,7 +722,7 @@
   const badgeProjectTotalVocab = document.getElementById("badge-project-total-vocab");
 
   let activePlayerDeck = [];
-  let playerMode = "day"; // "day" 或 "project_all"
+  let playerMode = "day";
 
   const studyDayTitle = document.getElementById("study-day-title");
   const lectureDayTag = document.getElementById("lecture-day-tag");
@@ -836,7 +863,6 @@
     return text.replace(/[*_#`[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
-  /* 智慧語言分詞：將中英文混合句子拆解成專屬語言段落，避免英文語音唸中文造成腔調怪異 */
   function segmentByLanguage(text) {
     if (!text) return [];
     const isCjk = (char) => /[\u3000-\u303F\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]/.test(char);
@@ -879,7 +905,6 @@
     return segments;
   }
 
-  /* 智慧語音：中文自動切換 zh-TW 原生語音，英文切換 en-US 原生發音 */
   function speakSmart(rawText, rate = state.speechRate) {
     if (!('speechSynthesis' in window)) {
       showToast("您的瀏覽器不支援語音合成朗讀", "error");
@@ -909,7 +934,6 @@
     });
   }
 
-  /* 專門朗讀英文句子（過濾中文說明，供 Shadowing 口語跟讀訓練） */
   function speakEnglishOnly(rawText, rate = state.speechRate) {
     if (!('speechSynthesis' in window)) {
       showToast("您的瀏覽器不支援語音合成朗讀", "error");
@@ -936,7 +960,6 @@
     });
   }
 
-  /* 相容函式：預設以智慧雙語朗讀 */
   function speakEnglish(text, rate = state.speechRate) {
     speakSmart(text, rate);
   }
@@ -972,11 +995,11 @@
       state.isRecording = true;
       manualStopRequested = false;
       btnVoiceInput.classList.add("mic-recording");
-      btnVoiceInput.textContent = "⏹️️";
+      btnVoiceInput.textContent = "⏹";
       btnVoiceInput.title = "點擊停止錄音並完成輸入";
       if (recordingActiveBar) recordingActiveBar.classList.remove("hidden");
       inputMessage.placeholder = "🔴 正在持續錄音中... 盡情開口說英文，說完請點擊 ⏹️ 停止";
-      showToast("🎙️️ 持續錄音已啟動！說話停頓不會被中斷，說完請點擊 ⏹️ 停止", "info");
+      showToast("🎙 持續錄音已啟動！說話停頓不會被中斷，說完請點擊 ⏹️ 停止", "info");
     };
 
     state.recognition.onresult = (event) => {
@@ -994,10 +1017,7 @@
 
     state.recognition.onerror = (event) => {
       console.warn("Speech Rec Notice:", event.error);
-      if (event.error === 'no-speech') {
-        // 短暫沒說話時不中斷，保持錄音狀態
-        return;
-      }
+      if (event.error === 'no-speech') return;
       if (event.error === 'not-allowed') {
         showToast("未取得麥克風權限，請在瀏覽器設定中允許使用麥克風！", "error");
         stopRecordingManually();
@@ -1005,7 +1025,6 @@
     };
 
     state.recognition.onend = () => {
-      // 關鍵：如果使用者尚未手動按下停止按鈕，瀏覽器短暫靜音超時會自動重新啟動，確保不中斷
       if (state.isRecording && !manualStopRequested) {
         try {
           state.recognition.start();
@@ -1014,13 +1033,12 @@
           console.debug("Recognition auto-restart guard:", e);
         }
       }
-      // 確定由使用者停止時，恢復按鈕正常狀態
       state.isRecording = false;
       btnVoiceInput.classList.remove("mic-recording");
       btnVoiceInput.textContent = "🎙️";
       btnVoiceInput.title = "點擊開始持續錄音（說完手動按停止）";
       if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
-      inputMessage.placeholder = "問文法、點左側麥克風直接開口說英文練習... (Enter 換行)";
+      inputMessage.placeholder = "問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)";
     };
   }
 
@@ -1059,7 +1077,7 @@
     btnVoiceInput.textContent = "🎙️";
     btnVoiceInput.title = "點擊開始持續錄音（說完手動按停止）";
     if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
-    inputMessage.placeholder = "問文法、點左側麥克風直接開口說英文練習... (Enter 換行)";
+    inputMessage.placeholder = "問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)";
     inputMessage.focus();
     showToast("✅ 錄音完成！英文內容已填入輸入框，點擊「發送」即可送出給助教", "success");
   }
@@ -1540,7 +1558,6 @@
     const currentActiveIndex = currentProj.currentDayIndex || 0;
     let completedCount = 0;
 
-    // 計算並更新全計畫單字總數
     const allProjCards = getAllProjectFlashcards(currentProj);
     if (badgeProjectTotalVocab) {
       badgeProjectTotalVocab.textContent = `${allProjCards.length} 字`;
@@ -1601,7 +1618,7 @@
           { left: "$$", right: "$$", display: true },
           { left: "$", right: "$", display: false },
           { left: "\\(", right: "\\)", display: false },
-          { left: "\\[", right: "\\]", display: true }
+          { left: "[", right: "]", display: true }
         ],
         throwOnError: false
       });
@@ -1626,6 +1643,10 @@
 
   async function startDayStudy(dayIdx) {
     state.activeDayIndex = dayIdx;
+    state.isQuizInProgress = false;
+    btnTriggerQuiz.disabled = false;
+    btnTriggerQuiz.textContent = "📝 進行 10+1 測驗";
+
     document.body.classList.add("in-study-mode");
     closeSidebarDrawer();
 
@@ -1739,7 +1760,7 @@
     const geminiChatHistory = [];
 
     if (savedChat.length === 0) {
-      const defaultWelcome = `已載入【${title}】深度講義！您可以點擊下方「🎙️ 麥克風」開口說英文發問、點擊「🎭 啟動情境口說對話」，或切換至單字卡庫複習語塊。準備好後點擊下方按鈕啟動 10+1 題隨堂測驗！`;
+      const defaultWelcome = `已載入【${title}】深度講義！您可以點擊下方「🎙️ 麥克風」開口說英文發問、點擊「🎭 啟動情境口說對話」，或切換至單字卡庫複習語塊。準備好後點擊右上角「📝 進行 10+1 測驗」啟動隨堂測驗！`;
       appendChatMessage("system", defaultWelcome, true);
     } else {
       savedChat.forEach(msg => {
@@ -1783,6 +1804,13 @@ ${cachedContent}
     appendChatMessage("user", text, true);
     inputMessage.value = "";
     inputMessage.rows = 1;
+
+    // 若使用者正在答題中，送出答案後解除測驗按鈕的鎖定
+    if (state.isQuizInProgress) {
+      state.isQuizInProgress = false;
+      btnTriggerQuiz.disabled = false;
+      btnTriggerQuiz.textContent = "📝 重新測驗";
+    }
 
     const typingId = "typing-" + Date.now();
     const typingDiv = document.createElement("div");
@@ -1859,7 +1887,6 @@ ${cachedContent}
       div.textContent = content;
     } else {
       renderMarkdownContent(div, content);
-      /* 如果是 AI 回覆，提供雙重朗讀模式：純英文跟讀 vs 智慧雙語切換發音 */
       if (type === "bot") {
         const btnRow = document.createElement("div");
         btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;";
@@ -1903,14 +1930,14 @@ ${cachedContent}
   }
 
   async function handleStartInChatQuiz() {
-    if (!state.chatInstance) return;
+    if (!state.chatInstance || state.isQuizInProgress) return;
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const projectGoal = currentProj.goal || "英文學習";
     const title = currentProj.plan[state.activeDayIndex];
 
     btnTriggerQuiz.disabled = true;
-    btnTriggerQuiz.textContent = "Gemini 3 Flash 正在精心設計 10+1 題測驗...";
+    btnTriggerQuiz.textContent = "⏳ 出題中...";
 
     const typingId = "typing-" + Date.now();
     const typingDiv = document.createElement("div");
@@ -1956,6 +1983,11 @@ Bonus. `;
       inputMessage.focus();
       inputMessage.setSelectionRange(3, 3);
 
+      // 設置為答題進行中狀態，鎖定測驗按鈕防止誤觸
+      state.isQuizInProgress = true;
+      btnTriggerQuiz.disabled = true;
+      btnTriggerQuiz.textContent = "📝 測驗作答中...";
+
       if (currentProj.history[state.activeDayIndex]) {
         currentProj.history[state.activeDayIndex].completed = true;
         if (state.activeDayIndex === currentProj.currentDayIndex && currentProj.currentDayIndex + 1 < currentProj.plan.length) {
@@ -1967,9 +1999,9 @@ Bonus. `;
     } catch (err) {
       document.getElementById(typingId)?.remove();
       appendChatMessage("system", "測驗出題失敗：" + err.message, true);
-    } finally {
       btnTriggerQuiz.disabled = false;
-      btnTriggerQuiz.textContent = "進行今日 10+1 題隨堂實戰測驗";
+      btnTriggerQuiz.textContent = "📝 進行 10+1 測驗";
+      state.isQuizInProgress = false;
     }
   }
 
@@ -1978,14 +2010,12 @@ Bonus. `;
     const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
     vocabCountBadge.textContent = cards.length;
 
-    // 同步更新全計畫單字總數標籤
     const allCards = getAllProjectFlashcards(currentProj);
     if (badgeProjectTotalVocab) {
       badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
     }
   }
 
-  // 取得該計畫到目前為止所有單元累積的全部單字
   function getAllProjectFlashcards(proj) {
     if (!proj || !proj.history) return [];
     const list = [];
@@ -2004,7 +2034,6 @@ Bonus. `;
     return list;
   }
 
-  // 洗牌演算法（隨機抽卡亂序）
   function shuffleArray(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -2014,7 +2043,6 @@ Bonus. `;
     return a;
   }
 
-  // 監聽：計畫看板右上角的「全計畫單字抽卡」
   if (btnProjectFlashcardDraw) {
     btnProjectFlashcardDraw.addEventListener("click", () => {
       const currentProj = state.appData.projects[state.appData.activeProjectId];
@@ -2180,8 +2208,7 @@ ${lessonContent}
 
               ${card.example2 ? `
               <div class="fc-example-box" style="margin-top: 4px;">
-                <div class="ex-en">💼 ${card.example2}</div>
-                ${card.example2_zh ? `<div class="ex-zh">${card.example2_zh}</div>` : ''}
+                <div class="ex-en">💼 ${card.example2}</div>${card.example2_zh ? `<div class="ex-zh">${card.example2_zh}</div>` : ''}
               </div>` : ''}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
@@ -2246,7 +2273,6 @@ ${lessonContent}
 
   btnCancelAddVocab.addEventListener("click", () => modalAddVocab.classList.add("hidden"));
 
-  /* 核心升級：AI 自動補全單字卡的所有欄位（音標、詞性、語塊、中文、2 個實戰例句） */
   async function fetchVocabDetailsFromAi(wordToLookup) {
     const ai = new GoogleGenAI({ apiKey: state.geminiKey });
     const prompt = `你是一位精通英語詞彙學與二語口語習得的專家。請為英文單字或片語「${wordToLookup}」生成完整的學習卡資訊。
@@ -2281,7 +2307,6 @@ ${lessonContent}
     return JSON.parse(res.text.trim());
   }
 
-  /* 監聽：點擊「AI 補全」按鈕 */
   btnAiFillSingleVocab.addEventListener("click", async () => {
     const word = inputNewWord.value.trim();
     if (!word) {
@@ -2338,7 +2363,6 @@ ${lessonContent}
     let example2 = inputNewExample2.value.trim();
     let example2Zh = inputNewExample2Zh.value.trim();
 
-    // 如果使用者只輸入了英文單字就直接點擊確認加入，自動觸發 AI 生成其餘資訊並直接入庫
     if (!meaning) {
       const origText = btnConfirmAddVocab.textContent;
       btnConfirmAddVocab.disabled = true;
@@ -2448,7 +2472,6 @@ ${lessonContent}
     playerBackMeaning.textContent = card.meaning;
     playerBackCollocations.textContent = card.collocations ? `口語語塊：${card.collocations}` : "";
     
-    // 渲染雙例句
     playerEx1En.textContent = card.example || "No example provided.";
     playerEx1Zh.textContent = card.example_zh || "";
     
