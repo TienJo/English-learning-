@@ -13,12 +13,12 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 0; background: #f8fafc; color: #1e293b; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-    header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 20; height: 56px; }
+    header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 20; height: 56px; min-height: 56px; flex-shrink: 0; }
     .header-left { display: flex; align-items: center; gap: 12px; }
     header h1 { margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px; font-weight: 700; }
     .status-badge { font-size: 12px; background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 9999px; font-weight: 500; }
 
-    #app-layout { display: flex; flex: 1; height: calc(100vh - 56px); overflow: hidden; position: relative; }
+    #app-layout { display: flex; flex: 1; height: calc(100vh - 56px); max-height: calc(100vh - 56px); overflow: hidden; position: relative; }
     .hidden { display: none !important; }
 
     button { background: #2563eb; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
@@ -167,24 +167,24 @@
     .day-card.locked .card-title { color: #64748b; }
 
     /* 雙欄模式與視圖 Tab */
-    .study-layout { display: flex; height: 100%; width: 100%; gap: 18px; padding: 16px 20px; overflow: hidden; }
-    .lecture-panel { flex: 6; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .study-layout { display: flex; height: 100%; max-height: 100%; width: 100%; gap: 16px; padding: 12px 16px; overflow: hidden; box-sizing: border-box; flex: 1; }
+    .lecture-panel { flex: 6; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 0; height: 100%; }
     
-    .lecture-header { padding: 12px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; gap: 14px; }
+    .lecture-header { padding: 12px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; gap: 14px; flex-shrink: 0; }
     .lecture-title-area { display: flex; flex-direction: column; justify-content: center; }
-    .tab-nav { display: flex; gap: 6px; border-bottom: 1px solid #e2e8f0; padding: 0 18px; background: #f8fafc; }
+    .tab-nav { display: flex; gap: 6px; border-bottom: 1px solid #e2e8f0; padding: 0 18px; background: #f8fafc; flex-shrink: 0; }
     .tab-btn { background: transparent; color: #64748b; border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 10px 14px; font-size: 13.5px; font-weight: 600; cursor: pointer; }
     .tab-btn:hover { color: #0f172a; background: transparent; }
     .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; background: #ffffff; }
 
-    .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+    .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; min-height: 0; }
     .tab-content.active { display: block; }
     .lecture-content { line-height: 1.8; font-size: 15px; color: #334155; }
     
-    .interactive-panel { flex: 4; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .interactive-header { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .chat-scroll-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
-    .chat-input-bar { padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 8px; }
+    .interactive-panel { flex: 4; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); min-height: 0; height: 100%; }
+    .interactive-header { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0; }
+    .chat-scroll-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; min-height: 0; }
+    .chat-input-bar { padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
 
     .msg { padding: 10px 14px; border-radius: 8px; line-height: 1.5; max-width: 92%; font-size: 13.5px; word-break: break-word; }
     .msg-bot { background: #ffffff; border: 1px solid #e2e8f0; align-self: flex-start; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
