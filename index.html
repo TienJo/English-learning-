@@ -59,6 +59,39 @@
       cursor: not-allowed;
     }
 
+    /* 單句朗讀小按鈕與點擊懸停效果 */
+    .inline-sentence-speaker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: 6px;
+      vertical-align: middle;
+      line-height: 1.2;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .inline-sentence-speaker:hover {
+      background: #2563eb;
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+    .clickable-sentence {
+      cursor: pointer;
+      border-bottom: 1px dashed #93c5fd;
+      transition: background-color 0.15s;
+    }
+    .clickable-sentence:hover {
+      background-color: #f0f7ff;
+      border-radius: 3px;
+    }
+
     /* 側邊欄樣式 */
     aside#main-sidebar {
       width: 270px;
@@ -363,7 +396,7 @@
           <!-- 分頁 1：深度講義 -->
           <div id="tab-pane-lecture" class="tab-content active">
             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: 12.5px; color: #166534; font-weight: 600;">🎙️ 口語跟讀與發音輔助：反覆跟讀例句以培養英語語感與流暢度</span>
+              <span style="font-size: 12.5px; color: #166534; font-weight: 600;">🎙️ 口語跟讀與發音輔助：每句英文後方皆附 🔊 單句發音，點選即可跟讀！</span>
               <div style="display: flex; gap: 6px; align-items: center;">
                 <span style="font-size: 11px; color: #15803d;">語速：</span>
                 <button id="btn-speed-slow" class="btn-outline" style="padding: 2px 8px; font-size: 11px;">0.8x 慢速清晰</button>
@@ -398,7 +431,6 @@
               <span id="speech-support-badge" style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">語音支援</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <!-- 測驗按鈕縮小並置頂於標題列，答題時進入 disabled 狀態 -->
               <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">📝 進行 10+1 測驗</button>
               <div style="display: flex; align-items: center; gap: 4px; font-weight: normal; font-size: 11.5px; color: #64748b;">
                 <span>詳盡度:</span>
@@ -421,7 +453,7 @@
               </span>
               <button id="btn-stop-recording-banner" style="background: #ef4444; color: white; padding: 2px 10px; font-size: 11px; border-radius: 4px;">⏹️ 說完了，停止錄音</button>
             </div>
-            <!-- 輸入列：送出按鈕作為唯一主要操作，不再受測驗按鈕干擾 -->
+            <!-- 輸入列：送出按鈕作為唯一主要操作 -->
             <div style="display: flex; gap: 6px; align-items: flex-end;">
               <button id="btn-voice-input" class="btn-outline" title="點擊開始持續錄音（說完手動按停止）" style="height: 38px; width: 42px; padding: 0; font-size: 18px;">🎙️</button>
               <textarea id="input-message" rows="1" placeholder="問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
@@ -905,6 +937,25 @@
     return segments;
   }
 
+  // 獨立朗讀單句專用函式 (確保立即取消前次發音並發音指定單句)
+  function speakSingleSentence(sentenceText, rate = state.speechRate) {
+    if (!('speechSynthesis' in window)) {
+      showToast("您的瀏覽器不支援語音合成朗讀", "error");
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = cleanMarkdownForSpeech(sentenceText).replace(/^[0-9]+[.)]\s*/, '').replace(/^"|"$/g, '').trim();
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "en-US";
+    const v = getBestVoice("en");
+    if (v) utterance.voice = v;
+    utterance.rate = rate || 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
   function speakSmart(rawText, rate = state.speechRate) {
     if (!('speechSynthesis' in window)) {
       showToast("您的瀏覽器不支援語音合成朗讀", "error");
@@ -961,7 +1012,7 @@
   }
 
   function speakEnglish(text, rate = state.speechRate) {
-    speakSmart(text, rate);
+    speakSingleSentence(text, rate);
   }
 
   btnSpeedSlow.addEventListener("click", () => {
@@ -1606,6 +1657,92 @@
     viewProjectProgress.textContent = `完成度：${completedCount} / ${currentProj.plan.length} 天 (${Math.round((completedCount/currentProj.plan.length)*100)}%)`;
   }
 
+  // 核心功能：精確為 Markdown 渲染後文字中的每一句獨立英文綁定單句點擊發音按鈕
+  function enhanceEnglishSentencesWithSpeech(container) {
+    if (!container) return;
+
+    // 1. 處理帶雙引號的英文例句，例如: "The project timelines varied..." 或 “...”
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (node.parentElement && !['SCRIPT', 'STYLE', 'BUTTON', 'CODE', 'PRE'].includes(node.parentElement.tagName)) {
+        if (node.parentElement.closest('button')) continue;
+        textNodes.push(node);
+      }
+    }
+
+    textNodes.forEach(node => {
+      const text = node.nodeValue;
+      if (!text || text.trim().length === 0) return;
+
+      // 匹配雙引號中的純英文句子，長度大於 4 個字元
+      const quoteRegex = /["“]([A-Za-z0-9\s,'’.\-!?]{4,})["”]/g;
+      if (quoteRegex.test(text)) {
+        const span = document.createElement("span");
+        let lastIndex = 0;
+        let match;
+        quoteRegex.lastIndex = 0;
+
+        while ((match = quoteRegex.exec(text)) !== null) {
+          span.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+
+          const quoteWrapper = document.createElement("span");
+          quoteWrapper.className = "clickable-sentence";
+          quoteWrapper.textContent = `"${match[1]}"`;
+          quoteWrapper.title = "點擊朗讀此句英文";
+          const targetSentence = match[1];
+
+          quoteWrapper.addEventListener("click", (e) => {
+            e.stopPropagation();
+            speakSingleSentence(targetSentence);
+          });
+
+          const spkBtn = document.createElement("button");
+          spkBtn.type = "button";
+          spkBtn.className = "inline-sentence-speaker";
+          spkBtn.textContent = "🔊";
+          spkBtn.title = "朗讀此句英文";
+          spkBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            speakSingleSentence(targetSentence);
+          });
+
+          span.appendChild(quoteWrapper);
+          span.appendChild(spkBtn);
+
+          lastIndex = quoteRegex.lastIndex;
+        }
+
+        span.appendChild(document.createTextNode(text.substring(lastIndex)));
+        if (node.parentNode) {
+          node.parentNode.replaceChild(span, node);
+        }
+      }
+    });
+
+    // 2. 處理以中文前綴開頭的單句英文，例如「【直接回答】 The project length depended...」或「1. The duration...」
+    container.querySelectorAll("p, li, blockquote").forEach(block => {
+      if (block.querySelector(".inline-sentence-speaker")) return;
+
+      const inner = block.innerHTML;
+      // 匹配中文冒號或括弧標籤後的英文句子
+      const labelPattern = /((?:【[^】]+】|「[^」]+」|[0-9]+\.|\:|\：)\s*)([A-Za-z][A-Za-z0-9\s,'’\-]{6,}[.!?]?)(?=(?:<br|\n|<\/|$|（|\())/i;
+      const match = inner.match(labelPattern);
+
+      if (match && match[2] && /[A-Za-z]{3,}/.test(match[2])) {
+        const fullEn = match[2].trim();
+        // 替換並注入按鈕
+        const replaced = inner.replace(match[0], `${match[1]}<span class="clickable-sentence" title="點擊朗讀此句英文" onclick="window.__playSingleEn(decodeURIComponent('${encodeURIComponent(fullEn)}'))">${fullEn}</span> <button type="button" class="inline-sentence-speaker" onclick="window.__playSingleEn(decodeURIComponent('${encodeURIComponent(fullEn)}'))" title="朗讀此句英文">🔊</button>`);
+        block.innerHTML = replaced;
+      }
+    });
+  }
+
+  window.__playSingleEn = function(text) {
+    speakSingleSentence(text);
+  };
+
   function renderMarkdownContent(targetElem, text) {
     if (!text) {
       targetElem.innerHTML = "";
@@ -1624,21 +1761,8 @@
       });
     }
 
-    targetElem.querySelectorAll("blockquote p, li").forEach(el => {
-      const textContent = el.textContent.trim();
-      if (/^[A-Za-z0-9\s,'".!?-]{8,}$/.test(textContent) && !el.querySelector(".inline-speaker")) {
-        const speakBtn = document.createElement("button");
-        speakBtn.className = "inline-speaker";
-        speakBtn.textContent = " 🔊";
-        speakBtn.title = "點擊跟讀朗讀";
-        speakBtn.style.cssText = "background:transparent; border:none; cursor:pointer; font-size:12px; padding:0 4px;";
-        speakBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          speakEnglish(textContent);
-        });
-        el.appendChild(speakBtn);
-      }
-    });
+    // 將內容中的每一句獨立英文增強為單獨可點選發音
+    enhanceEnglishSentencesWithSpeech(targetElem);
   }
 
   async function startDayStudy(dayIdx) {
@@ -1760,7 +1884,7 @@
     const geminiChatHistory = [];
 
     if (savedChat.length === 0) {
-      const defaultWelcome = `已載入【${title}】深度講義！您可以點擊下方「🎙️ 麥克風」開口說英文發問、點擊「🎭 啟動情境口說對話」，或切換至單字卡庫複習語塊。準備好後點擊右上角「📝 進行 10+1 測驗」啟動隨堂測驗！`;
+      const defaultWelcome = `已載入【${title}】深度講義！您可以點擊下方「🎙️ 麥克風」開口說英文發問、點擊「🎭 啟動情境口說對話」，或切換至單字卡庫複習語塊。每句英文皆可獨立點選發音跟讀！準備好後點擊右上角「📝 進行 10+1 測驗」啟動隨堂測驗！`;
       appendChatMessage("system", defaultWelcome, true);
     } else {
       savedChat.forEach(msg => {
@@ -1786,7 +1910,7 @@ ${cachedContent}
 【核心職責與指導規範】：
 1. 口說與對話陪伴：
    - 當學生輸入英文（尤其是語音輸入）時，請特別讚美學生的開口勇氣。
-   - **關鍵要求**：每一次回覆或修正時，請務必提供「2~3 個可供模仿的道地口語替換例句（Imitation Sentences）」，標註「口語常見場合」讓學生可以反覆跟讀模仿。
+   - **關鍵要求**：每一次回覆或修正時，請務必將英文替換例句加上雙引號（例如 "The project timelines varied..."），提供「2~3 個可供模仿的道地口語替換例句（Imitation Sentences）」，標註「常用場合」讓學生可以反覆點選單句發音跟讀模仿。
 2. 情境 Roleplay 模式：
    - 扮演對話夥伴，每次拋出 1~2 句話並給予適度追問，引導學生連續開口。
 3. 測驗批改與詳解：
@@ -1823,11 +1947,11 @@ ${cachedContent}
     const detailLevel = state.appData.settings?.detailLevel || 2;
     let detailConstraint = "";
     if (detailLevel === 1) {
-      detailConstraint = "\n\n【回答風格限制：簡答模式】請直截了當回答，若有更道地口語說法請一句話標註。";
+      detailConstraint = "\n\n【回答風格限制：簡答模式】請直截了當回答，若有更道地口語說法請將英文句子加上雙引號。";
     } else if (detailLevel === 3) {
-      detailConstraint = "\n\n【回答風格限制：詳盡模式】請給予深入文法剖析、母語者口語語感、高頻語塊搭配詞與 2 個口說實例。";
+      detailConstraint = "\n\n【回答風格限制：詳盡模式】請給予深入文法剖析、母語者口語語感、高頻語塊搭配詞與 2 個口說實例（英文例句請使用雙引號包覆）。";
     } else {
-      detailConstraint = "\n\n【回答風格限制：適中模式】請以條理清晰、重點突出的方式回答。";
+      detailConstraint = "\n\n【回答風格限制：適中模式】請以條理清晰、重點突出的方式回答，英文例句請使用雙引號包覆。";
     }
 
     try {
@@ -1850,7 +1974,7 @@ ${cachedContent}
 請根據今日文法「${title}」與主題「${projectGoal}」，為學生設計一個非常真實的生活或職場對話情境。
 要求：
 1. 說明情境角色設定（例如：我是外籍店員/主管/外國朋友，你是顧客/同事）。
-2. 用親切自然的英文開場說第一句（不要太長，1~2 句）。
+2. 用親切自然的英文開場說第一句（英文請加上雙引號包覆，不要太長，1~2 句）。
 3. 提示學生可以用麥克風語音輸入回答，或參考給予的句型鷹架作答。
 4. 在學生每次回答後，給予一句【道地口語升級指引】，然後繼續推進對話。`;
 
@@ -1889,26 +2013,31 @@ ${cachedContent}
       renderMarkdownContent(div, content);
       if (type === "bot") {
         const btnRow = document.createElement("div");
-        btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;";
+        btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center;";
+
+        const noteText = document.createElement("span");
+        noteText.style.cssText = "font-size: 11px; color: #64748b; margin-right: 4px;";
+        noteText.textContent = "💡 提示：點擊上方任一句英文或 🔊 即可單句發音";
 
         const enOnlyBtn = document.createElement("button");
-        enOnlyBtn.textContent = "🔊 朗讀英文句子 (跟讀訓練)";
+        enOnlyBtn.textContent = "🔊 朗讀整段所有英文";
         enOnlyBtn.className = "btn-outline";
         enOnlyBtn.style.cssText = "font-size: 11px; padding: 2px 8px; display: inline-flex;";
-        enOnlyBtn.title = "僅朗讀英文句子與搭配詞，方便大聲跟讀模仿";
+        enOnlyBtn.title = "朗讀整個回覆中的所有英文句子";
         enOnlyBtn.addEventListener("click", () => {
           speakEnglishOnly(content);
         });
 
         const bilingualBtn = document.createElement("button");
-        bilingualBtn.textContent = "🗣️ 智慧雙語朗讀";
+        bilingualBtn.textContent = "🗣️ 智慧雙語朗讀全文";
         bilingualBtn.className = "btn-outline";
         bilingualBtn.style.cssText = "font-size: 11px; padding: 2px 8px; display: inline-flex;";
-        bilingualBtn.title = "中英文各自以原生母語發音流暢朗讀";
+        bilingualBtn.title = "中英文各自以原生母語發音流暢朗讀全文";
         bilingualBtn.addEventListener("click", () => {
           speakSmart(content);
         });
 
+        btnRow.appendChild(noteText);
         btnRow.appendChild(enOnlyBtn);
         btnRow.appendChild(bilingualBtn);
         div.appendChild(btnRow);
@@ -1983,7 +2112,6 @@ Bonus. `;
       inputMessage.focus();
       inputMessage.setSelectionRange(3, 3);
 
-      // 設置為答題進行中狀態，鎖定測驗按鈕防止誤觸
       state.isQuizInProgress = true;
       btnTriggerQuiz.disabled = true;
       btnTriggerQuiz.textContent = "📝 測驗作答中...";
@@ -2202,13 +2330,20 @@ ${lessonContent}
               <div class="fc-meaning">${card.meaning}</div>
               
               <div class="fc-example-box">
-                <div class="ex-en">🗣️ ${card.example || "No example"}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="ex-en">🗣️ ${card.example || "No example"}</span>
+                  ${card.example ? `<button type="button" class="inline-sentence-speaker" data-en="${encodeURIComponent(card.example)}" title="朗讀此例句">🔊</button>` : ''}
+                </div>
                 ${card.example_zh ? `<div class="ex-zh">${card.example_zh}</div>` : ''}
               </div>
 
               ${card.example2 ? `
               <div class="fc-example-box" style="margin-top: 4px;">
-                <div class="ex-en">💼 ${card.example2}</div>${card.example2_zh ? `<div class="ex-zh">${card.example2_zh}</div>` : ''}
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="ex-en">💼 ${card.example2}</span>
+                  <button type="button" class="inline-sentence-speaker" data-en="${encodeURIComponent(card.example2)}" title="朗讀此例句">🔊</button>
+                </div>
+                ${card.example2_zh ? `<div class="ex-zh">${card.example2_zh}</div>` : ''}
               </div>` : ''}
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
@@ -2231,6 +2366,14 @@ ${lessonContent}
       cardDiv.querySelector(".btn-speak-item").addEventListener("click", (e) => {
         e.stopPropagation();
         speakEnglish(card.word);
+      });
+
+      cardDiv.querySelectorAll(".inline-sentence-speaker").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const en = decodeURIComponent(btn.dataset.en || "");
+          speakSingleSentence(en);
+        });
       });
 
       cardDiv.querySelector(".btn-del-card").addEventListener("click", (e) => {
@@ -2429,13 +2572,13 @@ ${lessonContent}
   btnPlayerSpeakEx1.addEventListener("click", (e) => {
     e.stopPropagation();
     const card = activePlayerDeck[state.currentStudyIndex];
-    if (card && card.example) speakEnglishOnly(card.example, 0.8);
+    if (card && card.example) speakSingleSentence(card.example, 0.8);
   });
 
   btnPlayerSpeakEx2.addEventListener("click", (e) => {
     e.stopPropagation();
     const card = activePlayerDeck[state.currentStudyIndex];
-    if (card && card.example2) speakEnglishOnly(card.example2, state.speechRate);
+    if (card && card.example2) speakSingleSentence(card.example2, state.speechRate);
   });
 
   btnPlayerSpeakAllEx.addEventListener("click", (e) => {
