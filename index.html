@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>英文學習工作台 & 智慧單字卡</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -13,577 +14,658 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
-    html, body { height: 100vh; max-height: 100vh; overflow: hidden; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f8fafc; color: #1e293b; display: flex; flex-direction: column; }
-    header { background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 20; height: 56px; min-height: 56px; max-height: 56px; flex-shrink: 0; }
-    .header-left { display: flex; align-items: center; gap: 12px; }
-    header h1 { margin: 0; font-size: 18px; color: #0f172a; display: flex; align-items: center; gap: 8px; font-weight: 700; }
-    .status-badge { font-size: 12px; background: #ecfdf5; color: #059669; padding: 4px 8px; border-radius: 9999px; font-weight: 500; }
+    /* ===================================================
+       設計系統：精簡 4 色 + 精確 4 種文字大小
+       顏色：
+         1. 黑 (深黑背景/主字): #121212 / #1c1c1c
+         2. 白 (純白卡片/亮色文字): #ffffff
+         3. 膚色 (柔和奶膚/次級底色): #f5ede4 / #ebe2d8
+         4. 深咖 (深褐碳棕/次級重要元素): #382b26 / #241c19
+       文字大小：
+         1. 標題: 20px
+         2. 次標: 16px
+         3. 內文: 14px (最佳行距 1.7)
+         4. 輔助: 12px
+       =================================================== */
+    :root {
+      --c-black: #121212;
+      --c-black-surface: #1e1e1e;
+      --c-white: #ffffff;
+      --c-nude: #f4ece1;
+      --c-nude-dark: #e8ded2;
+      --c-brown: #382b26;
+      --c-brown-light: #524039;
+      --c-line: #e3d9cd;
+      
+      --fs-h1: 20px;
+      --fs-h2: 16px;
+      --fs-body: 14px;
+      --fs-sm: 12px;
+      
+      --lh-text: 1.7;
+    }
 
-    #app-layout { display: flex; flex: 1; height: calc(100vh - 56px); max-height: calc(100vh - 56px); overflow: hidden; position: relative; }
+    * { box-sizing: border-box; }
+    html, body { 
+      height: 100vh; 
+      max-height: 100vh; 
+      overflow: hidden; 
+      margin: 0; 
+      padding: 0; 
+      background: var(--c-black); 
+      color: var(--c-black); 
+      font-family: "Plus Jakarta Sans", "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: var(--fs-body);
+      line-height: var(--lh-text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 頂部導航列 */
+    header { 
+      background: var(--c-black); 
+      padding: 0 20px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      height: 54px; 
+      min-height: 54px; 
+      flex-shrink: 0; 
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    header h1 { 
+      margin: 0; 
+      font-size: var(--fs-h2); 
+      color: var(--c-white); 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      font-weight: 600; 
+      letter-spacing: -0.01em;
+    }
+    .status-badge { 
+      font-size: var(--fs-sm); 
+      background: var(--c-nude); 
+      color: var(--c-brown); 
+      padding: 4px 10px; 
+      border-radius: 9999px; 
+      font-weight: 500; 
+    }
+
+    #app-layout { 
+      display: flex; 
+      flex: 1; 
+      height: calc(100vh - 54px); 
+      max-height: calc(100vh - 54px); 
+      overflow: hidden; 
+      position: relative; 
+      padding: 0 12px 12px;
+      gap: 12px;
+    }
     .hidden { display: none !important; }
 
-    button { background: #2563eb; color: #ffffff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    button:hover { background: #1d4ed8; }
-    button:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.7; }
-    .btn-green { background: #059669; }
-    .btn-green:hover { background: #047857; }
-    .btn-purple { background: #7c3aed; }
-    .btn-purple:hover { background: #6d28d9; }
-    .btn-amber { background: #d97706; }
-    .btn-amber:hover { background: #b45309; }
-    .btn-gray { background: #64748b; }
-    .btn-gray:hover { background: #475569; }
-    .btn-danger { background: #ef4444; }
-    .btn-danger:hover { background: #dc2626; }
-    .btn-outline { background: #ffffff; color: #334155; border: 1px solid #cbd5e1; }
-    .btn-outline:hover { background: #f1f5f9; color: #0f172a; }
-
+    /* 通用按鈕系統：膠囊圓角、純粹明快的深淺搭配 */
+    button { 
+      background: var(--c-black); 
+      color: var(--c-white); 
+      border: 1px solid transparent; 
+      padding: 8px 16px; 
+      border-radius: 9999px; 
+      font-weight: 500; 
+      font-size: var(--fs-sm); 
+      cursor: pointer; 
+      transition: all 0.15s ease; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 6px; 
+      line-height: 1.2;
+    }
+    button:hover { 
+      background: var(--c-brown); 
+      color: var(--c-white); 
+    }
+    button:disabled { 
+      background: var(--c-nude-dark); 
+      color: #999; 
+      cursor: not-allowed; 
+      border-color: transparent; 
+    }
+    
+    .btn-nude { 
+      background: var(--c-nude); 
+      color: var(--c-brown); 
+      border: 1px solid var(--c-line); 
+    }
+    .btn-nude:hover { 
+      background: var(--c-brown); 
+      color: var(--c-nude); 
+    }
+    .btn-brown { 
+      background: var(--c-brown); 
+      color: var(--c-white); 
+    }
+    .btn-brown:hover { 
+      background: var(--c-black); 
+      color: var(--c-white); 
+    }
+    .btn-outline { 
+      background: var(--c-white); 
+      color: var(--c-black); 
+      border: 1px solid var(--c-black); 
+    }
+    .btn-outline:hover { 
+      background: var(--c-black); 
+      color: var(--c-white); 
+    }
     .btn-quiz-compact {
-      background: #f0fdf4;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-      font-size: 11.5px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: 600;
-      white-space: nowrap;
+      background: var(--c-white);
+      color: var(--c-black);
+      border: 1px solid var(--c-black);
+      font-size: var(--fs-sm);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 500;
     }
     .btn-quiz-compact:hover:not(:disabled) {
-      background: #dcfce7;
-      color: #166534;
-    }
-    .btn-quiz-compact:disabled {
-      background: #f1f5f9;
-      color: #94a3b8;
-      border-color: #e2e8f0;
-      cursor: not-allowed;
+      background: var(--c-brown);
+      color: var(--c-white);
+      border-color: var(--c-brown);
     }
 
+    .btn-hamburger { 
+      background: var(--c-nude); 
+      border: none; 
+      color: var(--c-black); 
+      border-radius: 9999px; 
+      padding: 6px 12px; 
+      font-size: var(--fs-body); 
+    }
+    .btn-hamburger:hover { 
+      background: var(--c-white); 
+    }
+    body.in-study-mode .btn-hamburger { display: inline-flex; }
+
+    /* 單句發音按鈕：極簡低干擾 */
     .inline-sentence-speaker {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #eff6ff;
-      color: #2563eb;
-      border: 1px solid #bfdbfe;
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-size: 11px;
+      background: var(--c-nude);
+      color: var(--c-brown);
+      border: 1px solid var(--c-line);
+      border-radius: 9999px;
+      padding: 2px 7px;
+      font-size: var(--fs-sm);
       cursor: pointer;
       margin-left: 6px;
       vertical-align: middle;
-      line-height: 1.2;
+      line-height: 1;
       transition: all 0.15s ease;
-      user-select: none;
     }
     .inline-sentence-speaker:hover {
-      background: #2563eb;
-      color: #ffffff;
-      transform: scale(1.08);
-    }
-    .clickable-sentence {
-      cursor: pointer;
-      border-bottom: 1px dashed #93c5fd;
-      transition: background-color 0.15s;
-    }
-    .clickable-sentence:hover {
-      background-color: #f0f7ff;
-      border-radius: 3px;
+      background: var(--c-brown);
+      color: var(--c-white);
     }
 
+    /* 側邊導航欄 */
     aside#main-sidebar {
-      width: 270px;
-      min-width: 270px;
-      background: #ffffff;
-      border-right: 1px solid #e2e8f0;
+      width: 280px;
+      min-width: 280px;
+      background: var(--c-white);
+      border-radius: 20px;
       display: flex;
       flex-direction: column;
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
       z-index: 30;
+      overflow: hidden;
     }
-
     body.in-study-mode aside#main-sidebar {
       position: absolute;
       top: 0;
-      bottom: 0;
-      left: 0;
-      transform: translateX(-100%);
-      box-shadow: none;
+      bottom: 12px;
+      left: 12px;
+      transform: translateX(calc(-100% - 20px));
     }
-
     body.in-study-mode.drawer-open aside#main-sidebar {
       transform: translateX(0);
-      box-shadow: 10px 0 25px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
     }
-
     #sidebar-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.35);
-      backdrop-filter: blur(1px);
+      background: rgba(18, 18, 18, 0.7);
       z-index: 25;
       display: none;
     }
+    body.in-study-mode.drawer-open #sidebar-overlay { display: block; }
 
-    body.in-study-mode.drawer-open #sidebar-overlay {
-      display: block;
+    .sidebar-header { 
+      padding: 16px 20px; 
+      border-bottom: 1px solid var(--c-line); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
     }
+    .sidebar-header h2 { margin: 0; font-size: var(--fs-body); font-weight: 600; color: var(--c-black); }
+    .project-list { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: 10px; }
+    .project-item { 
+      padding: 12px 14px; 
+      border-radius: 12px; 
+      margin-bottom: 4px; 
+      cursor: pointer; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border: 1px solid transparent; 
+      transition: all 0.15s ease;
+    }
+    .project-item:hover { background: var(--c-nude); }
+    .project-item.active { background: var(--c-nude); border-color: var(--c-line); }
+    .project-title { font-size: var(--fs-body); font-weight: 600; color: var(--c-black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+    .project-meta { font-size: var(--fs-sm); color: var(--c-brown); margin-top: 2px; }
+    .btn-del-project { background: transparent; color: #999; padding: 2px 6px; font-size: var(--fs-sm); border-radius: 4px; }
+    .btn-del-project:hover { background: var(--c-brown); color: var(--c-white); }
 
-    .sidebar-header { padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-    .sidebar-header h2 { margin: 0; font-size: 15px; }
-    .project-list { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: 8px; }
-    .project-item { padding: 12px; border-radius: 8px; margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s; border: 1px solid transparent; }
-    .project-item:hover { background: #f1f5f9; }
-    .project-item.active { background: #eff6ff; border-color: #bfdbfe; }
-    .project-title { font-size: 14px; font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
-    .project-meta { font-size: 11px; color: #64748b; margin-top: 3px; }
-    .btn-del-project { background: transparent; color: #94a3b8; padding: 4px 6px; font-size: 16px; border-radius: 4px; }
-    .btn-del-project:hover { background: #fee2e2; color: #ef4444; }
-
+    /* 主內容區 */
     main { flex: 1; height: 100%; max-height: 100%; overflow: hidden; display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; min-height: 0; }
-    .content-container { max-width: 1120px; width: 100%; margin: 0 auto; padding: 24px; overflow-y: auto; flex: 1; min-height: 0; }
+    .content-container { max-width: 1160px; width: 100%; margin: 0 auto; padding: 16px 8px 24px; overflow-y: auto; flex: 1; min-height: 0; }
 
-    .empty-state-card { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .empty-state-card h2 { margin-top: 0; color: #0f172a; font-size: 20px; }
+    .empty-state-card { 
+      max-width: 580px; 
+      margin: 40px auto; 
+      background: var(--c-white); 
+      border-radius: 24px; 
+      padding: 36px; 
+    }
+    .empty-state-card h2 { margin-top: 0; font-size: var(--fs-h1); color: var(--c-black); font-weight: 600; line-height: 1.3; }
 
     .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .dashboard-header h2 { margin: 0; font-size: 22px; }
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .dashboard-header h2 { margin: 0; font-size: var(--fs-h1); color: var(--c-white); font-weight: 600; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
     
-    .day-card { background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 145px; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
-    .day-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px -1px rgba(0,0,0,0.08); }
-    .card-day-tag { font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; margin-bottom: 6px; }
-    .card-title { font-size: 15px; font-weight: 600; color: #0f172a; line-height: 1.4; margin-bottom: 12px; }
+    /* 每日卡片系統：四色純粹調配 */
+    .day-card { 
+      background: var(--c-white); 
+      border-radius: 20px; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      min-height: 160px; 
+      transition: transform 0.15s ease; 
+      border: 1px solid transparent;
+    }
+    .day-card:hover { transform: translateY(-2px); }
+    .card-day-tag { font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown); margin-bottom: 6px; letter-spacing: 0.04em; }
+    .card-title { font-size: var(--fs-h2); font-weight: 600; color: var(--c-black); line-height: 1.4; margin-bottom: 12px; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     
-    .day-card.completed { border-left: 4px solid #10b981; }
-    .day-card.completed .card-day-tag { color: #059669; }
-    .day-card.current { border: 2px solid #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    .day-card.locked { background: #f8fafc; border-color: #e2e8f0; opacity: 0.65; filter: grayscale(80%); }
-    .day-card.locked:hover { transform: none; box-shadow: none; }
-    .day-card.locked .card-day-tag { color: #94a3b8; }
-    .day-card.locked .card-title { color: #64748b; }
+    .day-card.completed { background: var(--c-nude); border-color: var(--c-line); }
+    .day-card.current { background: var(--c-white); border: 2px solid var(--c-brown); }
+    .day-card.locked { background: var(--c-black-surface); border: 1px solid #2a2a2a; }
+    .day-card.locked:hover { transform: none; }
+    .day-card.locked .card-day-tag, .day-card.locked .card-title { color: #666; }
+    .day-card.locked button { background: #333; color: #888; }
 
+    /* 學習主視圖：雙欄卡片風格 */
     .study-layout { 
       display: flex; 
       flex: 1; 
       width: 100%; 
       height: 100%; 
       max-height: 100%; 
-      gap: 16px; 
-      padding: 12px 16px; 
+      gap: 12px; 
       overflow: hidden; 
-      box-sizing: border-box; 
       min-height: 0; 
       min-width: 0;
     }
-    .lecture-panel { 
-      flex: 6; 
-      background: #ffffff; 
-      border-radius: 12px; 
-      border: 1px solid #e2e8f0; 
+    .lecture-panel, .interactive-panel { 
+      background: var(--c-white); 
+      border-radius: 24px; 
       display: flex; 
       flex-direction: column; 
       overflow: hidden; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
       height: 100%; 
       max-height: 100%; 
       min-height: 0; 
       min-width: 0;
     }
+    .lecture-panel { flex: 6; }
+    .interactive-panel { flex: 4; }
     
-    .lecture-header { padding: 12px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; gap: 14px; flex-shrink: 0; }
-    .lecture-title-area { display: flex; flex-direction: column; justify-content: center; }
-    .tab-nav { display: flex; gap: 6px; border-bottom: 1px solid #e2e8f0; padding: 0 18px; background: #f8fafc; flex-shrink: 0; }
-    .tab-btn { background: transparent; color: #64748b; border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 10px 14px; font-size: 13.5px; font-weight: 600; cursor: pointer; }
-    .tab-btn:hover { color: #0f172a; background: transparent; }
-    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; background: #ffffff; }
+    .lecture-header { 
+      padding: 14px 20px; 
+      border-bottom: 1px solid var(--c-line); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      gap: 14px; 
+      flex-shrink: 0; 
+    }
+    .lecture-title-area { display: flex; flex-direction: column; }
+    .tab-nav { 
+      display: flex; 
+      gap: 8px; 
+      padding: 10px 20px; 
+      background: var(--c-nude); 
+      border-bottom: 1px solid var(--c-line);
+      flex-shrink: 0; 
+    }
+    .tab-btn { 
+      background: var(--c-white); 
+      color: var(--c-black); 
+      border: 1px solid var(--c-line); 
+      border-radius: 9999px; 
+      padding: 6px 14px; 
+      font-size: var(--fs-sm); 
+      font-weight: 500; 
+      cursor: pointer; 
+    }
+    .tab-btn.active { 
+      background: var(--c-black); 
+      color: var(--c-white); 
+      border-color: var(--c-black); 
+    }
 
-    .tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; min-height: 0; height: 100%; }
+    .tab-content { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 24px; 
+      display: none; 
+      min-height: 0; 
+      height: 100%; 
+    }
     .tab-content.active { display: block; }
-    .lecture-content { line-height: 1.8; font-size: 15px; color: #334155; }
     
-    .interactive-panel { 
-      flex: 4; 
-      background: #ffffff; 
-      border-radius: 12px; 
-      border: 1px solid #e2e8f0; 
+    /* 講義排版：閱讀舒適優先，統一階層 */
+    .lecture-content { 
+      font-size: var(--fs-body); 
+      line-height: var(--lh-text); 
+      color: var(--c-black); 
+    }
+    .lecture-content h1, .lecture-content h2, .lecture-content h3 { 
+      color: var(--c-black); 
+      font-weight: 600; 
+      line-height: 1.4;
+      margin-top: 28px; 
+      margin-bottom: 12px; 
+    }
+    .lecture-content h1 { font-size: var(--fs-h1); }
+    .lecture-content h2 { 
+      font-size: var(--fs-h2); 
+      border-bottom: 1px solid var(--c-line); 
+      padding-bottom: 8px; 
+    }
+    .lecture-content h3 { 
+      font-size: var(--fs-body); 
+      border-left: 3px solid var(--c-brown); 
+      padding-left: 10px; 
+    }
+    .lecture-content p { margin: 0 0 14px; }
+    .lecture-content ul, .lecture-content ol { margin: 0 0 16px; padding-left: 20px; }
+    .lecture-content li { margin-bottom: 8px; }
+    
+    .lecture-content table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      margin: 16px 0; 
+      font-size: var(--fs-sm); 
+      border: 1px solid var(--c-line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .lecture-content th, .lecture-content td { 
+      border: 1px solid var(--c-line); 
+      padding: 10px 14px; 
+      text-align: left; 
+    }
+    .lecture-content th { background-color: var(--c-nude); font-weight: 600; color: var(--c-brown); }
+    .lecture-content blockquote { 
+      margin: 16px 0; 
+      padding: 12px 18px; 
+      border-left: 4px solid var(--c-brown); 
+      background: var(--c-nude); 
+      color: var(--c-black); 
+      border-radius: 0 12px 12px 0;
+      font-size: var(--fs-body);
+    }
+    .lecture-content code { 
+      background: var(--c-nude); 
+      color: var(--c-brown); 
+      padding: 2px 6px; 
+      border-radius: 4px; 
+      font-family: monospace; 
+      font-size: var(--fs-sm); 
+    }
+
+    /* 助教對話面板 */
+    .interactive-header { 
+      padding: 14px 18px; 
+      border-bottom: 1px solid var(--c-line); 
+      font-weight: 600; 
+      font-size: var(--fs-body); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      flex-shrink: 0; 
+    }
+    .chat-scroll-area { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 16px; 
       display: flex; 
       flex-direction: column; 
-      overflow: hidden; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-      height: 100%; 
-      max-height: 100%; 
+      gap: 12px; 
+      background: var(--c-nude); 
       min-height: 0; 
-      min-width: 0;
+      height: 100%; 
     }
-    .interactive-header { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0; }
-    .chat-scroll-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; min-height: 0; height: 100%; }
-    .chat-input-bar { padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+    .chat-input-bar { 
+      padding: 14px 18px; 
+      border-top: 1px solid var(--c-line); 
+      background: var(--c-white); 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px; 
+      flex-shrink: 0; 
+    }
 
-    .msg { padding: 10px 14px; border-radius: 8px; line-height: 1.5; max-width: 92%; font-size: 13.5px; word-break: break-word; }
-    .msg-bot { background: #ffffff; border: 1px solid #e2e8f0; align-self: flex-start; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-    .msg-user { background: #2563eb; color: #ffffff; align-self: flex-end; }
-    .msg-system { background: #fef3c7; color: #92400e; align-self: center; font-size: 12px; padding: 6px 12px; border-radius: 9999px; text-align: center; }
+    .msg { 
+      padding: 12px 16px; 
+      border-radius: 16px; 
+      line-height: var(--lh-text); 
+      max-width: 90%; 
+      font-size: var(--fs-body); 
+      word-break: break-word; 
+    }
+    .msg-bot { 
+      background: var(--c-white); 
+      border: 1px solid var(--c-line); 
+      align-self: flex-start; 
+      color: var(--c-black); 
+    }
+    .msg-user { 
+      background: var(--c-brown); 
+      color: var(--c-white); 
+      align-self: flex-end; 
+    }
+    .msg-system { 
+      background: var(--c-white); 
+      color: var(--c-brown); 
+      border: 1px solid var(--c-line); 
+      align-self: center; 
+      font-size: var(--fs-sm); 
+      padding: 6px 14px; 
+      border-radius: 9999px; 
+      text-align: center; 
+    }
 
-    .lecture-content h1, .lecture-content h2, .lecture-content h3 { color: #0f172a; margin-top: 24px; margin-bottom: 10px; }
-    .lecture-content h2 { border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
-    .lecture-content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
-    .lecture-content th, .lecture-content td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }
-    .lecture-content th { background-color: #f1f5f9; font-weight: 600; }
-    .lecture-content blockquote { margin: 12px 0; padding: 8px 16px; border-left: 4px solid #2563eb; background: #f8fafc; color: #475569; }
-    .lecture-content code { background: #e2e8f0; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+    /* 輸入表單控件 */
+    input:not([type=checkbox]):not([type=range]), textarea, select { 
+      border: 1px solid var(--c-line); 
+      border-radius: 12px; 
+      background: var(--c-white); 
+      color: var(--c-black); 
+      font-family: inherit; 
+      font-size: var(--fs-body);
+      padding: 10px 14px;
+      transition: border-color 0.15s ease;
+    }
+    input:focus, textarea:focus, select:focus { 
+      outline: none; 
+      border-color: var(--c-black); 
+    }
 
-    .flashcards-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-    .flashcards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-    
-    .flip-card { background-color: transparent; perspective: 1000px; height: 210px; cursor: pointer; }
-    .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    /* 單字卡片 (翻轉牌組) */
+    .flashcards-toolbar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px; 
+      flex-wrap: wrap; 
+      gap: 8px; 
+    }
+    .flashcards-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+      gap: 14px; 
+    }
+    .flip-card { background: transparent; perspective: 1000px; height: 220px; cursor: pointer; }
+    .flip-card-inner { 
+      position: relative; 
+      width: 100%; 
+      height: 100%; 
+      text-align: left; 
+      transition: transform 0.4s ease; 
+      transform-style: preserve-3d; 
+      border-radius: 16px; 
+    }
     .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
     
-    .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #e2e8f0; }
-    .flip-card-front { background-color: #ffffff; }
-    .flip-card-back { background-color: #f8fafc; transform: rotateY(180deg); border-color: #bfdbfe; text-align: left; }
+    .flip-card-front, .flip-card-back { 
+      position: absolute; 
+      width: 100%; 
+      height: 100%; 
+      -webkit-backface-visibility: hidden; 
+      backface-visibility: hidden; 
+      border-radius: 16px; 
+      padding: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      border: 1px solid var(--c-line); 
+    }
+    .flip-card-front { background: var(--c-white); }
+    .flip-card-back { background: var(--c-nude); transform: rotateY(180deg); }
 
-    .fc-word { font-size: 20px; font-weight: 700; color: #1e3a8a; margin-top: 10px; }
-    .fc-phonetic { font-size: 13px; color: #64748b; font-family: sans-serif; margin-top: 2px; }
-    .fc-pos { font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; align-self: center; margin-top: 4px; }
-    .fc-chunks { font-size: 11.5px; color: #0284c7; background: #e0f2fe; padding: 3px 6px; border-radius: 4px; margin-top: 6px; line-height: 1.3; }
-    .fc-meaning { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
-    .fc-example { font-size: 12px; color: #475569; font-style: italic; line-height: 1.4; }
-    .fc-example-box { background: #f1f5f9; padding: 8px 10px; border-radius: 6px; margin-top: 6px; font-size: 12px; color: #334155; line-height: 1.4; }
-    .fc-example-box .ex-en { font-weight: 600; color: #1e293b; }
-    .fc-example-box .ex-zh { color: #64748b; font-size: 11px; margin-top: 2px; }
+    .fc-word { font-size: var(--fs-h2); font-weight: 600; color: var(--c-black); margin-top: 6px; }
+    .fc-phonetic { font-size: var(--fs-sm); color: var(--c-brown); margin-top: 2px; }
+    .fc-pos { font-size: var(--fs-sm); background: var(--c-nude); color: var(--c-brown); padding: 2px 8px; border-radius: 9999px; align-self: flex-start; margin-top: 6px; }
+    .fc-chunks { font-size: var(--fs-sm); color: var(--c-black); background: var(--c-white); border: 1px solid var(--c-line); padding: 4px 8px; border-radius: 8px; margin-top: 6px; }
+    .fc-meaning { font-size: var(--fs-body); font-weight: 600; color: var(--c-black); margin-bottom: 6px; }
+    .fc-example-box { background: var(--c-white); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--c-line); margin-top: 6px; font-size: var(--fs-sm); line-height: 1.5; }
+    .fc-example-box .ex-en { font-weight: 600; color: var(--c-black); }
+    .fc-example-box .ex-zh { color: #666; margin-top: 2px; }
     
-    .fc-status-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 9999px; }
-    .fc-status-0 { background: #fee2e2; color: #b91c1c; }
-    .fc-status-1 { background: #fef3c7; color: #92400e; }
-    .fc-status-2 { background: #dcfce7; color: #15803d; }
+    .fc-status-badge { font-size: var(--fs-sm); font-weight: 500; padding: 2px 8px; border-radius: 9999px; }
+    .fc-status-0 { background: var(--c-line); color: var(--c-black); }
+    .fc-status-1 { background: var(--c-nude); color: var(--c-brown); border: 1px solid var(--c-line); }
+    .fc-status-2 { background: var(--c-brown); color: var(--c-white); }
 
+    /* 刷卡播放模態 */
     .study-card-box { width: 500px; max-width: 95%; height: 350px; perspective: 1200px; cursor: pointer; }
-    .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); }
+    .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s ease; transform-style: preserve-3d; border-radius: 24px; }
     .study-card-box.flipped .study-card-inner { transform: rotateY(180deg); }
-    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #e2e8f0; }
-    .study-card-front { background: #ffffff; }
-    .study-card-back { background: #ffffff; transform: rotateY(180deg); border-color: #93c5fd; }
+    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid var(--c-line); }
+    .study-card-front { background: var(--c-white); }
+    .study-card-back { background: var(--c-nude); transform: rotateY(180deg); }
 
-    .mic-recording { background-color: #ef4444 !important; animation: pulseMic 1.2s infinite; }
-    @keyframes pulseMic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); box-shadow: 0 0 12px rgba(239,68,68,0.5); } }
-
-    .btn-icon { background: transparent; color: #475569; border: 1px solid #cbd5e1; padding: 6px 10px; font-size: 15px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-    .btn-icon:hover { background: #f1f5f9; color: #0f172a; }
-
-    .btn-hamburger { display: none; background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; border-radius: 6px; padding: 5px 9px; font-size: 16px; cursor: pointer; line-height: 1; align-items: center; justify-content: center; }
-    .btn-hamburger:hover { background: #e2e8f0; }
-
-    body.in-study-mode .btn-hamburger { display: inline-flex; }
-
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
-    .modal-box { background: white; padding: 24px; border-radius: 12px; width: 440px; max-width: 90%; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-    .modal-box h3 { margin-top: 0; margin-bottom: 12px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-
-    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
-    .toast-msg { background: #1e293b; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: toastFade 0.2s ease-out; }
-    .toast-error { background: #ef4444; }
-    .toast-success { background: #059669; }
-    @keyframes toastFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    .typing-indicator { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; height: 24px; }
-    .typing-indicator span { width: 6px; height: 6px; background-color: #94a3b8; border-radius: 50%; animation: typing 1.4s infinite both; }
-    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
-
-    #input-message { font-family: inherit; resize: vertical; min-height: 38px; line-height: 1.4; }
-
-    /* 懸浮翻譯球樣式 */
+    /* 懸浮球與彈窗 */
     #float-translate-bubble {
       position: fixed;
-      right: 28px;
-      bottom: 84px;
-      width: 52px;
-      height: 52px;
+      right: 24px;
+      bottom: 24px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      color: #ffffff;
-      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+      background: var(--c-white);
+      color: var(--c-black);
+      border: 1px solid var(--c-line);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: var(--fs-h2);
       cursor: grab;
       z-index: 90;
-      user-select: none;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.15s ease;
     }
-    #float-translate-bubble:hover {
-      transform: scale(1.08);
-      box-shadow: 0 10px 28px rgba(79, 70, 229, 0.55);
-    }
-    #float-translate-bubble:active {
-      cursor: grabbing;
-    }
-
-    /* 懸浮翻譯展開視窗 */
+    #float-translate-bubble:hover { transform: scale(1.05); }
+    
     #float-translate-panel {
       position: fixed;
-      right: 28px;
-      bottom: 148px;
-      width: 360px;
+      right: 24px;
+      bottom: 84px;
+      width: 340px;
       max-width: calc(100vw - 40px);
-      background: #ffffff;
-      border-radius: 14px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.18);
+      background: var(--c-white);
+      border-radius: 20px;
+      border: 1px solid var(--c-line);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
       z-index: 95;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      animation: floatPanelIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    @keyframes floatPanelIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .float-panel-header {
-      padding: 10px 14px;
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 16px;
+      background: var(--c-nude);
+      border-bottom: 1px solid var(--c-line);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .float-panel-header h4 {
-      margin: 0;
-      font-size: 13.5px;
-      font-weight: 700;
-      color: #1e1b4b;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .float-panel-header h4 { margin: 0; font-size: var(--fs-body); font-weight: 600; color: var(--c-black); }
+    .float-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto; }
+
+    .modal-overlay { 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(18,18,18,0.7); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 50; 
     }
-    .float-panel-body {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 480px;
-      overflow-y: auto;
+    .modal-box { 
+      background: var(--c-white); 
+      padding: 28px; 
+      border-radius: 20px; 
+      width: 440px; 
+      max-width: 90%; 
     }
-    .voice-avatar-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      background: #fdf2f8;
-      color: #be185d;
-      border: 1px solid #fbcfe8;
-      padding: 2px 7px;
-      border-radius: 9999px;
-      font-weight: 600;
+    .modal-box h3 { margin-top: 0; margin-bottom: 12px; font-size: var(--fs-h2); color: var(--c-black); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast-msg { 
+      background: var(--c-black); 
+      color: var(--c-white); 
+      padding: 10px 18px; 
+      border-radius: 9999px; 
+      font-size: var(--fs-sm); 
+      border: 1px solid #333;
     }
 
-    /* ===================================================
-       FlexFit 風格主題：黑底 + 大圓角白/粉/黃卡片 + 粗體大寫
-       =================================================== */
-    :root { --ink:#111111; --ink2:#1d1d1d; --yellow:#f7dc00; --pink:#e8b0a8; --paper:#ffffff; --line:#e6e6e3; --mute:#6b6b68; }
-    body { font-family: "Noto Sans TC", "Helvetica Neue", "Arial Nova", Arial, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; background: var(--ink); color: var(--ink); }
-    h1,h2,h3,h4 { letter-spacing: -0.02em; }
-
-    /* Header（黑底導覽列） */
-    header { background: var(--ink); border-bottom: none; padding: 10px 24px; color: #fff; }
-    header h1 { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.03em; text-transform: uppercase; }
-    header h1::before { content:""; width:10px; height:20px; background:#fff; display:inline-block; margin-right:2px; border-radius:2px; box-shadow: 12px 0 0 var(--yellow); margin-right:16px; }
-    .status-badge { background: var(--yellow); color: var(--ink); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; padding: 6px 12px; }
-    header .btn-icon { background: #262626; color: #fff; border: none; border-radius: 9999px; padding: 9px 18px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    header .btn-icon:hover { background: var(--yellow); color: var(--ink); }
-    .btn-hamburger { background: var(--yellow); color: var(--ink); border: none; border-radius: 9999px; padding: 8px 12px; }
-    .btn-hamburger:hover { background: #fff; }
-
-    /* 按鈕：黑色膠囊 */
-    button { background: var(--ink); color: #fff; border-radius: 9999px; padding: 10px 18px; font-weight: 600; font-size: 12.5px; letter-spacing: .01em; }
-    button:hover { background: var(--yellow); color: var(--ink); }
-    button:disabled { background: #c9c9c6; color: #888; }
-    .btn-green, .btn-amber { background: var(--yellow); color: var(--ink); }
-    .btn-green:hover, .btn-amber:hover { background: var(--ink); color: var(--yellow); }
-    .btn-purple { background: var(--pink); color: var(--ink); }
-    .btn-purple:hover { background: var(--ink); color: var(--pink); }
-    .btn-gray { background: #2a2a2a; color: #fff; }
-    .btn-gray:hover { background: #444; color: #fff; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover { background: #b91c1c; color: #fff; }
-    .btn-outline, .btn-icon { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); }
-    .btn-outline:hover, .btn-icon:hover { background: var(--ink); color: #fff; }
-    .btn-quiz-compact { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 9999px; }
-    .btn-quiz-compact:hover:not(:disabled) { background: var(--yellow); color: var(--ink); }
-    .btn-quiz-compact:disabled { background: #f0f0ee; color: #aaa; border-color: #ddd; }
-
-    /* 版面：卡片之間留出黑色縫隙 */
-    #app-layout { padding: 0 12px 12px; gap: 12px; height: calc(100vh - 56px); max-height: calc(100vh - 56px); }
-    aside#main-sidebar { background: var(--paper); border: none; border-radius: 28px; width: 280px; min-width: 280px; }
-    body.in-study-mode aside#main-sidebar { top: 0; bottom: 12px; left: 12px; }
-    body.in-study-mode.drawer-open aside#main-sidebar { box-shadow: 0 20px 60px rgba(0,0,0,.6); }
-    #sidebar-overlay { background: rgba(0,0,0,.65); backdrop-filter: none; }
-    .sidebar-header { border-bottom: none; padding: 20px 20px 8px; }
-    .sidebar-header h2 { font-size: 15px; font-weight: 700; text-transform: uppercase; }
-    .project-item { border-radius: 18px; padding: 14px; }
-    .project-item:hover { background: #f4f4f2; }
-    .project-item.active { background: var(--yellow); border-color: var(--yellow); }
-    .project-title { font-weight: 600; color: var(--ink); }
-    .project-meta { color: var(--mute); }
-    .project-item.active .project-meta { color: #333; }
-    .btn-del-project { background: transparent; color: #999; }
-    .btn-del-project:hover { background: var(--ink); color: #fff; }
-
-    /* 深色底上的看板標題 */
-    .content-container { padding: 12px 8px 24px; }
-    .dashboard-header h2 { color: #fff; font-size: clamp(26px, 4vw, 44px); line-height: 1; font-weight: 700; text-transform: uppercase; letter-spacing: -0.04em; }
-    #view-project-progress { color: #bdbdb8 !important; font-weight: 600; }
-    .empty-state-card { background: var(--paper); border: none; border-radius: 28px; box-shadow: none; padding: 40px; }
-    .empty-state-card h2 { font-size: clamp(28px, 4vw, 44px); line-height: 1; font-weight: 700; text-transform: uppercase; letter-spacing: -0.04em; color: var(--ink); }
-
-    /* 每日卡片：白 / 黃(進行中) / 粉(已完成) / 深灰(鎖定) */
-    .cards-grid { gap: 12px; }
-    .day-card { background: var(--paper); border: none; border-radius: 28px; padding: 22px; min-height: 170px; }
-    .day-card:hover { transform: translateY(-3px); box-shadow: none; }
-    .card-day-tag { color: var(--ink); font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; letter-spacing: .02em; }
-    .card-day-tag::before { content:""; width: 8px; height: 14px; background: var(--ink); box-shadow: 9px 0 0 var(--yellow); margin-right: 10px; border-radius: 1px; }
-    .card-title { color: var(--ink); font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; text-transform: uppercase; }
-    .day-card.completed { background: var(--pink); border-left: none; }
-    .day-card.completed .card-day-tag { color: var(--ink); }
-    .day-card.current { background: var(--yellow); border: none; box-shadow: none; }
-    .day-card.current .card-day-tag::before { box-shadow: 9px 0 0 #fff; }
-    .day-card.locked { background: var(--ink2); opacity: 1; filter: none; border: 1px solid #2c2c2c; }
-    .day-card.locked .card-day-tag, .day-card.locked .card-title { color: #77776f; }
-    .day-card.locked .card-day-tag::before { background: #444; box-shadow: 9px 0 0 #333; }
-    .day-card .card-footer button { background: var(--ink); color: #fff; }
-    .day-card.current .card-footer button:hover, .day-card.completed .card-footer button:hover { background: #fff; color: var(--ink); }
-    .day-card.locked .card-footer button { background: #333; color: #888; }
-
-    /* 學習畫面：兩個大圓角面板 */
-    .study-layout { gap: 12px; padding: 0 0 4px; }
-    .lecture-panel, .interactive-panel { background: var(--paper); border: none; border-radius: 28px; box-shadow: none; }
-    .lecture-header { border-bottom: none; padding: 18px 24px 8px; }
-    .interactive-header { border-bottom: none; padding: 16px 20px 8px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-    .tab-nav { background: transparent; border-bottom: none; padding: 4px 20px 8px; gap: 8px; flex-wrap: wrap; }
-    .tab-btn { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 9999px; padding: 8px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    .tab-btn:hover { background: #f4f4f2; color: var(--ink); }
-    .tab-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .tab-content { padding: 8px 24px 24px; }
-    .lecture-content { color: #2a2a28; }
-    .lecture-content h1, .lecture-content h2, .lecture-content h3 { color: var(--ink); font-weight: 700; text-transform: uppercase; letter-spacing: -0.03em; }
-    .lecture-content h2 { border-bottom: 2px solid var(--ink); }
-    .lecture-content th { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .lecture-content td { border-color: var(--line); }
-    .lecture-content blockquote { background: #fffbd1; border-left: 6px solid var(--yellow); color: #333; border-radius: 0 14px 14px 0; }
-    .lecture-content code { background: #f1f1ee; border-radius: 6px; }
-    .inline-sentence-speaker { background: var(--yellow); color: var(--ink); border: none; border-radius: 9999px; }
-    .inline-sentence-speaker:hover { background: var(--ink); color: var(--yellow); }
-    .clickable-sentence { border-bottom: 2px solid var(--yellow); }
-    .clickable-sentence:hover { background: #fffbd1; }
-
-    /* 聊天區 */
-    .chat-scroll-area { background: #f4f4f2; }
-    .chat-input-bar { border-top: none; background: #fff; padding: 12px 16px 16px; }
-    .msg { border-radius: 20px; }
-    .msg-bot { background: #fff; border: none; color: var(--ink); box-shadow: none; }
-    .msg-user { background: var(--ink); color: #fff; }
-    .msg-system { background: var(--yellow); color: var(--ink); font-weight: 600; }
-    .typing-indicator span { background: var(--ink); }
-
-    /* 輸入框 */
-    input:not([type=checkbox]):not([type=radio]), textarea, select { border: 1.5px solid var(--ink) !important; border-radius: 14px !important; background: #fff; color: var(--ink); font-family: inherit; }
-    input:focus, textarea:focus, select:focus { outline: 3px solid var(--yellow); outline-offset: 0; }
-
-    /* 單字卡 */
-    .flip-card-inner { border-radius: 24px; box-shadow: none; }
-    .flip-card-front, .flip-card-back { border-radius: 24px; border: 2px solid var(--ink); padding: 18px; }
-    .flip-card-front { background: #fff; }
-    .flip-card-back { background: var(--pink); border-color: var(--pink); }
-    .fc-word { color: var(--ink); font-weight: 700; font-size: 22px; letter-spacing: -0.03em; text-transform: uppercase; }
-    .fc-phonetic { color: var(--mute); }
-    .fc-pos { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 9999px; padding: 2px 10px; font-weight: 600; }
-    .fc-chunks { background: var(--yellow); color: var(--ink); border-radius: 9999px; padding: 4px 10px; font-weight: 600; }
-    .fc-meaning { color: var(--ink); font-weight: 700; }
-    .fc-example { color: #333; }
-    .fc-example-box { background: rgba(255,255,255,.65); border-radius: 14px; }
-    .fc-example-box .ex-en { color: var(--ink); }
-    .fc-example-box .ex-zh { color: #555; }
-    .fc-status-badge { border-radius: 9999px; font-weight: 600; }
-    .fc-status-0 { background: var(--ink); color: #fff; }
-    .fc-status-1 { background: var(--yellow); color: var(--ink); }
-    .fc-status-2 { background: var(--pink); color: var(--ink); }
-    .study-card-inner { border-radius: 32px; box-shadow: none; }
-    .study-card-front, .study-card-back { border-radius: 32px; border: none; }
-    .study-card-front { background: #fff; }
-    .study-card-back { background: var(--yellow); }
-    .mic-recording { background-color: #ef4444 !important; color: #fff !important; }
-
-    /* 彈窗 / Toast */
-    .modal-overlay { background: rgba(0,0,0,.75); }
-    .modal-box { border-radius: 28px; padding: 28px; box-shadow: none; }
-    .modal-box h3 { font-weight: 700; text-transform: uppercase; font-size: 20px; letter-spacing: -0.02em; }
-    .toast-msg { background: var(--ink); border: 1.5px solid #333; border-radius: 9999px; padding: 12px 20px; font-weight: 600; box-shadow: none; }
-    .toast-error { background: #ef4444; border-color: #ef4444; }
-    .toast-success { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
-
-    /* 登入 / 歡迎卡片（覆蓋行內樣式） */
-    #section-auth { background: var(--paper) !important; border-radius: 32px !important; box-shadow: none !important; padding: 40px !important; max-width: 560px !important; }
-    #section-auth h2 { font-size: clamp(30px, 5vw, 48px); line-height: .95; font-weight: 700; text-transform: uppercase; letter-spacing: -0.04em; margin-top: 0; }
-    #section-auth p { color: var(--mute) !important; }
-    #section-auth div[style*="f0fdf4"] { background: var(--yellow) !important; border: none !important; border-radius: 24px !important; }
-    #section-auth div[style*="f0fdf4"] div, #section-auth div[style*="f0fdf4"] p { color: var(--ink) !important; }
-    #section-auth div[style*="f0fdf4"] button { background: var(--ink) !important; color: #fff !important; }
-    #section-auth div[style*="f0fdf4"] button:hover { background: #fff !important; color: var(--ink) !important; }
-    #section-auth div[style*="border-top"] { border-top: 1.5px solid var(--ink) !important; }
-
-    /* 懸浮翻譯球 */
-    #float-translate-bubble { background: var(--yellow); color: var(--ink); border: 3px solid var(--ink); box-shadow: 0 8px 24px rgba(0,0,0,.45); }
-    #float-translate-bubble:hover { background: #fff; box-shadow: 0 10px 28px rgba(0,0,0,.55); }
-    #float-translate-panel { background: #fff; border: none; border-radius: 28px; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
-    .float-panel-header { background: var(--pink); border-bottom: none; padding: 14px 18px; }
-    .float-panel-header h4 { color: var(--ink); font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; }
-    .float-panel-body { padding: 16px; }
-    .voice-avatar-badge { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); font-weight: 600; }
-    #float-result-box { border-radius: 18px !important; }
-
-    /* ===== 字級階序（講義內容）=====
-       H1 26 / H2 21 / H3 17 / H4 15 / 內文 15.5 / 表格 14 / 註解 13 */
-    .lecture-content { font-size: 15.5px; line-height: 1.85; color: #2a2a28; letter-spacing: 0; }
-    .lecture-content p { margin: 0 0 14px; }
-    .lecture-content h1, .lecture-content h2, .lecture-content h3, .lecture-content h4 { text-transform: none; line-height: 1.4; letter-spacing: -0.01em; color: var(--ink); }
-    .lecture-content h1 { font-size: 26px; font-weight: 700; margin: 28px 0 14px; }
-    .lecture-content h2 { font-size: 21px; font-weight: 700; margin: 36px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
-    .lecture-content h3 { font-size: 17px; font-weight: 600; margin: 26px 0 10px; padding-left: 10px; border-left: 5px solid var(--yellow); }
-    .lecture-content h4 { font-size: 15px; font-weight: 600; margin: 20px 0 8px; }
-    .lecture-content strong { font-weight: 600; color: var(--ink); }
-    .lecture-content ul, .lecture-content ol { margin: 0 0 16px; padding-left: 24px; }
-    .lecture-content li { margin-bottom: 6px; }
-    .lecture-content table { font-size: 14px; line-height: 1.6; }
-    .lecture-content th { font-size: 13px; font-weight: 600; letter-spacing: .02em; }
-    .lecture-content code { font-size: 13px; }
-    .lecture-content blockquote { font-size: 14px; line-height: 1.7; padding: 14px 20px; }
-    .lecture-content hr { border: none; border-top: 1.5px solid var(--line); margin: 24px 0; }
-
-    /* 頁首：DAY 標籤 → 標題 */
-    .lecture-title-area { gap: 2px; }
-    .lecture-title-area > * { text-transform: none; }
-    .lecture-title-area div:first-child, .lecture-title-area span:first-child { color: var(--mute) !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: .08em; text-transform: uppercase; }
-    .lecture-title-area h2, .lecture-title-area h3, .lecture-title-area div:nth-child(2) { font-size: 18px !important; font-weight: 700 !important; line-height: 1.35; letter-spacing: -0.01em; color: var(--ink) !important; }
-
-    /* 其他卡片標題：中文為主，不強制大寫、縮小字級 */
-    .card-title { font-size: 16px; text-transform: none; line-height: 1.4; }
-    .tab-btn { font-size: 13px; text-transform: none; }
-    .modal-box h3, .empty-state-card h2 { text-transform: none; }
-    .empty-state-card h2 { font-size: 28px; }
-    #section-auth h2 { font-size: 30px; line-height: 1.2; text-transform: none; }
-    .dashboard-header h2 { font-size: 30px; line-height: 1.2; text-transform: none; }
-    .interactive-header { text-transform: none; font-size: 13px; letter-spacing: 0; }
-    .fc-word { text-transform: none; }
+    .typing-indicator span { 
+      width: 5px; 
+      height: 5px; 
+      background-color: var(--c-brown); 
+      border-radius: 50%; 
+      display: inline-block;
+      animation: typing 1.4s infinite both; 
+    }
+    @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -591,54 +673,53 @@
   <header>
     <div class="header-left">
       <button id="btn-toggle-sidebar" class="btn-hamburger" title="切換學習專案">☰</button>
-      <h1>🇬🇧 英文學習工作台 & 智慧單字卡</h1>
+      <h1>英文學習工作台 & 智慧單字卡</h1>
     </div>
-    <div id="header-right" class="hidden" style="display: flex; align-items: center; gap: 12px;">
+    <div id="header-right" class="hidden" style="display: flex; align-items: center; gap: 10px;">
       <span class="status-badge" id="cloud-status">Google Drive 已連線</span>
-      <button id="btn-open-settings-modal" class="btn-icon" title="偏好設定">⚙️ 設定</button>
+      <button id="btn-open-settings-modal" class="btn-nude" title="偏好設定">⚙️ 設定</button>
     </div>
   </header>
 
   <div id="sidebar-overlay"></div>
 
-  <!-- 初始連線 Google Drive 卡片 -->
-  <div id="section-auth" style="max-width: 520px; margin: 50px auto; background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-    <h2>歡迎使用英文學習工作台</h2>
-    <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px;">
-      您可以選擇直接開始使用（資料自動儲存於本機瀏覽器），或登入 Google 雲端硬碟實現跨裝置同步。
+  <!-- 初始連線卡片 -->
+  <div id="section-auth" style="max-width: 480px; margin: 40px auto; background: var(--c-white); padding: 32px; border-radius: 24px;">
+    <h2 style="font-size: var(--fs-h1); margin-top: 0; margin-bottom: 8px;">開始你的英文工作台</h2>
+    <p style="font-size: var(--fs-body); color: #555; margin-bottom: 24px;">
+      選擇免登入直接使用（進度儲存於瀏覽器），或連線 Google Drive 同步。
     </p>
 
-    <!-- 方案一：免登入快速開始 (推薦) -->
-    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-      <div style="font-weight: 600; color: #166534; font-size: 15px; margin-bottom: 6px;">⚡ 免登入直接學習（最推薦・免設定）</div>
-      <p style="font-size: 13px; color: #15803d; line-height: 1.5; margin: 0 0 12px 0;">
-        立即開始規劃英文計畫、生成豐富例句講義、刷單字卡與 AI 口說對話，學習進度將自動安全保存於您的瀏覽器中！
+    <!-- 方案一：免登入 -->
+    <div style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 16px; padding: 20px; margin-bottom: 16px;">
+      <div style="font-weight: 600; color: var(--c-black); font-size: var(--fs-body); margin-bottom: 4px;">⚡ 免登入直接學習（推薦）</div>
+      <p style="font-size: var(--fs-sm); color: var(--c-brown); margin: 0 0 14px 0;">
+        立即規劃客製計畫、生成道地例句講義、刷單字卡與 AI 口說實戰。
       </p>
-      <button id="btn-use-local" class="btn-green" style="width: 100%; padding: 11px; font-size: 14px;">🚀 免登入，直接開始學習</button>
+      <button id="btn-use-local" class="btn-brown" style="width: 100%; padding: 10px;">直接開始學習</button>
     </div>
 
     <!-- 方案二：Google Drive 連線 -->
-    <div style="border-top: 1px solid #e2e8f0; padding-top: 18px;">
-      <div style="font-weight: 600; color: #334155; font-size: 14px; margin-bottom: 6px;">☁️ 或連線 Google 雲端硬碟同步</div>
-      <p style="font-size: 12.5px; color: #64748b; line-height: 1.4; margin-bottom: 12px;">
-        需確保當前網址已加入 Google Cloud Client ID 的授權來源名單中。
+    <div style="border-top: 1px solid var(--c-line); padding-top: 16px;">
+      <div style="font-weight: 600; color: var(--c-black); font-size: var(--fs-sm); margin-bottom: 4px;">☁️ 連線 Google 雲端硬碟同步</div>
+      <p style="font-size: var(--fs-sm); color: #666; margin-bottom: 12px;">
+        跨裝置保存您的學習紀錄與客製單字庫。
       </p>
 
-      <div id="env-file-warning" class="hidden" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin: 10px 0; font-size: 12px; color: #991b1b; line-height: 1.4;">
-        <strong>⚠️ 偵測到直接以本機檔案 (file://) 開啟：</strong><br>
-        Google 禁止以本地檔案協定登入。請直接點擊上方<strong>「免登入直接學習」</strong>即可順暢使用！
+      <div id="env-file-warning" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 8px; padding: 10px; margin: 8px 0; font-size: var(--fs-sm); color: var(--c-brown);">
+        偵測到直接以本機檔案開啟。Google 限制本機登入，請點擊上方「直接開始學習」。
       </div>
 
-      <div style="margin: 12px 0;">
-        <label style="font-size: 12px; font-weight: normal; color: #64748b; cursor: pointer;">
+      <div style="margin: 8px 0 12px;">
+        <label style="font-size: var(--fs-sm); color: #666; cursor: pointer;">
           <input type="checkbox" id="chk-custom-client-id" style="width: auto; margin-right: 4px;"> 顯示自訂 Client ID
         </label>
-        <div id="box-custom-client-id" class="hidden" style="margin-top: 8px;">
-          <input type="text" id="input-client-id" value="865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com" style="width: 100%; padding: 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        <div id="box-custom-client-id" class="hidden" style="margin-top: 6px;">
+          <input type="text" id="input-client-id" value="865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com" style="width: 100%;">
         </div>
       </div>
 
-      <button id="btn-login" class="btn-outline" style="width: 100%; padding: 10px; font-size: 13.5px;">登入 Google 帳號同步</button>
+      <button id="btn-login" class="btn-outline" style="width: 100%; padding: 9px;">登入 Google 帳號同步</button>
     </div>
   </div>
 
@@ -646,29 +727,29 @@
     <!-- 左側專案清單 -->
     <aside id="main-sidebar">
       <div class="sidebar-header">
-        <h2>英文計畫清單</h2>
-        <button id="btn-open-new-project-modal" style="padding: 4px 10px; font-size: 12px;">+ 新建計畫</button>
+        <h2>學習計畫清單</h2>
+        <button id="btn-open-new-project-modal" class="btn-nude" style="padding: 4px 10px; font-size: var(--fs-sm);">+ 新增</button>
       </div>
       <ul id="project-list" class="project-list"></ul>
     </aside>
 
     <!-- 右側主要操作區 -->
     <main>
-      <!-- 視圖 0: 當沒有任何專案時，直接顯示整頁新建表單 -->
+      <!-- 視圖 0: 空專案新建表單 -->
       <section id="view-empty-create" class="content-container hidden">
         <div class="empty-state-card">
           <h2>建立第一個英文學習計畫</h2>
-          <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 20px;">
-            目前尚未建立任何專案。請設定目標（如：多益核心文法、日常美語口語、學測長難句構），Gemini 3 Flash 將為你客製專屬的每日進度大綱與精選單字卡。
+          <p style="font-size: var(--fs-body); color: #555; margin-bottom: 20px;">
+            請設定目標（如：職場 Email 溝通、日常口語跟讀、長難句拆解），系統將為您生成每日進度大綱與精選語塊卡。
           </p>
 
-          <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">學習目標 / 主題：</label>
-          <input type="text" id="input-empty-goal" placeholder="例如：TOEIC 750分必考文法、商務職場 Email 句型、出國生活口語" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; margin-bottom: 16px;">
+          <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-bottom: 6px;">學習目標 / 主題：</label>
+          <input type="text" id="input-empty-goal" placeholder="例如：日常道地口語交流、商務簡報必備句構" style="width: 100%; margin-bottom: 16px;">
 
-          <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">規劃天數：</label>
-          <input type="number" id="input-empty-days" value="14" min="1" max="90" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; margin-bottom: 20px;">
+          <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-bottom: 6px;">規劃天數：</label>
+          <input type="number" id="input-empty-days" value="14" min="1" max="90" style="width: 100%; margin-bottom: 24px;">
 
-          <button id="btn-empty-create" style="width: 100%; padding: 12px; font-size: 15px;">開始規劃大綱並進入學習</button>
+          <button id="btn-empty-create" class="btn-brown" style="width: 100%; padding: 12px; font-size: var(--fs-body);">開始規劃並進入學習</button>
         </div>
       </section>
 
@@ -677,55 +758,55 @@
         <div class="dashboard-header" style="flex-wrap: wrap; gap: 12px;">
           <div>
             <h2 id="view-project-title">載入中...</h2>
-            <span id="view-project-progress" style="font-size: 13px; color: #64748b;">計算進度中...</span>
+            <span id="view-project-progress" style="font-size: var(--fs-sm); color: var(--c-nude);">計算進度中...</span>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <button id="btn-project-flashcard-draw" class="btn-purple" style="font-size: 13.5px; padding: 8px 16px; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25); display: inline-flex; align-items: center; gap: 6px;" title="隨機抽取本計畫所有單元累積的單字進行總複習">
-              <span>🎴 全計畫單字抽卡</span>
-              <span id="badge-project-total-vocab" style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 9999px; font-size: 11.5px; font-weight: 600;">0 字</span>
+            <button id="btn-project-flashcard-draw" class="btn-nude" title="隨機抽取本計畫所有單元累積的單字進行總複習">
+              <span>🎴 全計畫抽卡複習</span>
+              <span id="badge-project-total-vocab" style="background: var(--c-brown); color: var(--c-white); padding: 1px 6px; border-radius: 9999px; font-size: var(--fs-sm);">0 字</span>
             </button>
           </div>
         </div>
         <div id="day-cards-grid" class="cards-grid"></div>
       </section>
 
-      <!-- 視圖 B: 雙欄式深度研讀與單字卡工作區 -->
+      <!-- 視圖 B: 雙欄深度研讀與單字卡工作區 -->
       <section id="view-study" class="study-layout hidden">
-        <!-- 左欄：教材與單字卡分頁 -->
+        <!-- 左欄：教材與單字卡 -->
         <div class="lecture-panel">
           <div class="lecture-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <button id="btn-back-cards-left" class="btn-outline" style="padding: 6px 10px;" title="返回日程看板">
-                <span>← 返回看板</span>
+              <button id="btn-back-cards-left" class="btn-nude" style="padding: 4px 10px;" title="返回日程看板">
+                <span>← 返回</span>
               </button>
               <div class="lecture-title-area">
-                <span id="lecture-day-tag" style="font-size: 11px; font-weight: 600; color: #2563eb; text-transform: uppercase;">DAY 1</span>
-                <h2 id="study-day-title" style="margin: 2px 0 0; font-size: 16px; color: #0f172a; font-weight: 600;">教材標題</h2>
+                <span id="lecture-day-tag" style="font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown);">DAY 1</span>
+                <div id="study-day-title" style="font-size: var(--fs-h2); font-weight: 600; color: var(--c-black); line-height: 1.3;">教材標題</div>
               </div>
             </div>
             <div>
-              <button id="btn-start-flashcard-mode" class="btn-purple" style="font-size: 12px; padding: 6px 12px;">🎴 進入刷卡模式</button>
+              <button id="btn-start-flashcard-mode" class="btn-brown" style="font-size: var(--fs-sm); padding: 6px 14px;">🎴 刷卡模式</button>
             </div>
           </div>
 
-          <!-- 分頁頁籤：深度講義 vs 單字卡庫 -->
+          <!-- 分頁頁籤 -->
           <div class="tab-nav">
-            <button id="tab-btn-lecture" class="tab-btn active">📖 核心文法與解析講義</button>
-            <button id="tab-btn-vocab" class="tab-btn">🗂️ 今日高頻單字與語塊卡 (<span id="vocab-count-badge">0</span>)</button>
+            <button id="tab-btn-lecture" class="tab-btn active">核心解析講義</button>
+            <button id="tab-btn-vocab" class="tab-btn">高頻單字與語塊 (<span id="vocab-count-badge">0</span>)</button>
           </div>
 
           <!-- 分頁 1：深度講義 -->
           <div id="tab-pane-lecture" class="tab-content active">
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: 12.5px; color: #166534; font-weight: 600;">🎙️ 口語跟讀與發音輔助：每句英文後方皆附 🔊 單句發音，點選即可跟讀！</span>
+            <div style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">每句英文後方皆附 🔊 單句發音，點選即可跟讀。</span>
               <div style="display: flex; gap: 6px; align-items: center;">
-                <span style="font-size: 11px; color: #15803d;">語速：</span>
-                <button id="btn-speed-slow" class="btn-outline" style="padding: 2px 8px; font-size: 11px;">0.8x 慢速清晰</button>
-                <button id="btn-speed-normal" class="btn-green" style="padding: 2px 8px; font-size: 11px;">1.0x 母語語速</button>
+                <span style="font-size: var(--fs-sm); color: var(--c-brown);">語速：</span>
+                <button id="btn-speed-slow" class="btn-outline" style="padding: 2px 8px; font-size: var(--fs-sm);">0.8x 慢速</button>
+                <button id="btn-speed-normal" class="btn-brown" style="padding: 2px 8px; font-size: var(--fs-sm);">1.0x 正常</button>
               </div>
             </div>
             <div id="lecture-content-box" class="lecture-content">
-              <p style="color: #94a3b8;">正在準備教材...</p>
+              <p style="color: #888;">正在準備教材...</p>
             </div>
           </div>
 
@@ -733,52 +814,48 @@
           <div id="tab-pane-vocab" class="tab-content">
             <div class="flashcards-toolbar">
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button id="btn-ai-gen-vocab" class="btn-purple" style="font-size: 12px;">✨ AI 自動自講義提取高頻單字與口語搭配詞</button>
-                <button id="btn-add-custom-vocab" class="btn-outline" style="font-size: 12px;">+ 手動增卡</button>
+                <button id="btn-ai-gen-vocab" class="btn-brown" style="font-size: var(--fs-sm);">✨ AI 提煉搭配詞語塊</button>
+                <button id="btn-add-custom-vocab" class="btn-outline" style="font-size: var(--fs-sm);">+ 手動增卡</button>
               </div>
-              <div style="font-size: 12px; color: #64748b;">
-                掌握「動詞+介系詞語塊」，比單背單字開口流暢 3 倍！
+              <div style="font-size: var(--fs-sm); color: var(--c-brown);">
+                掌握動詞+介系詞搭配，比單背單字開口流暢 3 倍！
               </div>
             </div>
             <div id="flashcards-container" class="flashcards-grid"></div>
           </div>
         </div>
 
-        <!-- 右欄：即時 AI 助教問答與口說實戰對話 -->
+        <!-- 右欄：AI 助教問答與口說實戰 -->
         <div class="interactive-panel">
           <div class="interactive-header">
             <div style="display: flex; align-items: center; gap: 6px;">
-              <span>🤖 口語實戰助教 & 隨堂評測</span>
-              <span id="speech-support-badge" style="font-size: 10px; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">語音支援</span>
+              <span>口說助教 & 隨堂練習</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">📝 進行 10+1 測驗</button>
-              <div style="display: flex; align-items: center; gap: 4px; font-weight: normal; font-size: 11.5px; color: #64748b;">
-                <span>詳盡度:</span>
-                <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 55px; cursor: pointer;">
-                <span id="badge-detail-level" style="font-weight: 600; color: #2563eb; min-width: 24px;">適中</span>
+              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">📝 10+1 測驗</button>
+              <div style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-sm); color: #666;">
+                <span>詳盡:</span>
+                <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 50px;">
+                <span id="badge-detail-level" style="font-weight: 600; color: var(--c-brown);">適中</span>
               </div>
             </div>
           </div>
           <div id="chat-box" class="chat-scroll-area"></div>
           <div class="chat-input-bar">
-            <!-- 口說情境模擬捷徑列 -->
+            <!-- 捷徑列 -->
             <div style="display: flex; gap: 6px;">
-              <button id="btn-trigger-roleplay" class="btn-purple" style="flex: 1; font-size: 11.5px; padding: 6px;">🎭 啟動 5 句情境口說對話 (Roleplay)</button>
-              <button id="btn-trigger-speaking-drill" class="btn-amber" style="flex: 1; font-size: 11.5px; padding: 6px;">⚡ 快速口語反射造句訓練</button>
+              <button id="btn-trigger-roleplay" class="btn-nude" style="flex: 1; font-size: var(--fs-sm); padding: 6px;">🎭 5 句情境口說 (Roleplay)</button>
+              <button id="btn-trigger-speaking-drill" class="btn-nude" style="flex: 1; font-size: var(--fs-sm); padding: 6px;">⚡ 直覺反射造句訓練</button>
             </div>
-            <div id="recording-active-bar" class="hidden" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #dc2626;">
-              <span style="display: flex; align-items: center; gap: 6px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulseMic 1s infinite;"></span>
-                <strong>持續錄音中</strong>：想講多久就講多久，停頓不會被切斷！
-              </span>
-              <button id="btn-stop-recording-banner" style="background: #ef4444; color: white; padding: 2px 10px; font-size: 11px; border-radius: 4px;">⏹️ 說完了，停止錄音</button>
+            <div id="recording-active-bar" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 8px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-sm); color: var(--c-brown);">
+              <span>持續錄音中... 說完請點擊停止</span>
+              <button id="btn-stop-recording-banner" class="btn-brown" style="padding: 2px 8px; font-size: var(--fs-sm);">⏹️ 停止錄音</button>
             </div>
-            <!-- 輸入列：送出按鈕作為唯一主要操作 -->
+            <!-- 輸入列 -->
             <div style="display: flex; gap: 6px; align-items: flex-end;">
-              <button id="btn-voice-input" class="btn-outline" title="點擊開始持續錄音（說完手動按停止）" style="height: 38px; width: 42px; padding: 0; font-size: 18px;">🎙️</button>
-              <textarea id="input-message" rows="1" placeholder="問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)" style="flex: 1; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px;"></textarea>
-              <button id="btn-send-message" style="height: 38px; min-width: 68px; font-size: 14px;">發送</button>
+              <button id="btn-voice-input" class="btn-outline" title="持續語音輸入" style="height: 38px; width: 42px; padding: 0;">🎙️</button>
+              <textarea id="input-message" rows="1" placeholder="問文法、答題後按「發送」、或用語音練習... (Enter 換行)" style="flex: 1; padding: 8px 12px; font-size: var(--fs-body); resize: vertical; min-height: 38px;"></textarea>
+              <button id="btn-send-message" class="btn-brown" style="height: 38px; min-width: 68px;">發送</button>
             </div>
           </div>
         </div>
@@ -789,188 +866,180 @@
   <!-- 刷單字卡沉浸式視窗 -->
   <div id="modal-flashcard-player" class="modal-overlay hidden">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
-      <div style="display: flex; justify-content: space-between; width: 500px; max-width: 95%; color: #fff; font-size: 14px;">
+      <div style="display: flex; justify-content: space-between; width: 500px; max-width: 95%; color: var(--c-white); font-size: var(--fs-sm);">
         <span id="fc-player-progress">卡片 1 / 10</span>
-        <button id="btn-close-fc-player" style="background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 4px 10px; border-radius: 6px;">✕ 退出刷卡</button>
+        <button id="btn-close-fc-player" class="btn-nude" style="padding: 2px 10px; font-size: var(--fs-sm);">✕ 關閉</button>
       </div>
 
-      <!-- 3D 沉浸式卡片 -->
+      <!-- 沉浸式卡片 -->
       <div id="player-card-box" class="study-card-box">
         <div class="study-card-inner">
           <div class="study-card-front">
-            <span style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">[ 點擊翻轉看中文釋義與口語搭配詞 ]</span>
-            <div id="player-front-word" style="font-size: 34px; font-weight: 600; color: #1e3a8a;">Word</div>
-            <div id="player-front-phonetic" style="font-size: 15px; color: #64748b; margin-top: 4px;">/wɜːd/</div>
-            <div id="player-front-pos" style="font-size: 12px; background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 4px; margin-top: 8px;">noun</div>
-            <div id="player-front-collocations" style="font-size: 13px; color: #0284c7; background: #f0f9ff; border: 1px dashed #bae6fd; padding: 6px 12px; border-radius: 6px; margin-top: 12px; max-width: 90%;">
-              口語必備語塊：載入中...
+            <span style="font-size: var(--fs-sm); color: #888; margin-bottom: 8px;">[ 點擊翻轉看釋義與例句 ]</span>
+            <div id="player-front-word" style="font-size: 28px; font-weight: 600; color: var(--c-black);">Word</div>
+            <div id="player-front-phonetic" style="font-size: var(--fs-body); color: var(--c-brown); margin-top: 4px;">/wɜːd/</div>
+            <div id="player-front-pos" style="font-size: var(--fs-sm); background: var(--c-nude); color: var(--c-brown); padding: 2px 8px; border-radius: 9999px; margin-top: 8px;">noun</div>
+            <div id="player-front-collocations" style="font-size: var(--fs-sm); color: var(--c-black); background: var(--c-nude); padding: 8px 14px; border-radius: 10px; margin-top: 14px; max-width: 90%;">
+              語塊載入中...
             </div>
-            <div style="display: flex; gap: 8px; margin-top: 14px;">
-              <button id="btn-player-speak-slow" class="btn-outline" style="font-size: 12px; border-radius: 9999px; padding: 5px 12px;">🐢 慢速朗讀</button>
-              <button id="btn-player-speak-front" class="btn-outline" style="font-size: 12px; border-radius: 9999px; padding: 5px 14px;">🔊 母語發音</button>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+              <button id="btn-player-speak-slow" class="btn-outline" style="font-size: var(--fs-sm); padding: 4px 12px;">🐢 慢速</button>
+              <button id="btn-player-speak-front" class="btn-brown" style="font-size: var(--fs-sm); padding: 4px 14px;">🔊 發音</button>
             </div>
           </div>
           <div class="study-card-back">
-            <div id="player-back-meaning" style="font-size: 22px; font-weight: 600; color: #0f172a; margin-bottom: 10px;">中文釋義</div>
-            <div id="player-back-collocations" style="font-size: 13px; color: #1d4ed8; font-weight: 600; margin-bottom: 8px; text-align: left; width: 100%;">高頻搭售詞：-</div>
+            <div id="player-back-meaning" style="font-size: var(--fs-h1); font-weight: 600; color: var(--c-black); margin-bottom: 8px;">中文釋義</div>
+            <div id="player-back-collocations" style="font-size: var(--fs-sm); color: var(--c-brown); margin-bottom: 8px; text-align: left; width: 100%;">語塊：-</div>
             
-            <!-- 多例句模仿專區 -->
             <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto;">
-              <div id="player-box-ex1" style="background: #f1f5f9; padding: 10px; border-radius: 8px; text-align: left;">
+              <div id="player-box-ex1" style="background: var(--c-white); padding: 10px; border-radius: 10px; text-align: left; border: 1px solid var(--c-line);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
-                  <span style="font-size: 11px; background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 4px; font-weight: 600;">例句 1 (口語日常)</span>
-                  <button id="btn-player-speak-ex1" class="btn-outline" style="font-size: 11px; padding: 2px 8px;">🔊 慢速跟讀</button>
+                  <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">例句 1</span>
+                  <button id="btn-player-speak-ex1" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">🔊</button>
                 </div>
-                <div id="player-ex1-en" style="font-size: 13px; color: #0f172a; font-weight: 600; margin-top: 4px; line-height: 1.4;">-</div>
-                <div id="player-ex1-zh" style="font-size: 11.5px; color: #64748b; margin-top: 2px;">-</div>
+                <div id="player-ex1-en" style="font-size: var(--fs-sm); color: var(--c-black); font-weight: 500; margin-top: 4px;">-</div>
+                <div id="player-ex1-zh" style="font-size: var(--fs-sm); color: #666; margin-top: 2px;">-</div>
               </div>
 
-              <div id="player-box-ex2" style="background: #f1f5f9; padding: 10px; border-radius: 8px; text-align: left;">
+              <div id="player-box-ex2" style="background: var(--c-white); padding: 10px; border-radius: 10px; text-align: left; border: 1px solid var(--c-line);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
-                  <span style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 4px; font-weight: 600;">例句 2 (進階實戰)</span>
-                  <button id="btn-player-speak-ex2" class="btn-outline" style="font-size: 11px; padding: 2px 8px;">🔊 母語跟讀</button>
+                  <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">例句 2</span>
+                  <button id="btn-player-speak-ex2" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">🔊</button>
                 </div>
-                <div id="player-ex2-en" style="font-size: 13px; color: #0f172a; font-weight: 600; margin-top: 4px; line-height: 1.4;">-</div>
-                <div id="player-ex2-zh" style="font-size: 11.5px; color: #64748b; margin-top: 2px;">-</div>
+                <div id="player-ex2-en" style="font-size: var(--fs-sm); color: var(--c-black); font-weight: 500; margin-top: 4px;">-</div>
+                <div id="player-ex2-zh" style="font-size: var(--fs-sm); color: #666; margin-top: 2px;">-</div>
               </div>
             </div>
 
-            <button id="btn-player-speak-all-ex" class="btn-outline" style="margin-top: 10px; font-size: 11.5px; padding: 5px 12px;">🔊 連續朗讀所有例句 (連續跟讀 Shadowing)</button>
-            <span style="font-size: 11px; color: #94a3b8; margin-top: 8px;">[ 點擊可翻回正面 ]</span>
+            <button id="btn-player-speak-all-ex" class="btn-outline" style="margin-top: 10px; font-size: var(--fs-sm); padding: 4px 10px;">🔊 連續跟讀所有例句</button>
           </div>
         </div>
       </div>
 
-      <!-- 記憶熟練度操作列 -->
-      <div style="display: flex; gap: 12px; width: 500px; max-width: 95%; justify-content: center;">
-        <button id="btn-fc-rate-0" class="btn-danger" style="flex: 1; padding: 10px;">❌ 遺忘生疏</button>
-        <button id="btn-fc-rate-1" class="btn-amber" style="flex: 1; padding: 10px;">🤔 有點模糊</button>
-        <button id="btn-fc-rate-2" class="btn-green" style="flex: 1; padding: 10px;">✅ 熟練記住</button>
+      <div style="display: flex; gap: 10px; width: 500px; max-width: 95%; justify-content: center;">
+        <button id="btn-fc-rate-0" class="btn-outline" style="flex: 1; padding: 10px;">遺忘生疏</button>
+        <button id="btn-fc-rate-1" class="btn-nude" style="flex: 1; padding: 10px;">有點模糊</button>
+        <button id="btn-fc-rate-2" class="btn-brown" style="flex: 1; padding: 10px;">熟練記住</button>
       </div>
     </div>
   </div>
 
-  <!-- 手動新增單字彈跳視窗 -->
+  <!-- 手動新增單字彈窗 -->
   <div id="modal-add-vocab" class="modal-overlay hidden">
     <div class="modal-box" style="max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <h3 style="margin: 0;">新增自訂單字與語塊卡</h3>
-        <span style="font-size: 11px; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">✨ 支援 AI 自動補全</span>
+        <h3 style="margin: 0;">新增單字與語塊</h3>
       </div>
-      <p style="font-size: 12.5px; color: #64748b; line-height: 1.4; margin-top: 0; margin-bottom: 12px;">
-        輸入想學的英文單字或片語，點擊下方「AI 一鍵生成」按鈕，音標、詞性、口語語塊、中文意與雙例句將由 Gemini 自動為您補齊！
+      <p style="font-size: var(--fs-sm); color: #666; margin-top: 0; margin-bottom: 12px;">
+        輸入英文單字，點擊「AI 補全」即可自動填入音標、語塊與情境例句。
       </p>
 
-      <label style="font-size: 12.5px; font-weight: 600; color: #1e293b; display: block; margin-top: 6px;">英文單字 / 片語（必填）：</label>
+      <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 6px;">英文單字 / 片語：</label>
       <div style="display: flex; gap: 6px; margin-top: 4px;">
-        <input type="text" id="input-new-word" placeholder="例如：procrastinate 或 touch base" style="flex: 1; padding: 9px 10px; border: 1.5px solid #93c5fd; border-radius: 6px; font-size: 14px; font-weight: 600; color: #1e3a8a;">
-        <button id="btn-ai-fill-single-vocab" type="button" class="btn-purple" style="white-space: nowrap; padding: 8px 12px; font-size: 12.5px;" title="讓 AI 自動填寫音標、詞性、語塊、中文與 2 個例句">
+        <input type="text" id="input-new-word" placeholder="例如：procrastinate" style="flex: 1;">
+        <button id="btn-ai-fill-single-vocab" type="button" class="btn-brown" style="white-space: nowrap; font-size: var(--fs-sm);">
           ✨ AI 補全
         </button>
       </div>
 
-      <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 11.5px; font-weight: 600; color: #64748b;">以下欄位可手動填寫，或由上方 AI 自動帶入：</span>
-        </div>
-
+      <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--c-line);">
         <div style="display: flex; gap: 8px;">
           <div style="flex: 1;">
-            <label style="font-size: 12px; font-weight: 600; display: block;">音標：</label>
-            <input type="text" id="input-new-phonetic" placeholder="/prəˈkræstɪneɪt/" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+            <label style="font-size: var(--fs-sm); font-weight: 600; display: block;">音標：</label>
+            <input type="text" id="input-new-phonetic" placeholder="/.../" style="width: 100%; margin-top: 4px;">
           </div>
           <div style="flex: 1;">
-            <label style="font-size: 12px; font-weight: 600; display: block;">詞性：</label>
-            <input type="text" id="input-new-pos" placeholder="v. / phr. / adj." style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+            <label style="font-size: var(--fs-sm); font-weight: 600; display: block;">詞性：</label>
+            <input type="text" id="input-new-pos" placeholder="v. / n." style="width: 100%; margin-top: 4px;">
           </div>
         </div>
 
-        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">口語高頻搭配詞 (Collocations / 語塊)：</label>
-        <input type="text" id="input-new-collocations" placeholder="例如：procrastinate on doing sth" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">口語搭配詞 (Collocations)：</label>
+        <input type="text" id="input-new-collocations" placeholder="例如：procrastinate on sth" style="width: 100%; margin-top: 4px;">
 
-        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">中文釋義：</label>
-        <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
+        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">中文釋義：</label>
+        <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; margin-top: 4px;">
 
-        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">實用語境例句 1 (口語日常)：</label>
-        <input type="text" id="input-new-example" placeholder="英文：I used to procrastinate a lot before deadlines." style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
-        <input type="text" id="input-new-example-zh" placeholder="中文：我以前在截止日前總是很愛拖延。" style="width: 100%; padding: 6px 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 3px; font-size: 11.5px; color: #475569;">
+        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">情境例句 1：</label>
+        <input type="text" id="input-new-example" placeholder="英文例句" style="width: 100%; margin-top: 4px;">
+        <input type="text" id="input-new-example-zh" placeholder="中文翻譯" style="width: 100%; margin-top: 3px;">
 
-        <label style="font-size: 12px; font-weight: 600; display: block; margin-top: 8px;">實用語境例句 2 (進階實戰)：</label>
-        <input type="text" id="input-new-example2" placeholder="英文：Stop procrastinating and just make that phone call." style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px; font-size: 12.5px;">
-        <input type="text" id="input-new-example2-zh" placeholder="中文：別再拖延了，現在就把那通電話打了吧。" style="width: 100%; padding: 6px 7px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 3px; font-size: 11.5px; color: #475569;">
+        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">情境例句 2：</label>
+        <input type="text" id="input-new-example2" placeholder="進階英文例句" style="width: 100%; margin-top: 4px;">
+        <input type="text" id="input-new-example2-zh" placeholder="中文翻譯" style="width: 100%; margin-top: 3px;">
       </div>
 
-      <div class="modal-actions" style="margin-top: 14px;">
-        <button id="btn-cancel-add-vocab" class="btn-gray">取消</button>
-        <button id="btn-confirm-add-vocab">確認加入單字庫</button>
+      <div class="modal-actions">
+        <button id="btn-cancel-add-vocab" class="btn-nude">取消</button>
+        <button id="btn-confirm-add-vocab" class="btn-brown">確認新增</button>
       </div>
     </div>
   </div>
 
-  <!-- 彈跳視窗：API Key 設定 -->
+  <!-- API Key 設定 -->
   <div id="modal-key-setup" class="modal-overlay hidden">
     <div class="modal-box">
       <h3>設定 Gemini API Key</h3>
-      <p style="font-size: 13px; color: #64748b; line-height: 1.4;">
-        初次使用請輸入 Gemini API Key。金鑰將安全儲存於個人 Google Drive 專屬設定中，往後打開自動連線。
+      <p style="font-size: var(--fs-sm); color: #666;">
+        初次使用請輸入 Gemini API Key，將安全保存於本機或雲端。
       </p>
-      <input type="password" id="input-gemini-key" placeholder="AIzaSy..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; margin: 12px 0;">
+      <input type="password" id="input-gemini-key" placeholder="AIzaSy..." style="width: 100%; margin: 12px 0;">
       <div class="modal-actions">
-        <button id="btn-save-key">儲存至雲端並繼續</button>
+        <button id="btn-save-key" class="btn-brown">儲存並繼續</button>
       </div>
     </div>
   </div>
 
-  <!-- 彈跳視窗：模型偏好設定 -->
+  <!-- 偏好設定 -->
   <div id="modal-settings" class="modal-overlay hidden">
     <div class="modal-box">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <h3 style="margin: 0;">系統與模型設定</h3>
-        <button id="btn-close-settings-x" style="background: transparent; color: #94a3b8; font-size: 18px; padding: 2px 6px; border-radius: 4px;">✕</button>
+        <h3 style="margin: 0;">系統偏好設定</h3>
+        <button id="btn-close-settings-x" class="btn-nude" style="padding: 2px 6px;">✕</button>
       </div>
-      <p style="font-size: 13px; color: #64748b; line-height: 1.4; margin-bottom: 16px;">
-        自訂生成英文講義與日常助教問答的模型（測驗批改預設以 Gemini 3 Flash 提供深度解析）。
+      <p style="font-size: var(--fs-sm); color: #666; margin-bottom: 16px;">
+        自訂教學與助教問答的模型偏好。
       </p>
 
-      <div style="margin-bottom: 14px;">
-        <label for="select-lecture-model" style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
-          英文講義與單字提取模型：
+      <div style="margin-bottom: 12px;">
+        <label for="select-lecture-model" style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-bottom: 4px;">
+          英文講義與單字模型：
         </label>
-        <select id="select-lecture-model" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
+        <select id="select-lecture-model" style="width: 100%;">
           <option value="gemini-3-flash-preview">Gemini 3 Flash (推薦・深度英語教學)</option>
           <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (極速反應)</option>
         </select>
       </div>
 
       <div style="margin-bottom: 16px;">
-        <label for="select-chat-model" style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px;">
-          日常助教互動模型：
+        <label for="select-chat-model" style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-bottom: 4px;">
+          口說助教互動模型：
         </label>
-        <select id="select-chat-model" style="width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #ffffff;">
-          <option value="gemini-3-flash-preview">Gemini 3 Flash (推薦・智慧診斷)</option>
+        <select id="select-chat-model" style="width: 100%;">
+          <option value="gemini-3-flash-preview">Gemini 3 Flash (推薦・診斷回饋)</option>
           <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (快速問答)</option>
         </select>
       </div>
 
       <div class="modal-actions">
-        <button id="btn-save-settings">儲存並套用</button>
+        <button id="btn-save-settings" class="btn-brown">儲存套用</button>
       </div>
     </div>
   </div>
 
-  <!-- 彈跳視窗：新增專案 -->
+  <!-- 新增專案彈窗 -->
   <div id="modal-new-project" class="modal-overlay hidden">
     <div class="modal-box">
-      <h3>新增英文學習計畫</h3>
-      <label style="font-size: 13px; font-weight: 600; display: block; margin-top: 10px;">專案目標 / 主題：</label>
-      <input type="text" id="input-new-goal" placeholder="例如：TOEIC 閱讀高頻語法突破、美劇生活道地片語" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+      <h3>新增學習計畫</h3>
+      <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 10px;">目標 / 主題：</label>
+      <input type="text" id="input-new-goal" placeholder="例如：生活情境隨口說、美劇高頻片語" style="width: 100%; margin-top: 4px;">
 
-      <label style="font-size: 13px; font-weight: 600; display: block; margin-top: 12px;">規劃天數：</label>
-      <input type="number" id="input-new-days" value="14" min="1" max="90" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 4px;">
+      <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 12px;">天數：</label>
+      <input type="number" id="input-new-days" value="14" min="1" max="90" style="width: 100%; margin-top: 4px;">
 
       <div class="modal-actions">
-        <button id="btn-cancel-new-project" class="btn-gray">取消</button>
-        <button id="btn-confirm-create-project">開始規劃大綱</button>
+        <button id="btn-cancel-new-project" class="btn-nude">取消</button>
+        <button id="btn-confirm-create-project" class="btn-brown">開始規劃大綱</button>
       </div>
     </div>
   </div>
@@ -979,52 +1048,42 @@
   <div id="modal-confirm" class="modal-overlay hidden">
     <div class="modal-box">
       <h3 id="confirm-modal-title">請確認</h3>
-      <p id="confirm-modal-msg" style="font-size: 14px; color: #475569; line-height: 1.5; margin: 12px 0;"></p>
+      <p id="confirm-modal-msg" style="font-size: var(--fs-body); color: #555; margin: 12px 0;"></p>
       <div class="modal-actions">
-        <button id="btn-confirm-cancel" class="btn-gray">取消</button>
-        <button id="btn-confirm-ok" class="btn-danger">確認</button>
+        <button id="btn-confirm-cancel" class="btn-nude">取消</button>
+        <button id="btn-confirm-ok" class="btn-brown">確認</button>
       </div>
     </div>
   </div>
 
   <!-- 翻譯懸浮球與展開面板 -->
-  <div id="float-translate-bubble" title="點擊展開即時翻譯與自然女人聲朗讀（可拖曳）">
+  <div id="float-translate-bubble" title="即時翻譯（可拖曳）">
     <span>🌐</span>
   </div>
 
   <div id="float-translate-panel" class="hidden">
     <div class="float-panel-header">
-      <h4>
-        <span>🌐 即時翻譯</span>
-        <span class="voice-avatar-badge">👩 自然女人聲 (Aoede/US Female)</span>
-      </h4>
-      <button id="btn-close-float-panel" style="background: transparent; border: none; color: #94a3b8; font-size: 16px; padding: 2px 6px; cursor: pointer;">✕</button>
+      <h4>🌐 即時翻譯</h4>
+      <button id="btn-close-float-panel" class="btn-nude" style="padding: 2px 6px;">✕</button>
     </div>
     <div class="float-panel-body">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 12px; font-weight: 600; color: #475569;">輸入想翻譯的中/英文或片語：</span>
-        <button id="btn-float-paste" class="btn-outline" style="font-size: 11px; padding: 2px 6px;">📋 貼上選取內容</button>
+        <span style="font-size: var(--fs-sm); color: var(--c-brown);">輸入想查詢的中/英文：</span>
+        <button id="btn-float-paste" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">貼上選取</button>
       </div>
-      <textarea id="float-input-text" rows="3" placeholder="例如：procrastinate 或 剛才講義裡看不懂的長句..." style="width: 100%; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; resize: vertical;"></textarea>
+      <textarea id="float-input-text" rows="3" placeholder="例如：procrastinate..." style="width: 100%;"></textarea>
 
-      <div style="display: flex; gap: 8px;">
-        <button id="btn-exec-translate" class="btn-purple" style="flex: 1; padding: 8px; font-size: 13px;">
-          ✨ 開始翻譯
-        </button>
-        <button id="btn-speak-input-natural" class="btn-outline" style="padding: 8px 12px; font-size: 13px;" title="以自然女人聲朗讀輸入文字">
-          🔊 朗讀原文
-        </button>
+      <div style="display: flex; gap: 6px;">
+        <button id="btn-exec-translate" class="btn-brown" style="flex: 1; padding: 6px;">翻譯</button>
+        <button id="btn-speak-input-natural" class="btn-outline" style="padding: 6px 10px;">🔊 朗讀</button>
       </div>
 
-      <!-- 翻譯結果區塊 -->
-      <div id="float-result-box" class="hidden" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-top: 4px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-size: 11.5px; font-weight: 600; color: #4338ca;">✨ 翻譯與語意解析</span>
-          <button id="btn-speak-result-natural" class="btn-green" style="font-size: 11.5px; padding: 3px 8px;">
-            👩 朗讀譯文
-          </button>
+      <div id="float-result-box" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px; margin-top: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown);">解析結果</span>
+          <button id="btn-speak-result-natural" class="btn-nude" style="font-size: var(--fs-sm); padding: 2px 6px;">🔊 朗讀</button>
         </div>
-        <div id="float-result-text" style="font-size: 13px; color: #0f172a; line-height: 1.5; white-space: pre-wrap;"></div>
+        <div id="float-result-text" style="font-size: var(--fs-body); color: var(--c-black); line-height: 1.5; white-space: pre-wrap;"></div>
       </div>
     </div>
   </div>
@@ -1072,7 +1131,6 @@
     isQuizInProgress: false
   };
 
-  // 統一封裝 GoogleGenAI 初始化，確保強制指定 apiVersion: "v1beta"
   function getGenAIClient() {
     return new GoogleGenAI({
       apiKey: state.geminiKey,
@@ -1080,7 +1138,7 @@
     });
   }
 
-  // DOM 元素引用
+  // DOM 參照
   const sectionAuth = document.getElementById("section-auth");
   const appLayout = document.getElementById("app-layout");
   const headerRight = document.getElementById("header-right");
@@ -1138,7 +1196,6 @@
   const sliderDetailLevel = document.getElementById("slider-detail-level");
   const badgeDetailLevel = document.getElementById("badge-detail-level");
 
-  // 口說與語音控制 DOM
   const btnVoiceInput = document.getElementById("btn-voice-input");
   const btnTriggerRoleplay = document.getElementById("btn-trigger-roleplay");
   const btnTriggerSpeakingDrill = document.getElementById("btn-trigger-speaking-drill");
@@ -1151,7 +1208,6 @@
   let finalTranscript = "";
   let manualStopRequested = false;
 
-  // 單字卡相關 DOM
   const tabBtnLecture = document.getElementById("tab-btn-lecture");
   const tabBtnVocab = document.getElementById("tab-btn-vocab");
   const tabPaneLecture = document.getElementById("tab-pane-lecture");
@@ -1173,7 +1229,6 @@
   const btnConfirmAddVocab = document.getElementById("btn-confirm-add-vocab");
   const btnAiFillSingleVocab = document.getElementById("btn-ai-fill-single-vocab");
 
-  // 刷卡播放器 DOM
   const modalFlashcardPlayer = document.getElementById("modal-flashcard-player");
   const btnCloseFcPlayer = document.getElementById("btn-close-fc-player");
   const playerCardBox = document.getElementById("player-card-box");
@@ -1211,16 +1266,15 @@
 
   function showToast(text, type = "info") {
     const el = document.createElement("div");
-    el.className = `toast-msg ${type === "error" ? "toast-error" : (type === "success" ? "toast-success" : "")}`;
+    el.className = "toast-msg";
     el.textContent = text;
     toastContainer.appendChild(el);
     setTimeout(() => el.remove(), 4000);
   }
 
-  function showConfirm(title, message, onConfirm, okColor = "btn-danger") {
+  function showConfirm(title, message, onConfirm) {
     confirmModalTitle.textContent = title;
     confirmModalMsg.textContent = message;
-    btnConfirmOk.className = okColor;
     confirmCallback = onConfirm;
     modalConfirm.classList.remove("hidden");
   }
@@ -1249,251 +1303,40 @@
     window.speechSynthesis.onvoiceschanged = updateVoices;
   }
 
-  // 優先選取真實度高、自然生動的女性語音（避免機械金屬音）
   function getBestNaturalFemaleVoice(langCode) {
     updateVoices();
     if (!cachedVoices || cachedVoices.length === 0) return null;
-
     if (langCode === "zh") {
-      // 優先繁體中文自然女聲
-      return cachedVoices.find(v => (v.name.includes("HsiaoChen") || v.name.includes("Yating") || v.name.includes("Natural") || v.name.includes("Mei-Jia") || v.name.includes("Female")) && (v.lang === "zh-TW" || v.lang === "zh_TW")) ||
-             cachedVoices.find(v => v.lang === "zh-TW" || v.lang === "zh_TW") ||
+      return cachedVoices.find(v => (v.name.includes("HsiaoChen") || v.name.includes("Yating") || v.name.includes("Natural") || v.name.includes("Mei-Jia")) && v.lang.startsWith("zh")) ||
              cachedVoices.find(v => v.lang.startsWith("zh")) || null;
     } else {
-      // 優先英文高擬真自然女性音色 (Natural, Jenny, Ava, Samantha, Victoria, Google US English 等)
-      return cachedVoices.find(v => (v.name.includes("Jenny") || v.name.includes("Ava") || v.name.includes("Natural") || v.name.includes("Samantha") || v.name.includes("Victoria") || v.name.includes("Zira") || v.name.includes("Female")) && v.lang.startsWith("en")) ||
-             cachedVoices.find(v => v.lang === "en-US" && !v.name.toLowerCase().includes("male")) ||
+      return cachedVoices.find(v => (v.name.includes("Jenny") || v.name.includes("Ava") || v.name.includes("Natural") || v.name.includes("Samantha")) && v.lang.startsWith("en")) ||
              cachedVoices.find(v => v.lang.startsWith("en")) || null;
     }
   }
 
-  function getBestVoice(langCode) {
-    return getBestNaturalFemaleVoice(langCode);
-  }
-
-  // 將 PCM16 陣列封裝為標準 WAV 格式，供瀏覽器原生極速播放
-  function pcm16ToWavBlob(pcmData, sampleRate = 24000) {
-    const buffer = new ArrayBuffer(44 + pcmData.byteLength);
-    const view = new DataView(buffer);
-
-    function writeString(offset, string) {
-      for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-      }
-    }
-
-    writeString(0, 'RIFF');
-    view.setUint32(4, 36 + pcmData.byteLength, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, 1, true); // Mono
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeString(36, 'data');
-    view.setUint32(40, pcmData.byteLength, true);
-
-    const outBytes = new Uint8Array(buffer, 44);
-    outBytes.set(new Uint8Array(pcmData.buffer, pcmData.byteOffset, pcmData.byteLength));
-    return new Blob([buffer], { type: 'audio/wav' });
-  }
-
-  // 頂級自然女人聲生成器：優先使用 Gemini 2.5 TTS 自然女人聲 (Aoede)，離線自動回退高品質語音
-  async function speakNaturalFemaleVoice(textToSpeak, targetLang = "en") {
-    if (!textToSpeak || !textToSpeak.trim()) return;
-    const cleanText = cleanMarkdownForSpeech(textToSpeak).trim();
-    if (!cleanText) return;
-
-    // 若有 Gemini API Key，直接調用 Gemini 2.5 Flash TTS 的真人女人聲 (Aoede：優雅、自然且極具親和力)
-    if (state.geminiKey) {
-      try {
-        const payload = {
-          contents: [{
-            parts: [{ text: `Say naturally and gently as an experienced female English tutor: ${cleanText}` }]
-          }],
-          generationConfig: {
-            responseModalities: ["AUDIO"],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: { voiceName: "Aoede" } // Aoede: 輕快自然女聲
-              }
-            }
-          }
-        };
-
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${state.geminiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-          const result = await res.json();
-          const inlineAudio = result?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-          if (inlineAudio && inlineAudio.data) {
-            const rawBinary = atob(inlineAudio.data);
-            const bytes = new Uint8Array(rawBinary.length);
-            for (let i = 0; i < rawBinary.length; i++) {
-              bytes[i] = rawBinary.charCodeAt(i);
-            }
-            const pcm16 = new Int16Array(bytes.buffer);
-            const sampleRate = 24000;
-            const wavBlob = pcm16ToWavBlob(pcm16, sampleRate);
-            const audioUrl = URL.createObjectURL(wavBlob);
-            const audio = new Audio(audioUrl);
-            audio.onended = () => URL.revokeObjectURL(audioUrl);
-            await audio.play();
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn("Gemini TTS 呼叫失敗，自動降級為瀏覽器自然女聲：", err);
-      }
-    }
-
-    // 瀏覽器端最高等級自然女聲備援
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      const isZh = targetLang === "zh" || /[\u4e00-\u9fa5]/.test(cleanText);
-      utterance.lang = isZh ? "zh-TW" : "en-US";
-      const femaleVoice = getBestNaturalFemaleVoice(isZh ? "zh" : "en");
-      if (femaleVoice) utterance.voice = femaleVoice;
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05; // 稍微調高音調呈現柔和自然女人聲
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-
-  function cleanMarkdownForSpeech(text) {
-    if (!text) return "";
-    return text.replace(/[*_#`[\]()]/g, ' ').replace(/\s+/g, ' ').trim();
-  }
-
-  function segmentByLanguage(text) {
-    if (!text) return [];
-    const isCjk = (char) => /[\u3000-\u303F\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFF00-\uFFEF]/.test(char);
-    const isLatin = (char) => /[A-Za-z]/.test(char);
-
-    const segments = [];
-    let currentLang = null;
-    let currentText = "";
-
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      let charLang = null;
-      if (isCjk(char)) {
-        charLang = "zh";
-      } else if (isLatin(char)) {
-        charLang = "en";
-      }
-
-      if (charLang) {
-        if (!currentLang) {
-          currentLang = charLang;
-          currentText += char;
-        } else if (currentLang === charLang) {
-          currentText += char;
-        } else {
-          if (currentText.trim()) {
-            segments.push({ lang: currentLang, text: currentText.trim() });
-          }
-          currentLang = charLang;
-          currentText = char;
-        }
-      } else {
-        currentText += char;
-      }
-    }
-
-    if (currentText.trim()) {
-      segments.push({ lang: currentLang || "en", text: currentText.trim() });
-    }
-    return segments;
-  }
-
-  // 獨立朗讀單句專用函式 (確保立即取消前次發音並發音指定單句)
   function speakSingleSentence(sentenceText, rate = state.speechRate) {
     if (!('speechSynthesis' in window)) {
-      showToast("您的瀏覽器不支援語音合成朗讀", "error");
+      showToast("瀏覽器不支援語音合成朗讀", "error");
       return;
     }
     window.speechSynthesis.cancel();
-    let cleanText = cleanMarkdownForSpeech(sentenceText)
+    let cleanText = sentenceText
+      .replace(/<[^>]*>/g, '')
       .replace(/^[0-9]+[.)]\s*/, '')
-      // 過濾常見中文前綴標籤如 "例句："、"例："、"【例句】" 等，避免唸出中文
-      .replace(/^(?:例句|例|例\s*子|【例句】|【例】|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '')
-      .replace(/[\u4e00-\u9fa5]+/g, ' ') // 清除句子中殘留的中文字
-      .replace(/^"|"$/g, '')
+      .replace(/^(?:例句|例|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '')
+      .replace(/[\u4e00-\u9fa5]+/g, ' ')
+      .replace(/^["“]|["”]$/g, '')
       .replace(/\s+/g, ' ')
       .trim();
     if (!cleanText) return;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = "en-US";
-    const v = getBestVoice("en");
+    const v = getBestNaturalFemaleVoice("en");
     if (v) utterance.voice = v;
     utterance.rate = rate || 1.0;
-    utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
-  }
-
-  function speakSmart(rawText, rate = state.speechRate) {
-    if (!('speechSynthesis' in window)) {
-      showToast("您的瀏覽器不支援語音合成朗讀", "error");
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const cleanText = cleanMarkdownForSpeech(rawText);
-    const segments = segmentByLanguage(cleanText);
-
-    if (segments.length === 0) return;
-
-    segments.forEach(seg => {
-      const utterance = new SpeechSynthesisUtterance(seg.text);
-      if (seg.lang === "zh") {
-        utterance.lang = "zh-TW";
-        const v = getBestVoice("zh");
-        if (v) utterance.voice = v;
-        utterance.rate = 1.0;
-      } else {
-        utterance.lang = "en-US";
-        const v = getBestVoice("en");
-        if (v) utterance.voice = v;
-        utterance.rate = rate || 1.0;
-      }
-      utterance.pitch = 1.0;
-      window.speechSynthesis.speak(utterance);
-    });
-  }
-
-  function speakEnglishOnly(rawText, rate = state.speechRate) {
-    if (!('speechSynthesis' in window)) {
-      showToast("您的瀏覽器不支援語音合成朗讀", "error");
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const cleanText = cleanMarkdownForSpeech(rawText);
-    const segments = segmentByLanguage(cleanText);
-    const enSegments = segments.filter(s => s.lang === "en" && /[A-Za-z]{2,}/.test(s.text));
-
-    if (enSegments.length === 0) {
-      showToast("未偵測到英文句子可朗讀", "info");
-      return;
-    }
-
-    enSegments.forEach(seg => {
-      const utterance = new SpeechSynthesisUtterance(seg.text);
-      utterance.lang = "en-US";
-      const v = getBestVoice("en");
-      if (v) utterance.voice = v;
-      utterance.rate = rate || 1.0;
-      utterance.pitch = 1.0;
-      window.speechSynthesis.speak(utterance);
-    });
   }
 
   function speakEnglish(text, rate = state.speechRate) {
@@ -1502,25 +1345,21 @@
 
   btnSpeedSlow.addEventListener("click", () => {
     state.speechRate = 0.8;
-    btnSpeedSlow.className = "btn-green";
+    btnSpeedSlow.className = "btn-brown";
     btnSpeedNormal.className = "btn-outline";
-    showToast("已切換為 0.8x 慢速清晰跟讀模式", "info");
+    showToast("已切換為 0.8x 慢速模式", "info");
   });
 
   btnSpeedNormal.addEventListener("click", () => {
     state.speechRate = 1.0;
-    btnSpeedNormal.className = "btn-green";
+    btnSpeedNormal.className = "btn-brown";
     btnSpeedSlow.className = "btn-outline";
-    showToast("已切換為 1.0x 母語正常語速", "info");
+    showToast("已切換為 1.0x 正常語速", "info");
   });
 
   function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      btnVoiceInput.title = "目前瀏覽器不支援語音辨識 (建議使用 Chrome/Edge)";
-      btnVoiceInput.style.opacity = "0.5";
-      return;
-    }
+    if (!SpeechRecognition) return;
 
     state.recognition = new SpeechRecognition();
     state.recognition.continuous = true;
@@ -1530,12 +1369,9 @@
     state.recognition.onstart = () => {
       state.isRecording = true;
       manualStopRequested = false;
-      btnVoiceInput.classList.add("mic-recording");
+      btnVoiceInput.classList.add("btn-brown");
       btnVoiceInput.textContent = "⏹";
-      btnVoiceInput.title = "點擊停止錄音並完成輸入";
       if (recordingActiveBar) recordingActiveBar.classList.remove("hidden");
-      inputMessage.placeholder = "🔴 正在持續錄音中... 盡情開口說英文，說完請點擊 ⏹️ 停止";
-      showToast("🎙 持續錄音已啟動！說話停頓不會被中斷，說完請點擊 ⏹️ 停止", "info");
     };
 
     state.recognition.onresult = (event) => {
@@ -1548,84 +1384,44 @@
         }
       }
       inputMessage.value = (baseTextBeforeRecording + finalTranscript + interim).trimStart();
-      inputMessage.scrollTop = inputMessage.scrollHeight;
     };
 
-    state.recognition.onerror = (event) => {
-      console.warn("Speech Rec Notice:", event.error);
-      if (event.error === 'no-speech') return;
-      if (event.error === 'not-allowed') {
-        showToast("未取得麥克風權限，請在瀏覽器設定中允許使用麥克風！", "error");
-        stopRecordingManually();
-      }
-    };
-
+    state.recognition.onerror = () => stopRecordingManually();
     state.recognition.onend = () => {
       if (state.isRecording && !manualStopRequested) {
-        try {
-          state.recognition.start();
-          return;
-        } catch (e) {
-          console.debug("Recognition auto-restart guard:", e);
-        }
+        try { state.recognition.start(); return; } catch (e) {}
       }
       state.isRecording = false;
-      btnVoiceInput.classList.remove("mic-recording");
+      btnVoiceInput.classList.remove("btn-brown");
       btnVoiceInput.textContent = "🎙️";
-      btnVoiceInput.title = "點擊開始持續錄音（說完手動按停止）";
       if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
-      inputMessage.placeholder = "問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)";
     };
   }
 
   function startRecordingManually() {
-    if (!state.recognition) {
-      showToast("您的瀏覽器不支援語音輸入功能，請使用 Chrome 或 Edge 瀏覽器！", "error");
-      return;
-    }
+    if (!state.recognition) return;
     baseTextBeforeRecording = inputMessage.value ? inputMessage.value.trim() + " " : "";
     finalTranscript = "";
     manualStopRequested = false;
-    try {
-      state.recognition.start();
-    } catch (e) {
-      console.warn("Restarting recognition session...", e);
-      try {
-        state.recognition.stop();
-        setTimeout(() => state.recognition.start(), 200);
-      } catch (err) {
-        console.error(err);
-      }
-    }
+    try { state.recognition.start(); } catch (e) {}
   }
 
   function stopRecordingManually() {
     manualStopRequested = true;
     state.isRecording = false;
     if (state.recognition) {
-      try {
-        state.recognition.stop();
-      } catch (e) {
-        console.debug("Recognition stop error:", e);
-      }
+      try { state.recognition.stop(); } catch (e) {}
     }
-    btnVoiceInput.classList.remove("mic-recording");
+    btnVoiceInput.classList.remove("btn-brown");
     btnVoiceInput.textContent = "🎙️";
-    btnVoiceInput.title = "點擊開始持續錄音（說完手動按停止）";
     if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
-    inputMessage.placeholder = "問文法、答題後按「發送」、或點左側麥克風練習... (Enter 換行)";
-    inputMessage.focus();
-    showToast("✅ 錄音完成！英文內容已填入輸入框，點擊「發送」即可送出給助教", "success");
   }
 
   initSpeechRecognition();
 
   btnVoiceInput.addEventListener("click", () => {
-    if (state.isRecording) {
-      stopRecordingManually();
-    } else {
-      startRecordingManually();
-    }
+    if (state.isRecording) stopRecordingManually();
+    else startRecordingManually();
   });
 
   if (btnStopRecordingBanner) {
@@ -1653,9 +1449,7 @@
   btnSendMessage.addEventListener("click", handleSendMessage);
   btnTriggerQuiz.addEventListener("click", handleStartInChatQuiz);
 
-  btnToggleSidebar.addEventListener("click", () => {
-    document.body.classList.toggle("drawer-open");
-  });
+  btnToggleSidebar.addEventListener("click", () => document.body.classList.toggle("drawer-open"));
   sidebarOverlay.addEventListener("click", closeSidebarDrawer);
 
   function closeSidebarDrawer() {
@@ -1678,7 +1472,6 @@
   });
 
   const DETAIL_NAMES = { 1: "簡答", 2: "適中", 3: "詳盡" };
-
   function updateDetailBadge(val) {
     if (badgeDetailLevel) badgeDetailLevel.textContent = DETAIL_NAMES[val] || "適中";
   }
@@ -1705,13 +1498,9 @@
     if (!state.appData.settings) state.appData.settings = {};
     state.appData.settings.lectureModel = selectLectureModel.value;
     state.appData.settings.chatModel = selectChatModel.value;
-    btnSaveSettings.disabled = true;
-    btnSaveSettings.textContent = "儲存中...";
     await saveProgressToDrive();
-    btnSaveSettings.disabled = false;
-    btnSaveSettings.textContent = "儲存並套用";
     modalSettings.classList.add("hidden");
-    showToast("模型設定已更新並同步至雲端", "success");
+    showToast("設定已更新", "success");
   });
 
   function getActiveLectureModel() {
@@ -1722,71 +1511,27 @@
     return state.appData.settings?.chatModel || DEFAULT_CHAT_MODEL;
   }
 
-  function getModelLabel(modelId) {
-    return MODEL_DISPLAY_NAMES[modelId] || modelId;
-  }
-
-  if (window.location.protocol === "file:") {
-    const envWarning = document.getElementById("env-file-warning");
-    if (envWarning) envWarning.classList.remove("hidden");
-  }
-
   function handleGoogleAuth() {
-    if (window.location.protocol === "file:") {
-      showToast("Google OAuth 禁止在 file:// 協定運行，建議直接點擊「免登入直接學習」！", "error");
-      return;
-    }
-
     const clientId = inputClientId.value.trim() || DEFAULT_CLIENT_ID;
-
-    if (typeof google === "undefined" || !google.accounts || !google.accounts.oauth2) {
-      showToast("Google 驗證模組載入中，若無法載入建議點擊「免登入直接學習」！", "error");
+    if (typeof google === "undefined" || !google.accounts) {
+      showToast("Google 模組載入中，請點擊「免登入直接學習」", "error");
       return;
     }
-
-    btnLogin.disabled = true;
-    btnLogin.textContent = "驗證中...";
-
-    const authTimeout = setTimeout(() => {
-      if (btnLogin.disabled) {
-        btnLogin.disabled = false;
-        btnLogin.textContent = "登入 Google 帳號同步";
-        showToast("登入已超時。若有網域驗證限制，可直接點上方「免登入直接學習」！", "error");
-      }
-    }, 10000);
 
     try {
       const client = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: SCOPES,
-        error_callback: (err) => {
-          clearTimeout(authTimeout);
-          console.error("GIS Error:", err);
-          showToast(`Google 驗證未授權此網域，建議點擊「免登入直接學習」！`, "error");
-          btnLogin.disabled = false;
-          btnLogin.textContent = "登入 Google 帳號同步";
-        },
         callback: async (resp) => {
-          clearTimeout(authTimeout);
-          if (resp.error) {
-            showToast("授權失敗：" + resp.error + "，建議使用免登入模式", "error");
-            btnLogin.disabled = false;
-            btnLogin.textContent = "登入 Google 帳號同步";
-            return;
-          }
+          if (resp.error) return showToast("授權失敗", "error");
           state.isLocalMode = false;
           state.accessToken = resp.access_token;
           await syncDataFromDrive();
         }
       });
-
       client.requestAccessToken();
     } catch (err) {
-      clearTimeout(authTimeout);
-      console.error("Init Token Client Exception:", err);
-      showToast("啟動登入失敗，請直接點擊「免登入直接學習」！", "error");
-      btnLogin.disabled = false;
-      btnLogin.textContent = "登入 Google 帳號同步";
+      showToast("登入受限，請點擊免登入直接學習", "error");
     }
   }
 
@@ -1794,41 +1539,14 @@
     state.isLocalMode = true;
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        state.appData = JSON.parse(saved);
-      } else {
-        state.appData = {
-          geminiKey: "",
-          activeProjectId: null,
-          settings: {
-            lectureModel: DEFAULT_LECTURE_MODEL,
-            chatModel: DEFAULT_CHAT_MODEL,
-            detailLevel: 2
-          },
-          projects: {}
-        };
-      }
-    } catch (e) {
-      console.warn("LocalStorage load error:", e);
-    }
+      if (saved) state.appData = JSON.parse(saved);
+    } catch (e) {}
 
     sectionAuth.classList.add("hidden");
     headerRight.classList.remove("hidden");
     appLayout.classList.remove("hidden");
 
-    if (cloudStatus) {
-      cloudStatus.textContent = "本機儲存模式 (免登入)";
-      cloudStatus.style.background = "#e0f2fe";
-      cloudStatus.style.color = "#0284c7";
-    }
-
-    selectLectureModel.value = getActiveLectureModel();
-    selectChatModel.value = getActiveChatModel();
-
-    const currentDetail = state.appData.settings?.detailLevel || 2;
-    if (sliderDetailLevel) sliderDetailLevel.value = currentDetail;
-    updateDetailBadge(currentDetail);
-
+    if (cloudStatus) cloudStatus.textContent = "本機模式";
     if (state.appData.geminiKey) {
       state.geminiKey = state.appData.geminiKey;
       initAppFlow();
@@ -1851,54 +1569,11 @@
           headers: { Authorization: `Bearer ${state.accessToken}` }
         });
         state.appData = await fileContentRes.json();
-        if (!state.appData.settings) {
-          state.appData.settings = {
-            lectureModel: DEFAULT_LECTURE_MODEL,
-            chatModel: DEFAULT_CHAT_MODEL,
-            detailLevel: 2
-          };
-        }
-      } else {
-        state.appData = {
-          geminiKey: "",
-          activeProjectId: null,
-          settings: {
-            lectureModel: DEFAULT_LECTURE_MODEL,
-            chatModel: DEFAULT_CHAT_MODEL,
-            detailLevel: 2
-          },
-          projects: {}
-        };
-        const metadata = { name: DRIVE_FILE_NAME, mimeType: "application/json" };
-        const form = new FormData();
-        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
-        form.append("file", new Blob([JSON.stringify(state.appData)], { type: "application/json" }));
-
-        const createRes = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${state.accessToken}` },
-          body: form
-        });
-        const created = await createRes.json();
-        state.driveFileId = created.id;
       }
 
       sectionAuth.classList.add("hidden");
       headerRight.classList.remove("hidden");
       appLayout.classList.remove("hidden");
-
-      if (cloudStatus) {
-        cloudStatus.textContent = "Google Drive 已連線";
-        cloudStatus.style.background = "#ecfdf5";
-        cloudStatus.style.color = "#059669";
-      }
-
-      selectLectureModel.value = getActiveLectureModel();
-      selectChatModel.value = getActiveChatModel();
-
-      const currentDetail = state.appData.settings?.detailLevel || 2;
-      if (sliderDetailLevel) sliderDetailLevel.value = currentDetail;
-      updateDetailBadge(currentDetail);
 
       if (state.appData.geminiKey) {
         state.geminiKey = state.appData.geminiKey;
@@ -1907,49 +1582,36 @@
         modalKeySetup.classList.remove("hidden");
       }
     } catch (err) {
-      console.error(err);
-      showToast("存取 Google 雲端失敗，已為您自動切換至本機儲存模式！", "info");
       handleUseLocalMode();
     }
   }
 
   async function saveProgressToDrive() {
-    if (state.isLocalMode || !state.driveFileId) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.appData));
-      } catch (err) {
-        console.warn("LocalStorage save error:", err);
-      }
-      return;
-    }
-
     try {
-      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${state.driveFileId}?uploadType=media`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${state.accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(state.appData)
-      });
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.appData));
-    } catch (err) {
-      console.error("雲端同步失敗，已轉存本機：", err);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.appData));
+    } catch (e) {}
+
+    if (!state.isLocalMode && state.driveFileId) {
+      try {
+        await fetch(`https://www.googleapis.com/upload/drive/v3/files/${state.driveFileId}?uploadType=media`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${state.accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(state.appData)
+        });
+      } catch (err) {}
     }
   }
 
   async function handleSaveApiKey() {
     const key = inputGeminiKey.value.trim();
-    if (!key) {
-      showToast("請輸入 API Key", "error");
-      return;
-    }
+    if (!key) return showToast("請輸入 API Key", "error");
     state.geminiKey = key;
     state.appData.geminiKey = key;
     await saveProgressToDrive();
     modalKeySetup.classList.add("hidden");
-    showToast("API Key 儲存成功！", "success");
     initAppFlow();
   }
 
@@ -1961,7 +1623,6 @@
       document.body.classList.remove("in-study-mode", "drawer-open");
       viewStudy.classList.add("hidden");
       viewDashboard.classList.add("hidden");
-      modalNewProject.classList.add("hidden");
       viewEmptyCreate.classList.remove("hidden");
     } else {
       viewEmptyCreate.classList.add("hidden");
@@ -1975,73 +1636,38 @@
 
   async function executeCreateProject(goalText, daysValue, triggerBtn, modalToHide) {
     const goal = (goalText || "").trim();
-    const days = daysValue;
+    if (!goal) return showToast("請填寫專案目標", "error");
 
-    if (!goal) {
-      showToast("請填寫英文專案目標", "error");
-      return;
-    }
-
-    const currentLectureModel = getActiveLectureModel();
-    const originalText = triggerBtn.textContent;
     triggerBtn.disabled = true;
-    triggerBtn.textContent = `規劃大綱中 (${getModelLabel(currentLectureModel)})...`;
-
     try {
       const ai = getGenAIClient();
-      const prompt = `你是一位精通現代應用語言學、二語習得（SLA）與英文口語表達名師。請根據學習目標「${goal}」規劃 ${days} 天的每日英文學習進度大綱。
-要求：
-1. 每日主題必須「文法架構＋口語高頻搭配詞（Collocations）＋口說實戰情境」三位一體，解決開口卡頓與詞彙貧乏問題。
-2. 輸出格式必須是純 JSON 字串陣列，例如：["Day 1: 主題名稱", "Day 2: 主題名稱", ...]，不要有任何多餘的引言或代碼圍欄。`;
-
+      const prompt = `規劃 ${daysValue} 天的每日英文學習大綱，目標為「${goal}」。每日主題包含核心句構與口語語塊。輸出為純 JSON 字串陣列，例如：["Day 1: 主題名稱", "Day 2: 主題名稱"]。`;
       const res = await ai.models.generateContent({
-        model: currentLectureModel,
+        model: getActiveLectureModel(),
         contents: prompt,
         config: { responseMimeType: "application/json" }
       });
 
       const plan = JSON.parse(res.text.trim());
       const newId = "proj_" + Date.now();
-
       state.appData.projects[newId] = {
         id: newId,
         goal: goal,
-        totalDays: parseInt(days, 10),
+        totalDays: parseInt(daysValue, 10),
         plan: plan,
         currentDayIndex: 0,
         history: {}
       };
-
       state.appData.activeProjectId = newId;
       await saveProgressToDrive();
 
       if (modalToHide) modalToHide.classList.add("hidden");
-      inputNewGoal.value = "";
-      inputEmptyGoal.value = "";
-
-      triggerBtn.disabled = false;
-      triggerBtn.textContent = originalText;
-      showToast(`英文學習計畫「${goal}」規劃完成！`, "success");
       initAppFlow();
     } catch (e) {
-      console.error(e);
       showToast("大綱生成失敗：" + e.message, "error");
+    } finally {
       triggerBtn.disabled = false;
-      triggerBtn.textContent = originalText;
     }
-  }
-
-  function handleDeleteProject(id, e) {
-    e.stopPropagation();
-    const proj = state.appData.projects[id];
-    showConfirm("刪除專案確認", `確定要刪除「${proj.goal}」專案嗎？相關教材與單字卡將一併移除。`, async () => {
-      delete state.appData.projects[id];
-      const remaining = Object.keys(state.appData.projects);
-      state.appData.activeProjectId = remaining.length > 0 ? remaining[0] : null;
-      await saveProgressToDrive();
-      showToast("專案已刪除", "info");
-      initAppFlow();
-    });
   }
 
   function renderSidebar() {
@@ -2051,15 +1677,14 @@
     Object.values(projects).forEach((proj) => {
       const li = document.createElement("li");
       li.className = `project-item ${proj.id === state.appData.activeProjectId ? 'active' : ''}`;
-
       const completedCount = Object.values(proj.history || {}).filter(h => h.completed).length;
 
       li.innerHTML = `
         <div>
           <div class="project-title" title="${proj.goal}">${proj.goal}</div>
-          <div class="project-meta">${completedCount}/${proj.plan.length} 天 (${Math.round((completedCount/proj.plan.length)*100)}%)</div>
+          <div class="project-meta">${completedCount}/${proj.plan.length} 天</div>
         </div>
-        <button class="btn-del-project" title="刪除此專案">✕</button>
+        <button class="btn-del-project" title="刪除">✕</button>
       `;
 
       li.addEventListener("click", () => {
@@ -2070,7 +1695,16 @@
         showCardsDashboard();
       });
 
-      li.querySelector(".btn-del-project").addEventListener("click", (e) => handleDeleteProject(proj.id, e));
+      li.querySelector(".btn-del-project").addEventListener("click", (e) => {
+        e.stopPropagation();
+        showConfirm("刪除確認", `確定刪除「${proj.goal}」嗎？`, async () => {
+          delete state.appData.projects[proj.id];
+          const remaining = Object.keys(state.appData.projects);
+          state.appData.activeProjectId = remaining.length > 0 ? remaining[0] : null;
+          await saveProgressToDrive();
+          initAppFlow();
+        });
+      });
       projectListElem.appendChild(li);
     });
   }
@@ -2082,10 +1716,7 @@
     viewDashboard.classList.remove("hidden");
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
-    if (!currentProj) {
-      initAppFlow();
-      return;
-    }
+    if (!currentProj) return initAppFlow();
 
     viewProjectTitle.textContent = currentProj.goal;
     dayCardsGrid.innerHTML = "";
@@ -2094,15 +1725,12 @@
     const currentActiveIndex = currentProj.currentDayIndex || 0;
     let completedCount = 0;
 
-    const allProjCards = getAllProjectFlashcards(currentProj);
-    if (badgeProjectTotalVocab) {
-      badgeProjectTotalVocab.textContent = `${allProjCards.length} 字`;
-    }
+    const allCards = getAllProjectFlashcards(currentProj);
+    if (badgeProjectTotalVocab) badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
 
     currentProj.plan.forEach((title, idx) => {
       const isCompleted = history[idx]?.completed;
       if (isCompleted) completedCount++;
-
       const isCurrent = idx === currentActiveIndex;
       const isLocked = idx > currentActiveIndex && !isCompleted;
       const vocabCount = (history[idx]?.flashcards || []).length;
@@ -2112,142 +1740,57 @@
 
       card.innerHTML = `
         <div>
-          <div class="card-day-tag">Day ${idx + 1} ${isCompleted ? '✓' : ''}</div>
+          <div class="card-day-tag">DAY ${idx + 1} ${isCompleted ? '✓' : ''}</div>
           <div class="card-title">${title}</div>
-          <div style="font-size: 11.5px; color: #64748b; margin-top: 4px;">🗂️ ${vocabCount} 個單字與語塊卡</div>
+          <div style="font-size: var(--fs-sm); color: #777;">🗂️ ${vocabCount} 個語塊卡</div>
         </div>
         <div class="card-footer">
-          <span style="font-size: 12px; color: ${isLocked ? '#94a3b8' : '#64748b'};">
-            ${isCompleted ? '已熟練' : (isCurrent ? '當前單元' : (isLocked ? '尚未解鎖' : '進行中'))}
-          </span>
-          <button type="button" class="${isCompleted ? 'btn-gray' : ''}" id="btn-card-action-${idx}">
-            ${isCompleted ? '複習' : (isLocked ? '提前解鎖' : '開始學習')}
+          <span style="font-size: var(--fs-sm); color: #777;">${isCompleted ? '已熟練' : (isCurrent ? '進行中' : (isLocked ? '未解鎖' : '未完成'))}</span>
+          <button type="button" class="${isCompleted ? 'btn-nude' : 'btn-brown'}" id="btn-card-action-${idx}">
+            ${isCompleted ? '複習' : (isLocked ? '解鎖' : '開始')}
           </button>
         </div>
       `;
 
-      card.querySelector(`#btn-card-action-${idx}`).addEventListener("click", () => {
-        if (isLocked) {
-          showConfirm("解鎖單元確認", "這天為後續進度單元。建議循序漸進，確定要提前進入學習嗎？", () => {
-            startDayStudy(idx);
-          }, "btn-green");
-        } else {
-          startDayStudy(idx);
-        }
-      });
-
+      card.querySelector(`#btn-card-action-${idx}`).addEventListener("click", () => startDayStudy(idx));
       dayCardsGrid.appendChild(card);
     });
 
-    viewProjectProgress.textContent = `完成度：${completedCount} / ${currentProj.plan.length} 天 (${Math.round((completedCount/currentProj.plan.length)*100)}%)`;
+    viewProjectProgress.textContent = `進度：${completedCount} / ${currentProj.plan.length} 天`;
   }
 
-  // 精確為 Markdown 渲染後文字中的每一句獨立英文綁定單句點擊發音按鈕
   function enhanceEnglishSentencesWithSpeech(container) {
     if (!container) return;
-
-    function countEnglishWords(str) {
-      if (!str) return 0;
-      const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
-      const tokens = clean.split(/\s+/).filter(Boolean);
-      return tokens.length;
-    }
-
-    // 清洗並提取純英文字句（自動剔除「例句：」、「例：」等中文字）
-    function extractPureEnglishSentence(str) {
+    function extractPureEnglish(str) {
       if (!str) return "";
       let clean = str.replace(/<[^>]*>/g, '').trim();
       clean = clean.replace(/^[0-9]+[.)]\s*/, '');
-      clean = clean.replace(/^(?:例句|例|例\s*子|【例句】|【例】|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '');
+      clean = clean.replace(/^(?:例句|例|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '');
       clean = clean.replace(/[\u4e00-\u9fa5]/g, '').trim();
-      return cleanMarkdownForSpeech(clean).replace(/^["“]|["”]$/g, '').trim();
+      return clean.replace(/^["“]|["”]$/g, '').trim();
     }
 
-    function isEnglishSentence(str) {
-      if (!str) return false;
-      const cleanEn = extractPureEnglishSentence(str);
-      const enWords = countEnglishWords(cleanEn);
-      return enWords >= 3 && /[A-Za-z]/.test(cleanEn);
-    }
-
-    function createSpeakerBtn(textToSpeak) {
-      const spkBtn = document.createElement("button");
-      spkBtn.type = "button";
-      spkBtn.className = "inline-sentence-speaker";
-      spkBtn.textContent = "🔊";
-      spkBtn.title = "朗讀此句英文（純英發音）";
-      spkBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        speakSingleSentence(textToSpeak);
-      });
-      return spkBtn;
-    }
-
-    // 1. 針對清單項目 <li> (例如：例句：I've been so busy... going to get around to answering...)
     container.querySelectorAll("li").forEach(li => {
       if (li.querySelector(".inline-sentence-speaker")) return;
-
-      // 若有子清單，只取主層文字判定
-      let mainText = "";
-      const childUl = li.querySelector("ul, ol");
-      if (childUl) {
-        const clone = li.cloneNode(true);
-        const sub = clone.querySelector("ul, ol");
-        if (sub) sub.remove();
-        mainText = clone.textContent.trim();
-      } else {
-        mainText = li.textContent.trim();
-      }
-
-      const pureEn = extractPureEnglishSentence(mainText);
-      if (pureEn && countEnglishWords(pureEn) >= 3) {
-        const spkBtn = createSpeakerBtn(pureEn);
-        // 統一放到該行末端（若有子列表則放在子列表前，保證位於本句末尾）
-        if (childUl) {
-          childUl.before(spkBtn);
-        } else {
-          li.appendChild(spkBtn);
-        }
-      }
-    });
-
-    // 2. 針對段落 <p>
-    container.querySelectorAll("p").forEach(p => {
-      if (p.querySelector(".inline-sentence-speaker")) return;
-      if (p.closest("li")) return;
-
-      const rawText = p.textContent.trim();
-      const pureEn = extractPureEnglishSentence(rawText);
-
-      if (pureEn && countEnglishWords(pureEn) >= 3 && !rawText.startsWith("💡") && !rawText.startsWith("提示")) {
-        const spkBtn = createSpeakerBtn(pureEn);
-        p.appendChild(spkBtn);
+      const pureEn = extractPureEnglish(li.textContent);
+      if (pureEn && pureEn.split(/\s+/).length >= 3) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "inline-sentence-speaker";
+        btn.textContent = "🔊";
+        btn.title = "朗讀此句英文";
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          speakSingleSentence(pureEn);
+        });
+        li.appendChild(btn);
       }
     });
   }
 
-  window.__playSingleEn = function(text) {
-    speakSingleSentence(text);
-  };
-
   function renderMarkdownContent(targetElem, text) {
-    if (!text) {
-      targetElem.innerHTML = "";
-      return;
-    }
+    if (!text) return targetElem.innerHTML = "";
     targetElem.innerHTML = marked.parse(text);
-    if (window.renderMathInElement) {
-      window.renderMathInElement(targetElem, {
-        delimiters: [
-          { left: "$$", right: "$$", display: true },
-          { left: "$", right: "$", display: false },
-          { left: "\\(", right: "\\)", display: false },
-          { left: "[", right: "]", display: true }
-        ],
-        throwOnError: false
-      });
-    }
-
     enhanceEnglishSentencesWithSpeech(targetElem);
   }
 
@@ -2255,20 +1798,16 @@
     state.activeDayIndex = dayIdx;
     state.isQuizInProgress = false;
     btnTriggerQuiz.disabled = false;
-    btnTriggerQuiz.textContent = "📝 進行 10+1 測驗";
 
     document.body.classList.add("in-study-mode");
     closeSidebarDrawer();
 
     viewDashboard.classList.add("hidden");
-    viewEmptyCreate.classList.add("hidden");
     viewStudy.classList.remove("hidden");
-
     tabBtnLecture.click();
 
     chatBox.innerHTML = "";
     inputMessage.value = "";
-    inputMessage.rows = 1;
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const projectGoal = currentProj.goal || "英文學習";
@@ -2276,89 +1815,38 @@
     studyDayTitle.textContent = title;
     lectureDayTag.textContent = `DAY ${dayIdx + 1}`;
 
-    if (!currentProj.history) currentProj.history = {};
     if (!currentProj.history[dayIdx]) {
-      currentProj.history[dayIdx] = {
-        lessonContent: "",
-        completed: false,
-        chatHistory: [],
-        flashcards: []
-      };
-    } else {
-      if (!currentProj.history[dayIdx].chatHistory) currentProj.history[dayIdx].chatHistory = [];
-      if (!currentProj.history[dayIdx].flashcards) currentProj.history[dayIdx].flashcards = [];
+      currentProj.history[dayIdx] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
     }
 
     updateVocabBadgeCount();
-
-    const ai = getGenAIClient();
     let cachedContent = currentProj.history[dayIdx]?.lessonContent;
 
-    const currentLectureModel = getActiveLectureModel();
-
     if (!cachedContent) {
-      lectureContentBox.innerHTML = `<div style="text-align:center; padding: 40px; color: #64748b;">
-        <p style="font-weight:600; font-size:16px;">正在透過 ${getModelLabel(currentLectureModel)} 編寫豐富例句的英文講義...</p>
-        <p style="font-size:13px;">為專案【${projectGoal}】專屬打造「超大量口語跟讀例句」、「高頻語塊例句庫」與「中式思維避坑」，請稍候片刻。</p>
+      lectureContentBox.innerHTML = `<div style="text-align:center; padding: 40px; color: #666;">
+        <p style="font-size:var(--fs-body);">正在撰寫【${title}】例句與解析講義...</p>
       </div>`;
 
-      const lecturePrompt = `你是一位世界級英語應用語言學專家與口說流利度訓練名師。
-學生參與的學習專案總目標為：【${projectGoal}】。
-學生的最大學習痛點是：【口說不順、想說說不出來、單字量貧乏、例句太少無法大量模仿】。
-請針對今日核心英文主題「${title}」撰寫一份「超豐富實戰例句庫＋深度解析」的專業教學講義，給予學生最豐富的句子來進行跟讀模仿（Shadowing）。
-
-【核心導向要求】：
-講義中的所有語境例句、高頻用法、常見中式思維盲點，必須緊扣專案目標【${projectGoal}】。
-例句數量必須非常充沛，句句道地、自然、現代且適合朗讀！
-
-格式嚴格要求：
-1. 一律使用乾淨清晰的標準 Markdown 格式。
-2. 句構公式使用清晰行內標籤（例如：\`Subject + modal verb (could/would) + have + V-ed\`）。
-3. 嚴格包含以下六大核心板塊，並務必提供大量豐富例句供跟讀：
-
-# 【${title}】深度英文解析與高頻例句庫講義
-> 學習目標導向：【${projectGoal}】 ｜ 核心亮點：大量實戰句型・跟讀模仿專用
-
-## 一、 核心文法概念與直覺架構
-- 詳解本語法結構的原由、本質意義與核心公式。
-- 請使用 **Markdown 表格** 整理主詞、時態變化、助動詞或搭配詞形態對照表，並為每一種變化提供一個簡短明瞭的對照例句。
-
-## 二、 口說必備核心語塊與搭配詞（Collocations & Lexical Chunks）
-- 提供 6~8 個日常口說最常出現的高頻語塊（動詞＋介系詞搭配、成套句型）。
-- **關鍵要求**：請為這 6~8 個語塊的「每一個」都提供一句完整且超道地的口語例句（包含英文、中文翻譯與口語朗讀連音提示）。
-
-## 三、 中式英文（Chinglish）口語避坑對照專區（至少 3 組）
-- 列出 3~4 個華人最容易直譯的台式英文句子 vs. 母語者道地自然說法（Natural native phrasing）。
-- 附帶解說為什麼母語者這樣講更自然。
-
-## 四、 實戰情境超完整跟讀對話（Shadowing Practice）
-提供一段 8~10 句來回的精彩生活/職場雙人對話（Speaker A & B），完全貼合【${projectGoal}】情境：
-- 每一句附帶自然繁體中文翻譯。
-- 標註出這段對話中的朗讀重音與停頓位置，非常適合學生反覆朗讀。
-
-## 五、 實戰情境獨立模仿金句庫（6~8 句）
-提供 6~8 個貼合【${projectGoal}】的高質感金句，分類為：
-- 【日常交流隨口說】2 句
-- 【表達觀點與態度】2 句
-- 【職場/進階場合流暢應對】2~4 句
-每個句子都要有精準翻譯與用法重點，讓學生能直接背下來並在生活中套用！
-
-## 六、 一句話直覺反射口訣
-- 用一句好記的口訣或公式總結今日規則。`;
+      const lecturePrompt = `你是英語名師。學生學習目標：【${projectGoal}】。請針對核心主題「${title}」撰寫一份結構清晰、充滿實用例句的教學講義。
+包含：
+1. 核心文法概念與結構表格
+2. 5~7 個日常高頻口語搭配詞（Collocations），每個皆附英文例句與翻譯
+3. 2~3 組中式英文（Chinglish）避坑對照
+4. 實用日常跟讀對話與金句庫
+格式使用乾淨清晰的標準 Markdown。`;
 
       try {
+        const ai = getGenAIClient();
         const res = await ai.models.generateContent({
-          model: currentLectureModel,
+          model: getActiveLectureModel(),
           contents: lecturePrompt
         });
-
         cachedContent = res.text;
         currentProj.history[dayIdx].lessonContent = cachedContent;
         await saveProgressToDrive();
-
         triggerAiExtractVocab(cachedContent);
       } catch (e) {
-        lectureContentBox.innerHTML = `<p style="color: #ef4444;">教材載入失敗：${e.message}</p>`;
+        lectureContentBox.innerHTML = `<p style="color: red;">講義載入失敗：${e.message}</p>`;
         return;
       }
     }
@@ -2367,43 +1855,17 @@
     renderFlashcardsList();
 
     const savedChat = currentProj.history[dayIdx].chatHistory || [];
-    const geminiChatHistory = [];
-
     if (savedChat.length === 0) {
-      const defaultWelcome = `已載入【${title}】深度講義！您可以點擊下方「🎙️ 麥克風」開口說英文發問、點擊「🎭 啟動情境口說對話」，或切換至單字卡庫複習語塊。每句英文皆可獨立點選發音跟讀！準備好後點擊右上角「📝 進行 10+1 測驗」啟動隨堂測驗！`;
-      appendChatMessage("system", defaultWelcome, true);
+      appendChatMessage("system", `已載入【${title}】講義。點擊 🔊 即可跟讀句子，或透過麥克風與助教對話。`, true);
     } else {
-      savedChat.forEach(msg => {
-        appendChatMessage(msg.type, msg.content, false);
-        if (msg.type === "user") {
-          geminiChatHistory.push({ role: "user", parts: [{ text: msg.content }] });
-        } else if (msg.type === "bot") {
-          geminiChatHistory.push({ role: "model", parts: [{ text: msg.content }] });
-        }
-      });
+      savedChat.forEach(msg => appendChatMessage(msg.type, msg.content, false));
     }
 
-    const currentChatModel = getActiveChatModel();
+    const ai = getGenAIClient();
     state.chatInstance = ai.chats.create({
-      model: currentChatModel,
-      history: geminiChatHistory,
+      model: getActiveChatModel(),
       config: {
-        systemInstruction: `你是親切、專業、富有耐心且精通口說流利度訓練的外籍英文名師助教。
-學生目前的學習目標為：【${projectGoal}】。學生最大痛點是「開口不順暢、單字量少、例句不足難以模仿」。
-學生正在研讀今日單元「${title}」，今日教材內容如下：
-
-${cachedContent}
-
-【核心職責與指導規範】：
-1. 口說與對話陪伴：
-   - 當學生輸入英文（尤其是語音輸入）時，請特別讚美學生的開口勇氣。
-   - **關鍵要求**：每一次回覆或修正時，請務必將英文替換例句加上雙引號（例如 "The project timelines varied..."），提供「2~3 個可供模仿的道地口語替換例句（Imitation Sentences）」，標註「常用場合」讓學生可以反覆點選單句發音跟讀模仿。
-2. 情境 Roleplay 模式：
-   - 扮演對話夥伴，每次拋出 1~2 句話並給予適度追問，引導學生連續開口。
-3. 測驗批改與詳解：
-   - 逐題明確標示【正解】或【訂正】。
-   - 答錯或模稜兩可的題目，務必額外附贈一個相同文法結構的「生活實用例句」以加深印象。
-4. 口氣親切鼓勵、條理清晰，引導學生大聲開口朗讀！`
+        systemInstruction: `你是親切的英文助教。學生目標【${projectGoal}】，今日主題「${title}」。請提供簡潔道地的指引、替換例句與測驗批改。`
       }
     });
   }
@@ -2414,80 +1876,37 @@ ${cachedContent}
 
     appendChatMessage("user", text, true);
     inputMessage.value = "";
-    inputMessage.rows = 1;
 
-    if (state.isQuizInProgress) {
-      state.isQuizInProgress = false;
-      btnTriggerQuiz.disabled = false;
-      btnTriggerQuiz.textContent = "📝 重新測驗";
-    }
-
-    const typingId = "typing-" + Date.now();
     const typingDiv = document.createElement("div");
     typingDiv.className = "msg msg-bot";
-    typingDiv.id = typingId;
     typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
     chatBox.appendChild(typingDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    const detailLevel = state.appData.settings?.detailLevel || 2;
-    let detailConstraint = "";
-    if (detailLevel === 1) {
-      detailConstraint = "\n\n【回答風格限制：簡答模式】請直截了當回答，若有更道地口語說法請將英文句子加上雙引號。";
-    } else if (detailLevel === 3) {
-      detailConstraint = "\n\n【回答風格限制：詳盡模式】請給予深入文法剖析、母語者口語語感、高頻語塊搭配詞與 2 個口說實例（英文例句請使用雙引號包覆）。";
-    } else {
-      detailConstraint = "\n\n【回答風格限制：適中模式】請以條理清晰、重點突出的方式回答，英文例句請使用雙引號包覆。";
-    }
-
     try {
-      const res = await state.chatInstance.sendMessage({ message: text + detailConstraint });
-      document.getElementById(typingId)?.remove();
+      const res = await state.chatInstance.sendMessage({ message: text });
+      typingDiv.remove();
       appendChatMessage("bot", res.text, true);
     } catch (err) {
-      document.getElementById(typingId)?.remove();
-      appendChatMessage("system", "回覆取得失敗：" + err.message, true);
+      typingDiv.remove();
+      appendChatMessage("system", "回覆取得失敗", true);
     }
   }
 
   async function handleStartRoleplay() {
     if (!state.chatInstance) return;
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const projectGoal = currentProj.goal || "英文學習";
-    const title = currentProj.plan[state.activeDayIndex];
-
-    const roleplayPrompt = `【系統指令：啟動今日口說情境 Roleplay 模擬】
-請根據今日文法「${title}」與主題「${projectGoal}」，為學生設計一個非常真實的生活或職場對話情境。
-要求：
-1. 說明情境角色設定（例如：我是外籍店員/主管/外國朋友，你是顧客/同事）。
-2. 用親切自然的英文開場說第一句（英文請加上雙引號包覆，不要太長，1~2 句）。
-3. 提示學生可以用麥克風語音輸入回答，或參考給予的句型鷹架作答。
-4. 在學生每次回答後，給予一句【道地口語升級指引】，然後繼續推進對話。`;
-
-    appendChatMessage("system", "🎭 已啟動今日情境口說對話（Roleplay）！請使用麥克風開口說話回應助教！", true);
-    try {
-      const res = await state.chatInstance.sendMessage({ message: roleplayPrompt });
-      appendChatMessage("bot", res.text, true);
-    } catch (err) {
-      appendChatMessage("system", "情境對話啟動失敗：" + err.message, true);
-    }
+    const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+    appendChatMessage("system", "啟動口說情境模擬，請使用麥克風開口回應！", true);
+    const res = await state.chatInstance.sendMessage({ message: `啟動「${title}」的口說 Roleplay 對話，拋出第一句情境對話（1~2 句）。` });
+    appendChatMessage("bot", res.text, true);
   }
 
   async function handleStartOralReflexDrill() {
     if (!state.chatInstance) return;
     const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
-
-    const drillPrompt = `【系統指令：啟動口語直覺反射快問快答（Oral Reflex Drill）】
-請針對今日英文主題「${title}」，給予學生 3 道「中文情境句」，要求學生不假思索在 5 秒內大聲開口說出對應的道地英文。
-請一次先給出第 1 題，並提示學生點擊麥克風用語音回答！待學生回答後，給予即時語音辨識反饋並進入下一題。`;
-
-    appendChatMessage("system", "⚡ 啟動口語直覺反射訓練！請看到情境後直接用語音麥克風唸出英文！", true);
-    try {
-      const res = await state.chatInstance.sendMessage({ message: drillPrompt });
-      appendChatMessage("bot", res.text, true);
-    } catch (err) {
-      appendChatMessage("system", "訓練啟動失敗：" + err.message, true);
-    }
+    appendChatMessage("system", "啟動直覺反射造句訓練！請直接用語音回答！", true);
+    const res = await state.chatInstance.sendMessage({ message: `針對「${title}」，給出 1 道中文情境句，讓學生在 5 秒內大聲開口說出對應英文。` });
+    appendChatMessage("bot", res.text, true);
   }
 
   function appendChatMessage(type, content, shouldPersist = true) {
@@ -2499,33 +1918,14 @@ ${cachedContent}
       renderMarkdownContent(div, content);
       if (type === "bot") {
         const btnRow = document.createElement("div");
-        btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center;";
-
-        const noteText = document.createElement("span");
-        noteText.style.cssText = "font-size: 11px; color: #64748b; margin-right: 4px;";
-        noteText.textContent = "💡 提示：點擊上方任一句英文或 🔊 即可單句發音";
-
-        const enOnlyBtn = document.createElement("button");
-        enOnlyBtn.textContent = "🔊 朗讀整段所有英文";
-        enOnlyBtn.className = "btn-outline";
-        enOnlyBtn.style.cssText = "font-size: 11px; padding: 2px 8px; display: inline-flex;";
-        enOnlyBtn.title = "朗讀整個回覆中的所有英文句子";
-        enOnlyBtn.addEventListener("click", () => {
-          speakEnglishOnly(content);
-        });
-
-        const bilingualBtn = document.createElement("button");
-        bilingualBtn.textContent = "🗣️ 智慧雙語朗讀全文";
-        bilingualBtn.className = "btn-outline";
-        bilingualBtn.style.cssText = "font-size: 11px; padding: 2px 8px; display: inline-flex;";
-        bilingualBtn.title = "中英文各自以原生母語發音流暢朗讀全文";
-        bilingualBtn.addEventListener("click", () => {
-          speakSmart(content);
-        });
-
-        btnRow.appendChild(noteText);
-        btnRow.appendChild(enOnlyBtn);
-        btnRow.appendChild(bilingualBtn);
+        btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 6px;";
+        const enBtn = document.createElement("button");
+        enBtn.textContent = "🔊 朗讀英文";
+        enBtn.className = "btn-outline";
+        enBtn.style.padding = "2px 8px";
+        enBtn.style.fontSize = "var(--fs-sm)";
+        enBtn.addEventListener("click", () => speakSingleSentence(content));
+        btnRow.appendChild(enBtn);
         div.appendChild(btnRow);
       }
     }
@@ -2533,12 +1933,10 @@ ${cachedContent}
     chatBox.scrollTop = chatBox.scrollHeight;
 
     if (shouldPersist && state.activeDayIndex !== null) {
-      const currentProj = state.appData.projects[state.appData.activeProjectId];
-      if (currentProj && currentProj.history && currentProj.history[state.activeDayIndex]) {
-        if (!currentProj.history[state.activeDayIndex].chatHistory) {
-          currentProj.history[state.activeDayIndex].chatHistory = [];
-        }
-        currentProj.history[state.activeDayIndex].chatHistory.push({ type, content });
+      const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
+      if (hist) {
+        if (!hist.chatHistory) hist.chatHistory = [];
+        hist.chatHistory.push({ type, content });
         saveProgressToDrive();
       }
     }
@@ -2546,76 +1944,17 @@ ${cachedContent}
 
   async function handleStartInChatQuiz() {
     if (!state.chatInstance || state.isQuizInProgress) return;
-
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const projectGoal = currentProj.goal || "英文學習";
-    const title = currentProj.plan[state.activeDayIndex];
-
+    const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
     btnTriggerQuiz.disabled = true;
-    btnTriggerQuiz.textContent = "⏳ 出題中...";
-
-    const typingId = "typing-" + Date.now();
-    const typingDiv = document.createElement("div");
-    typingDiv.className = "msg msg-bot";
-    typingDiv.id = typingId;
-    typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
-    chatBox.appendChild(typingDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    const quizCommandPrompt = `【系統指令：請直接在此為學生出題，共嚴格要求 10 題 + 1 題 Bonus 困難題】
-請針對今日英文主題「${title}」（學習主題：${projectGoal}）出題。
-
-題型配置要求（共 11 題）：
-- 題 1 ~ 題 3：【英文語法選擇題】（4 選 1，考驗核心動詞時態、助動詞、接續或主被動）。
-- 題 4 ~ 題 6：【介系詞與口語語塊填空題】（提供英文情境句，在 ( ) 處挖空，要求填入適當介系詞或動詞正確搭配）。
-- 題 7 ~ 題 8：【重組與語塊構句題】（給予 4 個英文語塊，請學生排列成自然流暢的口語句子）。
-- 題 9 ~ 題 10：【中式英文病句糾錯 / 實戰中翻英】（針對【${projectGoal}】常見錯誤進行挑錯或改寫為道地英語）。
-- 題 11：【🔥 Bonus 困難挑戰題】（設計深度語感辨析題，如細微詞義區分、倒裝句、虛擬語氣等高階陷阱題，標為 Bonus 題）。
-
-排版要求：
-1. 嚴格按 1. 到 10. 與 Bonus. 依序列出，題目生動實用。
-2. 結尾親切提示學生：「已在下方輸入框預填好題號，填寫後點擊【發送】即可獲得完整批改！」。
-3. 嚴禁在這次回覆中給予答案或解析！`;
 
     try {
-      const res = await state.chatInstance.sendMessage({ message: quizCommandPrompt });
-      document.getElementById(typingId)?.remove();
+      const res = await state.chatInstance.sendMessage({ message: `請針對「${title}」出 10 題文法與語塊測驗 + 1 題 Bonus 困難題。先列題目，不給答案。` });
       appendChatMessage("bot", res.text, true);
-
-      inputMessage.rows = 11;
-      inputMessage.value = 
-`1. 
-2. 
-3. 
-4. 
-5. 
-6. 
-7. 
-8. 
-9. 
-10. 
-Bonus. `;
-      inputMessage.focus();
-      inputMessage.setSelectionRange(3, 3);
-
+      inputMessage.rows = 6;
+      inputMessage.value = "1. \n2. \n3. \n4. \n5. \n";
       state.isQuizInProgress = true;
-      btnTriggerQuiz.disabled = true;
-      btnTriggerQuiz.textContent = "📝 測驗作答中...";
-
-      if (currentProj.history[state.activeDayIndex]) {
-        currentProj.history[state.activeDayIndex].completed = true;
-        if (state.activeDayIndex === currentProj.currentDayIndex && currentProj.currentDayIndex + 1 < currentProj.plan.length) {
-          currentProj.currentDayIndex += 1;
-        }
-        await saveProgressToDrive();
-        renderSidebar();
-      }
-    } catch (err) {
-      document.getElementById(typingId)?.remove();
-      appendChatMessage("system", "測驗出題失敗：" + err.message, true);
+    } catch (e) {
       btnTriggerQuiz.disabled = false;
-      btnTriggerQuiz.textContent = "📝 進行 10+1 測驗";
-      state.isQuizInProgress = false;
     }
   }
 
@@ -2623,109 +1962,39 @@ Bonus. `;
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
     vocabCountBadge.textContent = cards.length;
-
-    const allCards = getAllProjectFlashcards(currentProj);
-    if (badgeProjectTotalVocab) {
-      badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
-    }
   }
 
   function getAllProjectFlashcards(proj) {
     if (!proj || !proj.history) return [];
     const list = [];
-    const seen = new Set();
-    Object.keys(proj.history).sort((a, b) => parseInt(a) - parseInt(b)).forEach(dayKey => {
-      const dayHistory = proj.history[dayKey];
-      const dayNum = parseInt(dayKey, 10) + 1;
-      (dayHistory.flashcards || []).forEach(card => {
-        const uniqueKey = card.id || card.word.toLowerCase();
-        if (!seen.has(uniqueKey)) {
-          seen.add(uniqueKey);
-          list.push({ ...card, _originDay: dayNum, _ref: card });
-        }
-      });
+    Object.keys(proj.history).forEach(dayKey => {
+      (proj.history[dayKey].flashcards || []).forEach(card => list.push(card));
     });
     return list;
-  }
-
-  function shuffleArray(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
   }
 
   if (btnProjectFlashcardDraw) {
     btnProjectFlashcardDraw.addEventListener("click", () => {
       const currentProj = state.appData.projects[state.appData.activeProjectId];
       const allCards = getAllProjectFlashcards(currentProj);
-      if (allCards.length === 0) {
-        showToast("目前本計畫尚未累積任何單字卡！請進入每日單元讓 AI 提煉或手動新增單字！", "info");
-        return;
-      }
-      activePlayerDeck = shuffleArray(allCards);
+      if (allCards.length === 0) return showToast("目前尚無單字卡", "info");
+      activePlayerDeck = [...allCards].sort(() => Math.random() - 0.5);
       playerMode = "project_all";
       state.currentStudyIndex = 0;
       openPlayerModal();
-      showToast(`🎯 已隨機抽取本計畫 ${allCards.length} 個累積單字，開始抽卡複習！`, "success");
     });
   }
 
   btnAiGenVocab.addEventListener("click", () => {
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const content = currentProj?.history?.[state.activeDayIndex]?.lessonContent;
-    if (!content) {
-      showToast("尚未生成講義，請先稍後講義加載完畢", "error");
-      return;
-    }
-    triggerAiExtractVocab(content);
+    const content = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.lessonContent;
+    if (content) triggerAiExtractVocab(content);
   });
 
   async function triggerAiExtractVocab(lessonContent) {
     btnAiGenVocab.disabled = true;
-    btnAiGenVocab.textContent = "✨ AI 提煉單字與多重跟讀例句中...";
-
     try {
       const ai = getGenAIClient();
-      const prompt = `你是一位英文二語習得（SLA）與詞彙學專家。請從以下這份英文教學講義中，精選出 6~10 個最關鍵的核心單字或片語（Idioms/Phrasal Verbs）。
-特別要求：
-1. 務必為每個單字附上 2 個口說中最常出現的「高頻搭配詞/語塊（Collocations）」。
-2. 【最重要要求】：每個單字務必提供 **2 個截然不同場合的高質量實用例句**，讓學生有充沛的句子做跟讀與模仿（Shadowing）：
-   - 例句 1 (example)：日常口語/隨性社交場景
-   - 例句 2 (example2)：職場/正式溝通/深化情境
-3. 每個例句都必須附帶道地通順的中文翻譯 (example_zh, example2_zh)。
-
-講義內容：
-${lessonContent}
-
-請嚴格輸出純 JSON 陣列格式，陣列每個物件包含以下欄位：
-- "word": 單字或片語 (String)
-- "phonetic": 國際音標 (String，例如 "/ɪnˈhæns/")
-- "pos": 詞性 (String，例如 "v." 或 "phr.")
-- "collocations": 高頻口語語塊搭配 (String，例如 "enhance one's skills / enhance the quality")
-- "meaning": 精確道地的中文釋義 (String)
-- "example": 日常情境例句 1 (String)
-- "example_zh": 例句 1 中文翻譯 (String)
-- "example2": 進階實戰例句 2 (String)
-- "example2_zh": 例句 2 中文翻譯 (String)
-
-範例格式：
-[
-  { 
-    "word": "procrastinate", 
-    "phonetic": "/prəˈkræstɪneɪt/", 
-    "pos": "v.", 
-    "collocations": "procrastinate on / stop procrastinating", 
-    "meaning": "拖延、耽擱", 
-    "example": "Don't procrastinate on packing your luggage.",
-    "example_zh": "別拖到最後一刻才收拾行李。",
-    "example2": "He tends to procrastinate whenever he faces a difficult task.",
-    "example2_zh": "每當面對艱鉅的任務，他往往習慣拖延逃避。"
-  }
-]`;
-
+      const prompt = `從以下英文講義提取 6~8 個關鍵單字或語塊。輸出 JSON 陣列，欄位包含 word, phonetic, pos, collocations, meaning, example, example_zh, example2, example2_zh。\n\n${lessonContent}`;
       const res = await ai.models.generateContent({
         model: getActiveLectureModel(),
         contents: prompt,
@@ -2733,120 +2002,83 @@ ${lessonContent}
       });
 
       const extracted = JSON.parse(res.text.trim());
-      const currentProj = state.appData.projects[state.appData.activeProjectId];
-      if (!currentProj.history[state.activeDayIndex].flashcards) {
-        currentProj.history[state.activeDayIndex].flashcards = [];
-      }
-
-      const existingCards = currentProj.history[state.activeDayIndex].flashcards;
-      const existingWords = new Set(existingCards.map(c => c.word.toLowerCase()));
-
+      const existingCards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
       extracted.forEach(item => {
-        if (!existingWords.has(item.word.toLowerCase())) {
-          existingCards.push({
-            id: "card_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
-            word: item.word,
-            phonetic: item.phonetic || "",
-            pos: item.pos || "",
-            collocations: item.collocations || "",
-            meaning: item.meaning,
-            example: item.example || "",
-            example_zh: item.example_zh || "",
-            example2: item.example2 || "",
-            example2_zh: item.example2_zh || "",
-            status: 0
-          });
-        }
+        existingCards.push({
+          id: "card_" + Date.now() + Math.random(),
+          word: item.word,
+          phonetic: item.phonetic || "",
+          pos: item.pos || "",
+          collocations: item.collocations || "",
+          meaning: item.meaning,
+          example: item.example || "",
+          example_zh: item.example_zh || "",
+          example2: item.example2 || "",
+          example2_zh: item.example2_zh || "",
+          status: 0
+        });
       });
 
       await saveProgressToDrive();
       updateVocabBadgeCount();
       renderFlashcardsList();
-      showToast(`已成功提煉 ${extracted.length} 個英文單字與雙重模仿例句！`, "success");
+      showToast(`已提取 ${extracted.length} 個單字卡`, "success");
     } catch (e) {
-      console.error(e);
-      showToast("單字提取失敗：" + e.message, "error");
+      showToast("單字提取失敗", "error");
     } finally {
       btnAiGenVocab.disabled = false;
-      btnAiGenVocab.textContent = "✨ AI 自動自講義提取高頻單字與口語搭配詞";
     }
   }
 
   function renderFlashcardsList() {
     flashcardsContainer.innerHTML = "";
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+    const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
 
     if (cards.length === 0) {
-      flashcardsContainer.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #fff; border-radius: 8px; border: 1px dashed #cbd5e1;">
-          <p style="color: #64748b; font-size: 14px; margin-bottom: 12px;">目前這天還沒有單字卡喔！</p>
-          <button onclick="document.getElementById('btn-ai-gen-vocab').click()" class="btn-purple" style="font-size: 13px;">點此讓 AI 一鍵自課文提煉核心單字與搭配詞</button>
-        </div>`;
+      flashcardsContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #777;">目前尚無單字卡，請點擊上方 AI 提煉。</div>`;
       return;
     }
 
     cards.forEach((card, index) => {
       const cardDiv = document.createElement("div");
       cardDiv.className = "flip-card";
-
-      const statusLabels = { 0: "生疏", 1: "模糊", 2: "熟練" };
-      const statusClass = `fc-status-${card.status || 0}`;
-
       cardDiv.innerHTML = `
         <div class="flip-card-inner">
           <div class="flip-card-front">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <span class="fc-status-badge ${statusClass}">${statusLabels[card.status || 0]}</span>
-              <button class="btn-speak-item" title="聆聽單字發音" style="background: transparent; color: #2563eb; padding: 2px 6px; font-size: 15px;">🔊</button>
+              <span class="fc-status-badge fc-status-${card.status || 0}">${['生疏', '模糊', '熟練'][card.status || 0]}</span>
+              <button class="btn-speak-item btn-nude" style="padding: 2px 6px;">🔊</button>
             </div>
             <div>
               <div class="fc-word">${card.word}</div>
               <div class="fc-phonetic">${card.phonetic}</div>
               <span class="fc-pos">${card.pos}</span>
-              ${card.collocations ? `<div class="fc-chunks">🔗 ${card.collocations}</div>` : ''}
+              ${card.collocations ? `<div class="fc-chunks">${card.collocations}</div>` : ''}
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8;">
-              <span>點擊翻轉看 2 組模仿例句 ↺</span>
-              <button class="btn-del-card" title="刪除此卡" style="background: transparent; color: #cbd5e1; font-size: 14px; padding: 2px;">✕</button>
+            <div style="display: flex; justify-content: space-between; font-size: var(--fs-sm); color: #888;">
+              <span>翻轉看例句 ↺</span>
+              <button class="btn-del-card" style="background:transparent; color:#999; padding:0;">✕</button>
             </div>
           </div>
           <div class="flip-card-back">
             <div>
               <div class="fc-meaning">${card.meaning}</div>
-              
               <div class="fc-example-box">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span class="ex-en">🗣️ ${card.example || "No example"}</span>
-                  ${card.example ? `<button type="button" class="inline-sentence-speaker" data-en="${encodeURIComponent(card.example)}" title="朗讀此例句">🔊</button>` : ''}
-                </div>
-                ${card.example_zh ? `<div class="ex-zh">${card.example_zh}</div>` : ''}
+                <div class="ex-en">${card.example}</div>
+                <div class="ex-zh">${card.example_zh}</div>
               </div>
-
-              ${card.example2 ? `
-              <div class="fc-example-box" style="margin-top: 4px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span class="ex-en">💼 ${card.example2}</span>
-                  <button type="button" class="inline-sentence-speaker" data-en="${encodeURIComponent(card.example2)}" title="朗讀此例句">🔊</button>
-                </div>
-                ${card.example2_zh ? `<div class="ex-zh">${card.example2_zh}</div>` : ''}
-              </div>` : ''}
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
-              <span style="font-size: 11px; color: #64748b;">熟練度:</span>
-              <div style="display: flex; gap: 4px;">
-                <button class="btn-mark-status" data-status="0" style="padding: 2px 6px; font-size: 11px; background: #fee2e2; color: #b91c1c;">生</button>
-                <button class="btn-mark-status" data-status="1" style="padding: 2px 6px; font-size: 11px; background: #fef3c7; color: #92400e;">半</button>
-                <button class="btn-mark-status" data-status="2" style="padding: 2px 6px; font-size: 11px; background: #dcfce7; color: #15803d;">熟</button>
-              </div>
+            <div style="display: flex; justify-content: flex-end; gap: 4px; margin-top: auto;">
+              <button class="btn-mark-status btn-nude" data-status="0" style="padding: 2px 6px;">生</button>
+              <button class="btn-mark-status btn-nude" data-status="1" style="padding: 2px 6px;">半</button>
+              <button class="btn-mark-status btn-brown" data-status="2" style="padding: 2px 6px;">熟</button>
             </div>
           </div>
         </div>
       `;
 
       cardDiv.addEventListener("click", (e) => {
-        if (e.target.closest("button")) return;
-        cardDiv.classList.toggle("flipped");
+        if (!e.target.closest("button")) cardDiv.classList.toggle("flipped");
       });
 
       cardDiv.querySelector(".btn-speak-item").addEventListener("click", (e) => {
@@ -2854,29 +2086,18 @@ ${lessonContent}
         speakEnglish(card.word);
       });
 
-      cardDiv.querySelectorAll(".inline-sentence-speaker").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const en = decodeURIComponent(btn.dataset.en || "");
-          speakSingleSentence(en);
-        });
-      });
-
       cardDiv.querySelector(".btn-del-card").addEventListener("click", (e) => {
         e.stopPropagation();
-        showConfirm("刪除單字卡", `確定要刪除單字「${card.word}」嗎？`, () => {
-          cards.splice(index, 1);
-          saveProgressToDrive();
-          updateVocabBadgeCount();
-          renderFlashcardsList();
-        });
+        cards.splice(index, 1);
+        saveProgressToDrive();
+        updateVocabBadgeCount();
+        renderFlashcardsList();
       });
 
       cardDiv.querySelectorAll(".btn-mark-status").forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
-          const newStatus = parseInt(btn.dataset.status, 10);
-          card.status = newStatus;
+          card.status = parseInt(btn.dataset.status, 10);
           saveProgressToDrive();
           renderFlashcardsList();
         });
@@ -2888,227 +2109,69 @@ ${lessonContent}
 
   btnAddCustomVocab.addEventListener("click", () => {
     inputNewWord.value = "";
-    inputNewPhonetic.value = "";
-    inputNewPos.value = "";
-    inputNewCollocations.value = "";
     inputNewMeaning.value = "";
-    inputNewExample.value = "";
-    inputNewExampleZh.value = "";
-    inputNewExample2.value = "";
-    inputNewExample2Zh.value = "";
     modalAddVocab.classList.remove("hidden");
-    inputNewWord.focus();
   });
 
   btnCancelAddVocab.addEventListener("click", () => modalAddVocab.classList.add("hidden"));
 
-  async function fetchVocabDetailsFromAi(wordToLookup) {
-    const ai = getGenAIClient();
-    const prompt = `你是一位精通英語詞彙學與二語口語習得的專家。請為英文單字或片語「${wordToLookup}」生成完整的學習卡資訊。
-要求：
-1. phonetic: 國際音標 (IPA)，如 "/prəˈkræstɪneɪt/"。
-2. pos: 詞性簡寫，如 "v.", "phr. v.", "adj.", "n." 等。
-3. collocations: 2~3 個口說高頻搭配語塊，用斜線分開（如 "tend to procrastinate / procrastinate on sth"）。
-4. meaning: 精確道地的繁體中文釋義。
-5. example: 日常生活或口語對話中的常用英文例句。
-6. example_zh: 例句 1 的繁體中文翻譯。
-7. example2: 職場、商務或進階口說場合的英文例句。
-8. example2_zh: 例句 2 的繁體中文翻譯。
-
-請嚴格輸出純 JSON 物件格式（無 markdown 圍欄）：
-{
-  "phonetic": "...",
-  "pos": "...",
-  "collocations": "...",
-  "meaning": "...",
-  "example": "...",
-  "example_zh": "...",
-  "example2": "...",
-  "example2_zh": "..."
-}`;
-
-    const res = await ai.models.generateContent({
-      model: getActiveLectureModel(),
-      contents: prompt,
-      config: { responseMimeType: "application/json" }
-    });
-
-    return JSON.parse(res.text.trim());
-  }
-
-  btnAiFillSingleVocab.addEventListener("click", async () => {
-    const word = inputNewWord.value.trim();
-    if (!word) {
-      showToast("請先在上方輸入框填寫英文單字或片語！", "error");
-      inputNewWord.focus();
-      return;
-    }
-
-    if (!state.geminiKey) {
-      showToast("尚未設定 Gemini API Key，請先於設定中配置！", "error");
-      return;
-    }
-
-    const origText = btnAiFillSingleVocab.textContent;
-    btnAiFillSingleVocab.disabled = true;
-    btnAiFillSingleVocab.textContent = "⏳ AI 查詢中...";
-
-    try {
-      const data = await fetchVocabDetailsFromAi(word);
-
-      inputNewPhonetic.value = data.phonetic || "";
-      inputNewPos.value = data.pos || "";
-      inputNewCollocations.value = data.collocations || "";
-      inputNewMeaning.value = data.meaning || "";
-      inputNewExample.value = data.example || "";
-      inputNewExampleZh.value = data.example_zh || "";
-      inputNewExample2.value = data.example2 || "";
-      inputNewExample2Zh.value = data.example2_zh || "";
-
-      showToast(`✨ 已成功補全「${word}」的音標、語塊與 2 組情境例句！`, "success");
-    } catch (err) {
-      console.error(err);
-      showToast("AI 補全失敗：" + err.message, "error");
-    } finally {
-      btnAiFillSingleVocab.disabled = false;
-      btnAiFillSingleVocab.textContent = origText;
-    }
-  });
-
   btnConfirmAddVocab.addEventListener("click", async () => {
     const word = inputNewWord.value.trim();
-    if (!word) {
-      showToast("請輸入英文單字或片語", "error");
-      inputNewWord.focus();
-      return;
-    }
-
-    let meaning = inputNewMeaning.value.trim();
-    let phonetic = inputNewPhonetic.value.trim();
-    let pos = inputNewPos.value.trim();
-    let collocations = inputNewCollocations.value.trim();
-    let example = inputNewExample.value.trim();
-    let exampleZh = inputNewExampleZh.value.trim();
-    let example2 = inputNewExample2.value.trim();
-    let example2Zh = inputNewExample2Zh.value.trim();
-
-    if (!meaning) {
-      const origText = btnConfirmAddVocab.textContent;
-      btnConfirmAddVocab.disabled = true;
-      btnConfirmAddVocab.textContent = "⏳ AI 自動生成卡片資料中...";
-
-      try {
-        const data = await fetchVocabDetailsFromAi(word);
-        phonetic = data.phonetic || "";
-        pos = data.pos || "";
-        collocations = data.collocations || "";
-        meaning = data.meaning || "常見單字";
-        example = data.example || `Let's practice the word "${word}".`;
-        exampleZh = data.example_zh || "";
-        example2 = data.example2 || "";
-        example2Zh = data.example2_zh || "";
-      } catch (err) {
-        console.warn("Auto-fill fallback:", err);
-        meaning = meaning || "自訂字詞";
-      } finally {
-        btnConfirmAddVocab.disabled = false;
-        btnConfirmAddVocab.textContent = origText;
-      }
-    }
-
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    if (!currentProj.history[state.activeDayIndex].flashcards) {
-      currentProj.history[state.activeDayIndex].flashcards = [];
-    }
-
-    currentProj.history[state.activeDayIndex].flashcards.push({
+    if (!word) return;
+    const cards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
+    cards.push({
       id: "card_" + Date.now(),
       word: word,
-      phonetic: phonetic,
-      pos: pos,
-      collocations: collocations,
-      meaning: meaning,
-      example: example || `Remember to practice "${word}".`,
-      example_zh: exampleZh,
-      example2: example2,
-      example2_zh: example2Zh,
+      phonetic: inputNewPhonetic.value.trim(),
+      pos: inputNewPos.value.trim(),
+      collocations: inputNewCollocations.value.trim(),
+      meaning: inputNewMeaning.value.trim() || "自訂字詞",
+      example: inputNewExample.value.trim(),
+      example_zh: inputNewExampleZh.value.trim(),
+      example2: inputNewExample2.value.trim(),
+      example2_zh: inputNewExample2Zh.value.trim(),
       status: 0
     });
-
     await saveProgressToDrive();
     updateVocabBadgeCount();
     renderFlashcardsList();
     modalAddVocab.classList.add("hidden");
-    showToast(`單字「${word}」已成功新增！`, "success");
   });
 
   btnStartFlashcardMode.addEventListener("click", () => {
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
-    if (cards.length === 0) {
-      showToast("目前尚無單字卡，請先點擊提煉或新增單字卡！", "info");
-      return;
-    }
-    activePlayerDeck = cards.map(c => ({ ...c, _ref: c }));
+    const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
+    if (cards.length === 0) return showToast("目前尚無單字卡", "info");
+    activePlayerDeck = [...cards];
     playerMode = "day";
     state.currentStudyIndex = 0;
     openPlayerModal();
   });
 
-  btnPlayerSpeakEx1.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = activePlayerDeck[state.currentStudyIndex];
-    if (card && card.example) speakSingleSentence(card.example, 0.8);
-  });
-
-  btnPlayerSpeakEx2.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = activePlayerDeck[state.currentStudyIndex];
-    if (card && card.example2) speakSingleSentence(card.example2, state.speechRate);
-  });
-
-  btnPlayerSpeakAllEx.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = activePlayerDeck[state.currentStudyIndex];
-    if (!card) return;
-    let full = card.example || "";
-    if (card.example2) full += ". " + card.example2;
-    if (full) speakEnglishOnly(full, state.speechRate);
-  });
-
   function renderPlayerCard() {
     playerCardBox.classList.remove("flipped");
-
     if (state.currentStudyIndex >= activePlayerDeck.length) {
-      const congratsMsg = playerMode === "project_all" 
-        ? "🎉 太棒了！您已完成本計畫所有累積單字的抽卡總複習！" 
-        : "🎉 太棒了！您已完成今日所有單字與語塊卡複習！";
-      showToast(congratsMsg, "success");
+      showToast("🎉 已完成所有單字卡複習！", "success");
       modalFlashcardPlayer.classList.add("hidden");
       renderFlashcardsList();
       return;
     }
 
     const card = activePlayerDeck[state.currentStudyIndex];
-    const originTag = (playerMode === "project_all" && card._originDay) ? ` (Day ${card._originDay})` : "";
-    const modePrefix = playerMode === "project_all" ? "🎯 全計畫抽卡" : "單元卡片";
-    fcPlayerProgress.textContent = `${modePrefix} ${state.currentStudyIndex + 1} / ${activePlayerDeck.length}${originTag}`;
-    
+    fcPlayerProgress.textContent = `卡片 ${state.currentStudyIndex + 1} / ${activePlayerDeck.length}`;
     playerFrontWord.textContent = card.word;
     playerFrontPhonetic.textContent = card.phonetic || "";
-    playerFrontPos.textContent = card.pos || "word";
-    playerFrontCollocations.textContent = card.collocations ? `🔗 高頻搭配語塊：${card.collocations}` : "💡 試著大聲將這個單字唸出三次！";
+    playerFrontPos.textContent = card.pos || "";
+    playerFrontCollocations.textContent = card.collocations || "常讀常記，形成自然語感";
     playerBackMeaning.textContent = card.meaning;
-    playerBackCollocations.textContent = card.collocations ? `口語語塊：${card.collocations}` : "";
-    
-    playerEx1En.textContent = card.example || "No example provided.";
-    playerEx1Zh.textContent = card.example_zh || "";
-    
+    playerBackCollocations.textContent = card.collocations ? `語塊：${card.collocations}` : "";
+    playerEx1En.textContent = card.example || "-";
+    playerEx1Zh.textContent = card.example_zh || "-";
+
     const box2 = document.getElementById("player-box-ex2");
     if (card.example2) {
       box2.style.display = "block";
       playerEx2En.textContent = card.example2;
-      playerEx2Zh.textContent = card.example2_zh || "";
+      playerEx2Zh.textContent = card.example2_zh || "-";
     } else {
       box2.style.display = "none";
     }
@@ -3119,13 +2182,13 @@ ${lessonContent}
     renderPlayerCard();
   }
 
-  btnCloseFcPlayer.addEventListener("click", () => {
-    modalFlashcardPlayer.classList.add("hidden");
-    renderFlashcardsList();
-  });
+  btnCloseFcPlayer.addEventListener("click", () => modalFlashcardPlayer.classList.add("hidden"));
+  playerCardBox.addEventListener("click", () => playerCardBox.classList.toggle("flipped"));
 
-  playerCardBox.addEventListener("click", () => {
-    playerCardBox.classList.toggle("flipped");
+  btnPlayerSpeakFront.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const card = activePlayerDeck[state.currentStudyIndex];
+    if (card) speakEnglish(card.word);
   });
 
   btnPlayerSpeakSlow.addEventListener("click", (e) => {
@@ -3134,18 +2197,9 @@ ${lessonContent}
     if (card) speakEnglish(card.word, 0.75);
   });
 
-  btnPlayerSpeakFront.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = activePlayerDeck[state.currentStudyIndex];
-    if (card) speakEnglish(card.word, 1.0);
-  });
-
   function advancePlayerCard(status) {
     const card = activePlayerDeck[state.currentStudyIndex];
     if (card) {
-      if (card._ref) {
-        card._ref.status = status;
-      }
       card.status = status;
       saveProgressToDrive();
     }
@@ -3157,159 +2211,43 @@ ${lessonContent}
   btnFcRate1.addEventListener("click", () => advancePlayerCard(1));
   btnFcRate2.addEventListener("click", () => advancePlayerCard(2));
 
-  // ==========================================
-  // 翻譯懸浮球與自然女聲邏輯綁定
-  // ==========================================
+  // 翻譯面板控制
   const floatTranslateBubble = document.getElementById("float-translate-bubble");
   const floatTranslatePanel = document.getElementById("float-translate-panel");
   const btnCloseFloatPanel = document.getElementById("btn-close-float-panel");
-  const btnFloatPaste = document.getElementById("btn-float-paste");
   const floatInputText = document.getElementById("float-input-text");
   const btnExecTranslate = document.getElementById("btn-exec-translate");
-  const btnSpeakInputNatural = document.getElementById("btn-speak-input-natural");
   const floatResultBox = document.getElementById("float-result-box");
   const floatResultText = document.getElementById("float-result-text");
-  const btnSpeakResultNatural = document.getElementById("btn-speak-result-natural");
 
-  let isDragging = false;
-  let dragMoved = false;
-  let dragStartX = 0, dragStartY = 0;
-  let elemStartX = 0, elemStartY = 0;
-
-  // 拖曳懸浮球支援 (滑鼠與觸控)
-  function handleDragStart(e) {
-    isDragging = true;
-    dragMoved = false;
-    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-    dragStartX = clientX;
-    dragStartY = clientY;
-    const rect = floatTranslateBubble.getBoundingClientRect();
-    elemStartX = rect.left;
-    elemStartY = rect.top;
-  }
-
-  function handleDragMove(e) {
-    if (!isDragging) return;
-    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-    const dx = clientX - dragStartX;
-    const dy = clientY - dragStartY;
-    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
-      dragMoved = true;
-    }
-    const newLeft = Math.max(10, Math.min(window.innerWidth - 62, elemStartX + dx));
-    const newTop = Math.max(60, Math.min(window.innerHeight - 62, elemStartY + dy));
-    floatTranslateBubble.style.left = `${newLeft}px`;
-    floatTranslateBubble.style.top = `${newTop}px`;
-    floatTranslateBubble.style.right = 'auto';
-    floatTranslateBubble.style.bottom = 'auto';
-
-    // 同步面板位置靠近懸浮球
-    floatTranslatePanel.style.left = `${Math.min(window.innerWidth - 380, Math.max(10, newLeft - 300))}px`;
-    floatTranslatePanel.style.top = `${Math.max(70, newTop - 340)}px`;
-    floatTranslatePanel.style.right = 'auto';
-    floatTranslatePanel.style.bottom = 'auto';
-  }
-
-  function handleDragEnd() {
-    isDragging = false;
-  }
-
-  floatTranslateBubble.addEventListener("mousedown", handleDragStart);
-  window.addEventListener("mousemove", handleDragMove);
-  window.addEventListener("mouseup", handleDragEnd);
-
-  floatTranslateBubble.addEventListener("touchstart", handleDragStart, { passive: true });
-  window.addEventListener("touchmove", handleDragMove, { passive: true });
-  window.addEventListener("touchend", handleDragEnd);
-
-  // 點擊懸浮球切換展開/關閉
   floatTranslateBubble.addEventListener("click", () => {
-    if (dragMoved) return; // 拖曳中不觸發開關
-    const isHidden = floatTranslatePanel.classList.toggle("hidden");
-    if (!isHidden) {
-      floatInputText.focus();
-      // 若頁面當前有反白選取的文字，自動填入
-      const selected = window.getSelection()?.toString()?.trim();
-      if (selected && !floatInputText.value) {
-        floatInputText.value = selected;
-      }
-    }
-  });
-
-  btnCloseFloatPanel.addEventListener("click", () => {
-    floatTranslatePanel.classList.add("hidden");
-  });
-
-  // 一鍵貼上反白文字或剪貼簿
-  btnFloatPaste.addEventListener("click", () => {
-    const selected = window.getSelection()?.toString()?.trim();
-    if (selected) {
-      floatInputText.value = selected;
-      showToast("已帶入頁面選取內容", "info");
-      return;
-    }
+    floatTranslatePanel.classList.toggle("hidden");
     floatInputText.focus();
-    document.execCommand('paste');
   });
+  btnCloseFloatPanel.addEventListener("click", () => floatTranslatePanel.classList.add("hidden"));
 
-  // 執行翻譯與深度語意解析
   btnExecTranslate.addEventListener("click", async () => {
     const text = floatInputText.value.trim();
-    if (!text) {
-      showToast("請先輸入想翻譯的文字", "error");
-      floatInputText.focus();
-      return;
-    }
-
-    const origText = btnExecTranslate.textContent;
-    btnExecTranslate.disabled = true;
-    btnExecTranslate.textContent = "⏳ 翻譯中...";
-
+    if (!text) return;
     try {
       const ai = getGenAIClient();
-      const prompt = `你是一位專業中英雙語翻譯名師。請將以下文字進行精確翻譯。
-要求：
-1. 若輸入為英文：請提供繁體中文翻譯，並列出核心口語搭配詞（Collocations）與 1 個道地例句。
-2. 若輸入為中文：請提供 2~3 種道地、自然且母語者常說的英文說法（附場合區分：日常口語 / 正式書信），並為最佳說法附上音標或重音。
-3. 簡潔明瞭、排版清晰，避免多餘套話。
-
-輸入文字：
-${text}`;
-
       const res = await ai.models.generateContent({
         model: FLASH_MODEL,
-        contents: prompt
+        contents: `精確翻譯並給出 1 個道地口語例句：${text}`
       });
-
       floatResultText.textContent = res.text.trim();
       floatResultBox.classList.remove("hidden");
-      showToast("翻譯完成！可點擊上方按鈕聆聽自然女人聲朗讀", "success");
     } catch (e) {
-      floatResultText.textContent = "翻譯失敗：" + e.message;
+      floatResultText.textContent = "翻譯失敗";
       floatResultBox.classList.remove("hidden");
-    } finally {
-      btnExecTranslate.disabled = false;
-      btnExecTranslate.textContent = origText;
     }
   });
 
-  // 以自然女人聲朗讀原文
-  btnSpeakInputNatural.addEventListener("click", () => {
-    const text = floatInputText.value.trim();
-    if (!text) {
-      showToast("請輸入欲朗讀的文字", "info");
-      return;
-    }
-    speakNaturalFemaleVoice(text, "en");
+  document.getElementById("btn-speak-input-natural").addEventListener("click", () => {
+    speakSingleSentence(floatInputText.value.trim());
   });
-
-  // 以自然女人聲朗讀翻譯結果
-  btnSpeakResultNatural.addEventListener("click", () => {
-    const text = floatResultText.textContent.trim();
-    if (!text) return;
-    speakNaturalFemaleVoice(text, "en");
+  document.getElementById("btn-speak-result-natural").addEventListener("click", () => {
+    speakSingleSentence(floatResultText.textContent.trim());
   });
   </script>
 </body>
