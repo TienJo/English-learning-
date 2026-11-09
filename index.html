@@ -584,71 +584,113 @@
       border-color: var(--c-brown); 
       color: var(--c-brown); 
     }
-    .btn-brown { 
+    .chat-input-bar { 
+      padding: 12px 16px; 
+      border-top: 1px solid var(--c-line); 
+      background: var(--c-nude); 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      flex-shrink: 0; 
+    }
+    .msg { 
+      padding: 10px 14px; 
+      border-radius: 12px; 
+      line-height: 1.6; 
+      max-width: 90%; 
+      font-size: var(--fs-body); 
+      word-break: break-word; 
+    }
+    .msg-bot { 
+      background: var(--c-white); 
+      border: 1px solid var(--c-line); 
+      align-self: flex-start; 
+      color: var(--c-black); 
+    }
+    .msg-user { 
       background: var(--c-brown); 
       color: var(--c-white); 
+      align-self: flex-end; 
     }
-    .btn-brown:hover { 
-      background: var(--c-black); 
-      color: var(--c-white); 
-    }
-    .btn-outline { 
-      background: var(--c-white); 
-      color: var(--c-black); 
+    .msg-system { 
+      background: var(--c-nude); 
+      color: var(--c-brown); 
+      align-self: center; 
+      font-size: var(--fs-sm); 
+      padding: 4px 12px; 
+      border-radius: 9999px; 
       border: 1px solid var(--c-line); 
     }
-    .btn-outline:hover { 
-      background: var(--c-nude); 
+
+    /* 單字卡 */
+    .flashcards-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .flashcards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    
+    .flip-card { background-color: transparent; perspective: 1000px; height: 210px; cursor: pointer; }
+    .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s ease; transform-style: preserve-3d; border-radius: 16px; }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    
+    .flip-card-front, .flip-card-back { 
+      position: absolute; 
+      width: 100%; 
+      height: 100%; 
+      -webkit-backface-visibility: hidden; 
+      backface-visibility: hidden; 
+      border-radius: 16px; 
+      padding: 16px; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: space-between; 
+      border: 1px solid var(--c-line); 
+    }
+    .flip-card-front { background: var(--c-white); }
+    .flip-card-back { background: var(--c-nude); transform: rotateY(180deg); text-align: left; }
+
+    .fc-word { font-size: var(--fs-h1); font-weight: 600; color: var(--c-black); margin-top: 6px; }
+    .fc-phonetic { font-size: var(--fs-sm); color: var(--c-brown); margin-top: 2px; }
+    .fc-pos { font-size: var(--fs-sm); background: var(--c-nude); color: var(--c-brown); padding: 1px 6px; border-radius: 9999px; align-self: center; margin-top: 4px; display: inline-block; }
+    .fc-chunks { font-size: var(--fs-sm); color: var(--c-black); background: var(--c-white); padding: 4px 8px; border-radius: 6px; margin-top: 6px; border: 1px solid var(--c-line); }
+    .fc-meaning { font-size: var(--fs-body); font-weight: 600; color: var(--c-black); margin-bottom: 4px; }
+    .fc-example-box { background: var(--c-nude-light); padding: 8px 10px; border-radius: 8px; margin-top: 6px; font-size: var(--fs-sm); border: 1px solid var(--c-line); }
+    .fc-example-box .ex-en { font-weight: 500; color: var(--c-black); }
+    .fc-example-box .ex-zh { color: #666; font-size: var(--fs-sm); margin-top: 2px; }
+    
+    .fc-status-badge { font-size: var(--fs-sm); font-weight: 500; padding: 2px 8px; border-radius: 9999px; }
+    .fc-status-0 { background: var(--c-white); color: var(--c-black); border: 1px solid var(--c-line); }
+    .fc-status-1 { background: var(--c-nude); color: var(--c-brown); border: 1px solid var(--c-line); }
+    .fc-status-2 { background: var(--c-brown); color: var(--c-white); }
+
+    .study-card-box { width: 500px; max-width: 95%; height: 350px; perspective: 1200px; cursor: pointer; }
+    .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s ease; transform-style: preserve-3d; border-radius: 20px; }
+    .study-card-box.flipped .study-card-inner { transform: rotateY(180deg); }
+    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid var(--c-line); }
+    .study-card-front { background: var(--c-white); }
+    .study-card-back { background: var(--c-nude); transform: rotateY(180deg); }
+
+    input:not([type=checkbox]):not([type=radio]), textarea, select { 
+      border: 1px solid var(--c-line) !important; 
+      border-radius: 10px !important; 
+      background: var(--c-white); 
       color: var(--c-black); 
+      font-family: inherit; 
+      padding: 8px 12px;
+      font-size: var(--fs-body);
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus { 
+      border-color: var(--c-brown) !important; 
     }
 
-    /* 講義內文圖示標籤（取代彩色 Emoji，嚴格遵循深咖/淡紫粉 4 色體系） */
-    .doc-icon-tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-    .doc-tag-cross {
-      background: var(--c-brown);
-      color: var(--c-white);
-    }
-    .doc-tag-check {
-      background: var(--c-brown);
-      color: var(--c-nude);
-      border: 1px solid var(--c-line);
-    }
-    .doc-tag-tip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
+    #float-translate-bubble {
+      position: fixed;
+      right: 18px;
+      top: 62%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--c-nude);
       color: var(--c-brown);
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-    .doc-tag-tip svg {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: var(--c-brown);
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .btn-quiz-compact {
-      background: var(--c-white);
-      color: var(--c-black);
-      border: 1px solid var(--c-line);
+      border: 1px solid var(--c-brown);
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
@@ -1352,29 +1394,34 @@
     const el = document.createElement("div");
     el.className = "toast-msg";
     el.textContent = text;
-    toastContainer.appendChild(el);
+    if (toastContainer) toastContainer.appendChild(el);
     setTimeout(() => el.remove(), 4000);
   }
 
   function showConfirm(title, message, onConfirm) {
+    if (!modalConfirm) return;
     confirmModalTitle.textContent = title;
     confirmModalMsg.textContent = message;
     confirmCallback = onConfirm;
     modalConfirm.classList.remove("hidden");
   }
 
-  btnConfirmCancel.addEventListener("click", () => {
-    modalConfirm.classList.add("hidden");
-    confirmCallback = null;
-  });
-
-  btnConfirmOk.addEventListener("click", () => {
-    modalConfirm.classList.add("hidden");
-    if (confirmCallback) {
-      confirmCallback();
+  if (btnConfirmCancel) {
+    btnConfirmCancel.addEventListener("click", () => {
+      modalConfirm.classList.add("hidden");
       confirmCallback = null;
-    }
-  });
+    });
+  }
+
+  if (btnConfirmOk) {
+    btnConfirmOk.addEventListener("click", () => {
+      modalConfirm.classList.add("hidden");
+      if (confirmCallback) {
+        confirmCallback();
+        confirmCallback = null;
+      }
+    });
+  }
 
   let cachedVoices = [];
   function updateVoices() {
@@ -1407,9 +1454,7 @@
     window.speechSynthesis.cancel();
     let cleanText = sentenceText
       .replace(/<[^>]*>/g, '')
-      // 過濾所有常見 Emoji 與特殊符號（避免朗讀出 "cross mark"、"check mark" 等）
       .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D❌✅💡✔✖⚠️✓]/gu, ' ')
-      // 過濾中英文括號內的補充說明，例如 "(有人敲門)" 或 "（有人敲門）"
       .replace(/[(（][^()（）]*[\u4e00-\u9fa5]+[^()（）]*[)）]/g, ' ')
       .replace(/^[0-9]+[.)]\s*/, '')
       .replace(/^(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[/／、]?\s*(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[:：]\s*/i, '')
@@ -1431,19 +1476,23 @@
     speakSingleSentence(text, rate);
   }
 
-  btnSpeedSlow.addEventListener("click", () => {
-    state.speechRate = 0.8;
-    btnSpeedSlow.className = "btn-brown";
-    btnSpeedNormal.className = "btn-outline";
-    showToast("已切換為 0.8x 慢速模式", "info");
-  });
+  if (btnSpeedSlow) {
+    btnSpeedSlow.addEventListener("click", () => {
+      state.speechRate = 0.8;
+      btnSpeedSlow.className = "btn-brown";
+      if (btnSpeedNormal) btnSpeedNormal.className = "btn-outline";
+      showToast("已切換為 0.8x 慢速模式", "info");
+    });
+  }
 
-  btnSpeedNormal.addEventListener("click", () => {
-    state.speechRate = 1.0;
-    btnSpeedNormal.className = "btn-brown";
-    btnSpeedSlow.className = "btn-outline";
-    showToast("已切換為 1.0x 正常語速", "info");
-  });
+  if (btnSpeedNormal) {
+    btnSpeedNormal.addEventListener("click", () => {
+      state.speechRate = 1.0;
+      btnSpeedNormal.className = "btn-brown";
+      if (btnSpeedSlow) btnSpeedSlow.className = "btn-outline";
+      showToast("已切換為 1.0x 正常語速", "info");
+    });
+  }
 
   function initSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1457,9 +1506,11 @@
     state.recognition.onstart = () => {
       state.isRecording = true;
       manualStopRequested = false;
-      btnVoiceInput.classList.remove("btn-soft-pink");
-      btnVoiceInput.classList.add("btn-brown");
-      btnVoiceInput.textContent = "⏹";
+      if (btnVoiceInput) {
+        btnVoiceInput.classList.remove("btn-soft-pink");
+        btnVoiceInput.classList.add("btn-brown");
+        btnVoiceInput.textContent = "⏹";
+      }
       if (recordingActiveBar) recordingActiveBar.classList.remove("hidden");
     };
 
@@ -1472,7 +1523,7 @@
           interim += event.results[i][0].transcript;
         }
       }
-      inputMessage.value = (baseTextBeforeRecording + finalTranscript + interim).trimStart();
+      if (inputMessage) inputMessage.value = (baseTextBeforeRecording + finalTranscript + interim).trimStart();
     };
 
     state.recognition.onerror = () => stopRecordingManually();
@@ -1481,16 +1532,18 @@
         try { state.recognition.start(); return; } catch (e) {}
       }
       state.isRecording = false;
-      btnVoiceInput.classList.remove("btn-brown");
-      btnVoiceInput.classList.add("btn-soft-pink");
-      btnVoiceInput.textContent = "🎙️";
+      if (btnVoiceInput) {
+        btnVoiceInput.classList.remove("btn-brown");
+        btnVoiceInput.classList.add("btn-soft-pink");
+        btnVoiceInput.textContent = "🎙️";
+      }
       if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
     };
   }
 
   function startRecordingManually() {
     if (!state.recognition) return;
-    baseTextBeforeRecording = inputMessage.value ? inputMessage.value.trim() + " " : "";
+    baseTextBeforeRecording = inputMessage && inputMessage.value ? inputMessage.value.trim() + " " : "";
     finalTranscript = "";
     manualStopRequested = false;
     try { state.recognition.start(); } catch (e) {}
@@ -1502,65 +1555,88 @@
     if (state.recognition) {
       try { state.recognition.stop(); } catch (e) {}
     }
-    btnVoiceInput.classList.remove("btn-brown");
-    btnVoiceInput.classList.add("btn-soft-pink");
-    btnVoiceInput.textContent = "🎙️";
+    if (btnVoiceInput) {
+      btnVoiceInput.classList.remove("btn-brown");
+      btnVoiceInput.classList.add("btn-soft-pink");
+      btnVoiceInput.textContent = "🎙️";
+    }
     if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
   }
 
   initSpeechRecognition();
 
-  btnVoiceInput.addEventListener("click", () => {
-    if (state.isRecording) stopRecordingManually();
-    else startRecordingManually();
-  });
+  if (btnVoiceInput) {
+    btnVoiceInput.addEventListener("click", () => {
+      if (state.isRecording) stopRecordingManually();
+      else startRecordingManually();
+    });
+  }
 
   if (btnStopRecordingBanner) {
     btnStopRecordingBanner.addEventListener("click", stopRecordingManually);
   }
 
-  btnTriggerRoleplay.addEventListener("click", handleStartRoleplay);
-  btnTriggerSpeakingDrill.addEventListener("click", handleStartOralReflexDrill);
+  if (btnTriggerRoleplay) btnTriggerRoleplay.addEventListener("click", handleStartRoleplay);
+  if (btnTriggerSpeakingDrill) btnTriggerSpeakingDrill.addEventListener("click", handleStartOralReflexDrill);
 
-  chkCustomClientId.addEventListener("change", (e) => {
-    boxCustomClientId.classList.toggle("hidden", !e.target.checked);
-  });
-  btnLogin.addEventListener("click", handleGoogleAuth);
-  btnUseLocal.addEventListener("click", handleUseLocalMode);
-  btnSaveKey.addEventListener("click", handleSaveApiKey);
-  btnOpenNewProject.addEventListener("click", () => {
-    closeSidebarDrawer();
-    modalNewProject.classList.remove("hidden");
-  });
-  btnCancelNewProject.addEventListener("click", () => modalNewProject.classList.add("hidden"));
-  btnConfirmCreateProject.addEventListener("click", () => executeCreateProject(inputNewGoal.value, inputNewDays.value, btnConfirmCreateProject, modalNewProject));
-  btnEmptyCreate.addEventListener("click", () => executeCreateProject(inputEmptyGoal.value, inputEmptyDays.value, btnEmptyCreate, null));
-  btnBackCardsLeft.addEventListener("click", showCardsDashboard);
+  if (chkCustomClientId) {
+    chkCustomClientId.addEventListener("change", (e) => {
+      if (boxCustomClientId) boxCustomClientId.classList.toggle("hidden", !e.target.checked);
+    });
+  }
 
-  btnSendMessage.addEventListener("click", handleSendMessage);
-  btnTriggerQuiz.addEventListener("click", handleStartInChatQuiz);
+  // 核心登入與免登入按鈕綁定（確保完整有效）
+  if (btnLogin) btnLogin.addEventListener("click", handleGoogleAuth);
+  if (btnUseLocal) btnUseLocal.addEventListener("click", handleUseLocalMode);
+  if (btnSaveKey) btnSaveKey.addEventListener("click", handleSaveApiKey);
 
-  btnToggleSidebar.addEventListener("click", () => document.body.classList.toggle("drawer-open"));
-  sidebarOverlay.addEventListener("click", closeSidebarDrawer);
+  if (btnOpenNewProject) {
+    btnOpenNewProject.addEventListener("click", () => {
+      closeSidebarDrawer();
+      if (modalNewProject) modalNewProject.classList.remove("hidden");
+    });
+  }
+  if (btnCancelNewProject) {
+    btnCancelNewProject.addEventListener("click", () => {
+      if (modalNewProject) modalNewProject.classList.add("hidden");
+    });
+  }
+  if (btnConfirmCreateProject) {
+    btnConfirmCreateProject.addEventListener("click", () => executeCreateProject(inputNewGoal ? inputNewGoal.value : "", inputNewDays ? inputNewDays.value : 14, btnConfirmCreateProject, modalNewProject));
+  }
+  if (btnEmptyCreate) {
+    btnEmptyCreate.addEventListener("click", () => executeCreateProject(inputEmptyGoal ? inputEmptyGoal.value : "", inputEmptyDays ? inputEmptyDays.value : 14, btnEmptyCreate, null));
+  }
+  if (btnBackCardsLeft) btnBackCardsLeft.addEventListener("click", showCardsDashboard);
+
+  if (btnSendMessage) btnSendMessage.addEventListener("click", handleSendMessage);
+  if (btnTriggerQuiz) btnTriggerQuiz.addEventListener("click", handleStartInChatQuiz);
+
+  if (btnToggleSidebar) btnToggleSidebar.addEventListener("click", () => document.body.classList.toggle("drawer-open"));
+  if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebarDrawer);
 
   function closeSidebarDrawer() {
     document.body.classList.remove("drawer-open");
   }
 
-  tabBtnLecture.addEventListener("click", () => {
-    tabBtnLecture.classList.add("active");
-    tabBtnVocab.classList.remove("active");
-    tabPaneLecture.classList.add("active");
-    tabPaneVocab.classList.remove("active");
-  });
+  if (tabBtnLecture) {
+    tabBtnLecture.addEventListener("click", () => {
+      tabBtnLecture.classList.add("active");
+      if (tabBtnVocab) tabBtnVocab.classList.remove("active");
+      if (tabPaneLecture) tabPaneLecture.classList.add("active");
+      if (tabPaneVocab) tabPaneVocab.classList.remove("active");
+    });
+  }
 
-  tabBtnVocab.addEventListener("click", () => {
-    tabBtnVocab.classList.add("active");
-    tabBtnLecture.classList.remove("active");
-    tabPaneVocab.classList.add("active");
-    tabPaneLecture.classList.remove("active");
-    renderFlashcardsList();
-  });
+  if (tabBtnVocab) {
+    tabBtnVocab.addEventListener("click", () => {
+      tabBtnVocab.classList.add("active");
+      if (tabBtnLecture) tabBtnLecture.classList.remove("active");
+      if (tabPaneVocab) tabPaneVocab.classList.add("active");
+      if (tabPaneLecture) tabPaneLecture.classList.remove("active");
+      renderFlashcardsList();
+    });
+  }
 
   const DETAIL_NAMES = { 1: "簡答", 2: "適中", 3: "詳盡" };
   function updateDetailBadge(val) {
@@ -1577,22 +1653,30 @@
     });
   }
 
-  btnOpenSettings.addEventListener("click", () => {
-    selectLectureModel.value = getActiveLectureModel();
-    selectChatModel.value = getActiveChatModel();
-    modalSettings.classList.remove("hidden");
-  });
+  if (btnOpenSettings) {
+    btnOpenSettings.addEventListener("click", () => {
+      if (selectLectureModel) selectLectureModel.value = getActiveLectureModel();
+      if (selectChatModel) selectChatModel.value = getActiveChatModel();
+      if (modalSettings) modalSettings.classList.remove("hidden");
+    });
+  }
 
-  btnCloseSettingsX.addEventListener("click", () => modalSettings.classList.add("hidden"));
+  if (btnCloseSettingsX) {
+    btnCloseSettingsX.addEventListener("click", () => {
+      if (modalSettings) modalSettings.classList.add("hidden");
+    });
+  }
 
-  btnSaveSettings.addEventListener("click", async () => {
-    if (!state.appData.settings) state.appData.settings = {};
-    state.appData.settings.lectureModel = selectLectureModel.value;
-    state.appData.settings.chatModel = selectChatModel.value;
-    await saveProgressToDrive();
-    modalSettings.classList.add("hidden");
-    showToast("設定已更新", "success");
-  });
+  if (btnSaveSettings) {
+    btnSaveSettings.addEventListener("click", async () => {
+      if (!state.appData.settings) state.appData.settings = {};
+      if (selectLectureModel) state.appData.settings.lectureModel = selectLectureModel.value;
+      if (selectChatModel) state.appData.settings.chatModel = selectChatModel.value;
+      await saveProgressToDrive();
+      if (modalSettings) modalSettings.classList.add("hidden");
+      showToast("設定已更新", "success");
+    });
+  }
 
   function getActiveLectureModel() {
     return state.appData.settings?.lectureModel || DEFAULT_LECTURE_MODEL;
@@ -1603,7 +1687,7 @@
   }
 
   function handleGoogleAuth() {
-    const clientId = inputClientId.value.trim() || DEFAULT_CLIENT_ID;
+    const clientId = inputClientId ? inputClientId.value.trim() : DEFAULT_CLIENT_ID;
     if (typeof google === "undefined" || !google.accounts) {
       showToast("Google 模組載入中，請點擊「免登入直接學習」", "error");
       return;
@@ -1633,16 +1717,16 @@
       if (saved) state.appData = JSON.parse(saved);
     } catch (e) {}
 
-    sectionAuth.classList.add("hidden");
-    headerRight.classList.remove("hidden");
-    appLayout.classList.remove("hidden");
+    if (sectionAuth) sectionAuth.classList.add("hidden");
+    if (headerRight) headerRight.classList.remove("hidden");
+    if (appLayout) appLayout.classList.remove("hidden");
 
     if (cloudStatus) cloudStatus.textContent = "本機模式";
     if (state.appData.geminiKey) {
       state.geminiKey = state.appData.geminiKey;
       initAppFlow();
     } else {
-      modalKeySetup.classList.remove("hidden");
+      if (modalKeySetup) modalKeySetup.classList.remove("hidden");
     }
   }
 
@@ -1662,15 +1746,15 @@
         state.appData = await fileContentRes.json();
       }
 
-      sectionAuth.classList.add("hidden");
-      headerRight.classList.remove("hidden");
-      appLayout.classList.remove("hidden");
+      if (sectionAuth) sectionAuth.classList.add("hidden");
+      if (headerRight) headerRight.classList.remove("hidden");
+      if (appLayout) appLayout.classList.remove("hidden");
 
       if (state.appData.geminiKey) {
         state.geminiKey = state.appData.geminiKey;
         initAppFlow();
       } else {
-        modalKeySetup.classList.remove("hidden");
+        if (modalKeySetup) modalKeySetup.classList.remove("hidden");
       }
     } catch (err) {
       handleUseLocalMode();
@@ -1697,12 +1781,12 @@
   }
 
   async function handleSaveApiKey() {
-    const key = inputGeminiKey.value.trim();
+    const key = inputGeminiKey ? inputGeminiKey.value.trim() : "";
     if (!key) return showToast("請輸入 API Key", "error");
     state.geminiKey = key;
     state.appData.geminiKey = key;
     await saveProgressToDrive();
-    modalKeySetup.classList.add("hidden");
+    if (modalKeySetup) modalKeySetup.classList.add("hidden");
     initAppFlow();
   }
 
@@ -1712,11 +1796,11 @@
 
     if (projectKeys.length === 0) {
       document.body.classList.remove("in-study-mode", "drawer-open");
-      viewStudy.classList.add("hidden");
-      viewDashboard.classList.add("hidden");
-      viewEmptyCreate.classList.remove("hidden");
+      if (viewStudy) viewStudy.classList.add("hidden");
+      if (viewDashboard) viewDashboard.classList.add("hidden");
+      if (viewEmptyCreate) viewEmptyCreate.classList.remove("hidden");
     } else {
-      viewEmptyCreate.classList.add("hidden");
+      if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
       if (!state.appData.activeProjectId || !state.appData.projects[state.appData.activeProjectId]) {
         state.appData.activeProjectId = projectKeys[0];
       }
@@ -1729,7 +1813,7 @@
     const goal = (goalText || "").trim();
     if (!goal) return showToast("請填寫專案目標", "error");
 
-    triggerBtn.disabled = true;
+    if (triggerBtn) triggerBtn.disabled = true;
     try {
       const ai = getGenAIClient();
       const prompt = `規劃 ${daysValue} 天的每日英文學習大綱，目標為「${goal}」。每日主題包含核心句構與口語語塊。
@@ -1761,11 +1845,12 @@
     } catch (e) {
       showToast("大綱生成失敗：" + e.message, "error");
     } finally {
-      triggerBtn.disabled = false;
+      if (triggerBtn) triggerBtn.disabled = false;
     }
   }
 
   function renderSidebar() {
+    if (!projectListElem) return;
     projectListElem.innerHTML = "";
     const projects = state.appData.projects || {};
 
@@ -1790,31 +1875,34 @@
         showCardsDashboard();
       });
 
-      li.querySelector(".btn-del-project").addEventListener("click", (e) => {
-        e.stopPropagation();
-        showConfirm("刪除確認", `確定刪除「${proj.goal}」嗎？`, async () => {
-          delete state.appData.projects[proj.id];
-          const remaining = Object.keys(state.appData.projects);
-          state.appData.activeProjectId = remaining.length > 0 ? remaining[0] : null;
-          await saveProgressToDrive();
-          initAppFlow();
+      const delBtn = li.querySelector(".btn-del-project");
+      if (delBtn) {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showConfirm("刪除確認", `確定刪除「${proj.goal}」嗎？`, async () => {
+            delete state.appData.projects[proj.id];
+            const remaining = Object.keys(state.appData.projects);
+            state.appData.activeProjectId = remaining.length > 0 ? remaining[0] : null;
+            await saveProgressToDrive();
+            initAppFlow();
+          });
         });
-      });
+      }
       projectListElem.appendChild(li);
     });
   }
 
   function showCardsDashboard() {
     document.body.classList.remove("in-study-mode", "drawer-open");
-    viewStudy.classList.add("hidden");
-    viewEmptyCreate.classList.add("hidden");
-    viewDashboard.classList.remove("hidden");
+    if (viewStudy) viewStudy.classList.add("hidden");
+    if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
+    if (viewDashboard) viewDashboard.classList.remove("hidden");
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     if (!currentProj) return initAppFlow();
 
-    viewProjectTitle.textContent = currentProj.goal;
-    dayCardsGrid.innerHTML = "";
+    if (viewProjectTitle) viewProjectTitle.textContent = currentProj.goal;
+    if (dayCardsGrid) dayCardsGrid.innerHTML = "";
 
     const history = currentProj.history || {};
     const currentActiveIndex = currentProj.currentDayIndex || 0;
@@ -1847,73 +1935,57 @@
         </div>
       `;
 
-      card.querySelector(`#btn-card-action-${idx}`).addEventListener("click", () => startDayStudy(idx));
-      dayCardsGrid.appendChild(card);
+      const actionBtn = card.querySelector(`#btn-card-action-${idx}`);
+      if (actionBtn) {
+        actionBtn.addEventListener("click", () => startDayStudy(idx));
+      }
+      if (dayCardsGrid) dayCardsGrid.appendChild(card);
     });
 
-    viewProjectProgress.textContent = `進度：${completedCount} / ${currentProj.plan.length} 天`;
+    if (viewProjectProgress) viewProjectProgress.textContent = `進度：${completedCount} / ${currentProj.plan.length} 天`;
   }
 
   function enhanceEnglishSentencesWithSpeech(container) {
     if (!container) return;
 
-    // 計算英文單字個數
-  function countEnglishWords(str) {
-    if (!str) return 0;
-    const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
-    return clean.split(/\s+/).filter(Boolean).length;
-  }
+    function countEnglishWords(str) {
+      if (!str) return 0;
+      const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
+      return clean.split(/\s+/).filter(Boolean).length;
+    }
 
-    // 計算中文字個數
     function countChineseChars(str) {
       if (!str) return 0;
       const matches = str.match(/[\u4e00-\u9fa5]/g);
       return matches ? matches.length : 0;
     }
 
-    // 清除開頭標號與標籤（如 "1.", "Be going to:", "Will:", "例句：" 等）
     function extractPureEnglish(str) {
       if (!str) return "";
       let clean = str.replace(/<[^>]*>/g, '').trim();
-      // 移除 Emoji 與符號（如 ❌, ✅, 💡）
       clean = clean.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D❌✅💡✔✖⚠️✓]/gu, ' ');
-      // 移除帶中文的括號備註，例如 "(有人敲門)"
       clean = clean.replace(/[(（][^()（）]*[\u4e00-\u9fa5]+[^()（）]*[)）]/g, ' ');
       clean = clean.replace(/^[0-9]+[.)]\s*/, '');
-      // 移除「❌ 錯誤/生硬：」、「✅ 道地說法：」、「💡 專家解析：」等前後綴標籤
       clean = clean.replace(/^(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[/／、]?\s*(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[:：]\s*/i, '');
-      // 清除開頭單純的文法術語標題（例如 "Be going to:" 或 "Will:"）
       clean = clean.replace(/^[A-Za-z\s/()_-]+[:：]\s*/i, '');
       clean = clean.replace(/[\u4e00-\u9fa5]/g, '').trim();
       return clean.replace(/^["“]|["”]$/g, '').trim();
     }
 
-    // 檢查是否為「真正可朗讀的完整英文例句」
     function isValidEnglishSentence(rawText) {
       if (!rawText) return false;
-
-      // 若該行帶有「解析」、「說明」、「提示」等字眼，純粹為語法解釋，不論是否夾帶英文都不附加喇叭
-      if (/(?:專家解析|解析|說明|註解|提示|概念)/i.test(rawText)) {
-        return false;
-      }
+      if (/(?:專家解析|解析|說明|註解|提示|概念)/i.test(rawText)) return false;
 
       const zhCount = countChineseChars(rawText);
       const pureEn = extractPureEnglish(rawText);
       const enWordCount = countEnglishWords(pureEn);
 
-      // 1. 若提取出的英文字詞小於 3 個單字（例如僅 "Be going to"、"Will"、"At least" 等片語），不視為完整句子
       if (enWordCount < 3) return false;
-
-      // 2. 若整行文字幾乎全是中文（中文字數量遠大於英文字數，且無獨立英語子句），不應視為英文句子
       if (zhCount > 10 && enWordCount < 5) {
-        // 檢查是否有包含在引號內的獨立英文子句，如 "I am going to leave."
         const quotedEn = rawText.match(/["“]([A-Za-z\s',.!?]{10,})["”]/);
         if (!quotedEn) return false;
       }
-
-      // 3. 避免公式代號或文法代稱（如 Subject + verb + object）
       if (/\b(subject|verb|object|modal|noun|adj|adv)\s*\+/i.test(pureEn)) return false;
-
       return true;
     }
 
@@ -1938,39 +2010,30 @@
     });
   }
 
-  // 清洗與標準化 Markdown 文字，消除無法正常解析的殘留 ** 符號與彩色 Emoji
   function cleanMarkdownFormatting(rawText) {
     if (!rawText) return "";
     let text = rawText;
-
-    // 1. 先處理容易殘留的空括號或之前的殘留標記
     text = text.replace(/\[\s*\]/g, '');
-
-    // 2. 將 ❌、✅、💡 替換為符合 4 色系統的精緻深咖色標籤與向量圖示，不再留下空括號
     text = text.replace(/❌/g, '<span class="doc-icon-tag doc-tag-cross">✕</span>');
     text = text.replace(/✅/g, '<span class="doc-icon-tag doc-tag-check">✓</span>');
     text = text.replace(/(?:💡|🔔|📌)/g, '<span class="doc-tag-tip"><svg viewBox="0 0 24 24"><path d="M9 18h6m-4 4h2M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/></svg></span>');
-
-    // 3. 移除其他不可控的彩色 Emoji，保留文字純淨
     text = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D🎯🎭⚡🎴⚙️🎙️🔊🐢🌐]/gu, '');
-
-    // 4. 修復星號與全形引號/括號間的空隙，例如 **「意圖的起源」** 或 ** 「內容」 **
     text = text.replace(/\*\*\s*([^\n*]+?)\s*\*\*/g, '<strong>$1</strong>');
-
-    // 5. 修復單邊孤立或異常留空的 ** 符號，直接移除避免污染版面
     text = text.replace(/\*\*/g, '');
-
     return text;
   }
 
-  // 移除標題開頭重複的 "Day X:" 或 "第X天：" 等前綴
   function cleanTitleDayPrefix(title) {
     if (!title) return "";
     return title.replace(/^(?:Day\s*\d+|第\s*\d+\s*天)\s*[:：\-–—\s]\s*/i, '').trim();
   }
 
   function renderMarkdownContent(targetElem, text) {
-    if (!text) return targetElem.innerHTML = "";
+    if (!targetElem) return;
+    if (!text) {
+      targetElem.innerHTML = "";
+      return;
+    }
     const cleanedText = cleanMarkdownFormatting(text);
     targetElem.innerHTML = marked.parse(cleanedText);
     enhanceEnglishSentencesWithSpeech(targetElem);
@@ -1979,24 +2042,24 @@
   async function startDayStudy(dayIdx) {
     state.activeDayIndex = dayIdx;
     state.isQuizInProgress = false;
-    btnTriggerQuiz.disabled = false;
+    if (btnTriggerQuiz) btnTriggerQuiz.disabled = false;
 
     document.body.classList.add("in-study-mode");
     closeSidebarDrawer();
 
-    viewDashboard.classList.add("hidden");
-    viewStudy.classList.remove("hidden");
-    tabBtnLecture.click();
+    if (viewDashboard) viewDashboard.classList.add("hidden");
+    if (viewStudy) viewStudy.classList.remove("hidden");
+    if (tabBtnLecture) tabBtnLecture.click();
 
-    chatBox.innerHTML = "";
-    inputMessage.value = "";
+    if (chatBox) chatBox.innerHTML = "";
+    if (inputMessage) inputMessage.value = "";
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const projectGoal = currentProj.goal || "英文學習";
     const rawTitle = currentProj.plan[dayIdx];
     const title = cleanTitleDayPrefix(rawTitle);
-    studyDayTitle.textContent = title;
-    lectureDayTag.textContent = `DAY ${dayIdx + 1}`;
+    if (studyDayTitle) studyDayTitle.textContent = title;
+    if (lectureDayTag) lectureDayTag.textContent = `DAY ${dayIdx + 1}`;
 
     if (!currentProj.history[dayIdx]) {
       currentProj.history[dayIdx] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
@@ -2006,9 +2069,11 @@
     let cachedContent = currentProj.history[dayIdx]?.lessonContent;
 
     if (!cachedContent) {
-      lectureContentBox.innerHTML = `<div style="text-align:center; padding: 40px; color: #666;">
-        <p style="font-size:var(--fs-body);">正在撰寫【${title}】例句與解析講義...</p>
-      </div>`;
+      if (lectureContentBox) {
+        lectureContentBox.innerHTML = `<div style="text-align:center; padding: 40px; color: #666;">
+          <p style="font-size:var(--fs-body);">正在撰寫【${title}】例句與解析講義...</p>
+        </div>`;
+      }
 
       const lecturePrompt = `你是英語名師。學生學習目標：【${projectGoal}】。請針對核心主題「${title}」撰寫一份結構清晰、充滿實用例句的教學講義。
 包含：
@@ -2033,12 +2098,12 @@
         await saveProgressToDrive();
         triggerAiExtractVocab(cachedContent);
       } catch (e) {
-        lectureContentBox.innerHTML = `<p style="color: red;">講義載入失敗：${e.message}</p>`;
+        if (lectureContentBox) lectureContentBox.innerHTML = `<p style="color: red;">講義載入失敗：${e.message}</p>`;
         return;
       }
     }
 
-    renderMarkdownContent(lectureContentBox, cachedContent);
+    if (lectureContentBox) renderMarkdownContent(lectureContentBox, cachedContent);
     renderFlashcardsList();
 
     const savedChat = currentProj.history[dayIdx].chatHistory || [];
@@ -2058,17 +2123,19 @@
   }
 
   async function handleSendMessage() {
-    const text = inputMessage.value.trim();
+    const text = inputMessage ? inputMessage.value.trim() : "";
     if (!text || !state.chatInstance) return;
 
     appendChatMessage("user", text, true);
-    inputMessage.value = "";
+    if (inputMessage) inputMessage.value = "";
 
     const typingDiv = document.createElement("div");
     typingDiv.className = "msg msg-bot";
     typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
-    chatBox.appendChild(typingDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    if (chatBox) {
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
     try {
       const res = await state.chatInstance.sendMessage({ message: text });
@@ -2097,6 +2164,7 @@
   }
 
   function appendChatMessage(type, content, shouldPersist = true) {
+    if (!chatBox) return;
     const div = document.createElement("div");
     div.className = `msg msg-${type}`;
     if (type === "system") {
@@ -2132,23 +2200,25 @@
   async function handleStartInChatQuiz() {
     if (!state.chatInstance || state.isQuizInProgress) return;
     const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
-    btnTriggerQuiz.disabled = true;
+    if (btnTriggerQuiz) btnTriggerQuiz.disabled = true;
 
     try {
       const res = await state.chatInstance.sendMessage({ message: `請針對「${title}」出 10 題文法與語塊測驗 + 1 題 Bonus 困難題。先列題目，不給答案。` });
       appendChatMessage("bot", res.text, true);
-      inputMessage.rows = 6;
-      inputMessage.value = "1. \n2. \n3. \n4. \n5. \n";
+      if (inputMessage) {
+        inputMessage.rows = 6;
+        inputMessage.value = "1. \n2. \n3. \n4. \n5. \n";
+      }
       state.isQuizInProgress = true;
     } catch (e) {
-      btnTriggerQuiz.disabled = false;
+      if (btnTriggerQuiz) btnTriggerQuiz.disabled = false;
     }
   }
 
   function updateVocabBadgeCount() {
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
-    vocabCountBadge.textContent = cards.length;
+    if (vocabCountBadge) vocabCountBadge.textContent = cards.length;
   }
 
   function getAllProjectFlashcards(proj) {
@@ -2172,13 +2242,15 @@
     });
   }
 
-  btnAiGenVocab.addEventListener("click", () => {
-    const content = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.lessonContent;
-    if (content) triggerAiExtractVocab(content);
-  });
+  if (btnAiGenVocab) {
+    btnAiGenVocab.addEventListener("click", () => {
+      const content = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.lessonContent;
+      if (content) triggerAiExtractVocab(content);
+    });
+  }
 
   async function triggerAiExtractVocab(lessonContent) {
-    btnAiGenVocab.disabled = true;
+    if (btnAiGenVocab) btnAiGenVocab.disabled = true;
     try {
       const ai = getGenAIClient();
       const prompt = `從以下英文講義提取 6~8 個關鍵單字或語塊。輸出 JSON 陣列，欄位包含 word, phonetic, pos, collocations, meaning, example, example_zh, example2, example2_zh。\n\n${lessonContent}`;
@@ -2213,11 +2285,12 @@
     } catch (e) {
       showToast("單字提取失敗", "error");
     } finally {
-      btnAiGenVocab.disabled = false;
+      if (btnAiGenVocab) btnAiGenVocab.disabled = false;
     }
   }
 
   function renderFlashcardsList() {
+    if (!flashcardsContainer) return;
     flashcardsContainer.innerHTML = "";
     const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
 
@@ -2268,18 +2341,24 @@
         if (!e.target.closest("button")) cardDiv.classList.toggle("flipped");
       });
 
-      cardDiv.querySelector(".btn-speak-item").addEventListener("click", (e) => {
-        e.stopPropagation();
-        speakEnglish(card.word);
-      });
+      const spkBtn = cardDiv.querySelector(".btn-speak-item");
+      if (spkBtn) {
+        spkBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          speakEnglish(card.word);
+        });
+      }
 
-      cardDiv.querySelector(".btn-del-card").addEventListener("click", (e) => {
-        e.stopPropagation();
-        cards.splice(index, 1);
-        saveProgressToDrive();
-        updateVocabBadgeCount();
-        renderFlashcardsList();
-      });
+      const delBtn = cardDiv.querySelector(".btn-del-card");
+      if (delBtn) {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          cards.splice(index, 1);
+          saveProgressToDrive();
+          updateVocabBadgeCount();
+          renderFlashcardsList();
+        });
+      }
 
       cardDiv.querySelectorAll(".btn-mark-status").forEach(btn => {
         btn.addEventListener("click", (e) => {
@@ -2294,95 +2373,118 @@
     });
   }
 
-  btnAddCustomVocab.addEventListener("click", () => {
-    inputNewWord.value = "";
-    inputNewMeaning.value = "";
-    modalAddVocab.classList.remove("hidden");
-  });
-
-  btnCancelAddVocab.addEventListener("click", () => modalAddVocab.classList.add("hidden"));
-
-  btnConfirmAddVocab.addEventListener("click", async () => {
-    const word = inputNewWord.value.trim();
-    if (!word) return;
-    const cards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
-    cards.push({
-      id: "card_" + Date.now(),
-      word: word,
-      phonetic: inputNewPhonetic.value.trim(),
-      pos: inputNewPos.value.trim(),
-      collocations: inputNewCollocations.value.trim(),
-      meaning: inputNewMeaning.value.trim() || "自訂字詞",
-      example: inputNewExample.value.trim(),
-      example_zh: inputNewExampleZh.value.trim(),
-      example2: inputNewExample2.value.trim(),
-      example2_zh: inputNewExample2Zh.value.trim(),
-      status: 0
+  if (btnAddCustomVocab) {
+    btnAddCustomVocab.addEventListener("click", () => {
+      if (inputNewWord) inputNewWord.value = "";
+      if (inputNewMeaning) inputNewMeaning.value = "";
+      if (modalAddVocab) modalAddVocab.classList.remove("hidden");
     });
-    await saveProgressToDrive();
-    updateVocabBadgeCount();
-    renderFlashcardsList();
-    modalAddVocab.classList.add("hidden");
-  });
+  }
 
-  btnStartFlashcardMode.addEventListener("click", () => {
-    const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
-    if (cards.length === 0) return showToast("目前尚無單字卡", "info");
-    activePlayerDeck = [...cards];
-    playerMode = "day";
-    state.currentStudyIndex = 0;
-    openPlayerModal();
-  });
+  if (btnCancelAddVocab) {
+    btnCancelAddVocab.addEventListener("click", () => {
+      if (modalAddVocab) modalAddVocab.classList.add("hidden");
+    });
+  }
+
+  if (btnConfirmAddVocab) {
+    btnConfirmAddVocab.addEventListener("click", async () => {
+      const word = inputNewWord ? inputNewWord.value.trim() : "";
+      if (!word) return;
+      const cards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
+      cards.push({
+        id: "card_" + Date.now(),
+        word: word,
+        phonetic: inputNewPhonetic ? inputNewPhonetic.value.trim() : "",
+        pos: inputNewPos ? inputNewPos.value.trim() : "",
+        collocations: inputNewCollocations ? inputNewCollocations.value.trim() : "",
+        meaning: (inputNewMeaning && inputNewMeaning.value.trim()) || "自訂字詞",
+        example: inputNewExample ? inputNewExample.value.trim() : "",
+        example_zh: inputNewExampleZh ? inputNewExampleZh.value.trim() : "",
+        example2: inputNewExample2 ? inputNewExample2.value.trim() : "",
+        example2_zh: inputNewExample2Zh ? inputNewExample2Zh.value.trim() : "",
+        status: 0
+      });
+      await saveProgressToDrive();
+      updateVocabBadgeCount();
+      renderFlashcardsList();
+      if (modalAddVocab) modalAddVocab.classList.add("hidden");
+    });
+  }
+
+  if (btnStartFlashcardMode) {
+    btnStartFlashcardMode.addEventListener("click", () => {
+      const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
+      if (cards.length === 0) return showToast("目前尚無單字卡", "info");
+      activePlayerDeck = [...cards];
+      playerMode = "day";
+      state.currentStudyIndex = 0;
+      openPlayerModal();
+    });
+  }
 
   function renderPlayerCard() {
-    playerCardBox.classList.remove("flipped");
+    if (playerCardBox) playerCardBox.classList.remove("flipped");
     if (state.currentStudyIndex >= activePlayerDeck.length) {
       showToast("🎉 已完成所有單字卡複習！", "success");
-      modalFlashcardPlayer.classList.add("hidden");
+      if (modalFlashcardPlayer) modalFlashcardPlayer.classList.add("hidden");
       renderFlashcardsList();
       return;
     }
 
     const card = activePlayerDeck[state.currentStudyIndex];
-    fcPlayerProgress.textContent = `卡片 ${state.currentStudyIndex + 1} / ${activePlayerDeck.length}`;
-    playerFrontWord.textContent = card.word;
-    playerFrontPhonetic.textContent = card.phonetic || "";
-    playerFrontPos.textContent = card.pos || "";
-    playerFrontCollocations.textContent = card.collocations || "常讀常記，形成自然語感";
-    playerBackMeaning.textContent = card.meaning;
-    playerBackCollocations.textContent = card.collocations ? `語塊：${card.collocations}` : "";
-    playerEx1En.textContent = card.example || "-";
-    playerEx1Zh.textContent = card.example_zh || "-";
+    if (fcPlayerProgress) fcPlayerProgress.textContent = `卡片 ${state.currentStudyIndex + 1} / ${activePlayerDeck.length}`;
+    if (playerFrontWord) playerFrontWord.textContent = card.word;
+    if (playerFrontPhonetic) playerFrontPhonetic.textContent = card.phonetic || "";
+    if (playerFrontPos) playerFrontPos.textContent = card.pos || "";
+    if (playerFrontCollocations) playerFrontCollocations.textContent = card.collocations || "常讀常記，形成自然語感";
+    if (playerBackMeaning) playerBackMeaning.textContent = card.meaning;
+    if (playerBackCollocations) playerBackCollocations.textContent = card.collocations ? `語塊：${card.collocations}` : "";
+    if (playerEx1En) playerEx1En.textContent = card.example || "-";
+    if (playerEx1Zh) playerEx1Zh.textContent = card.example_zh || "-";
 
     const box2 = document.getElementById("player-box-ex2");
-    if (card.example2) {
-      box2.style.display = "block";
-      playerEx2En.textContent = card.example2;
-      playerEx2Zh.textContent = card.example2_zh || "-";
-    } else {
-      box2.style.display = "none";
+    if (box2) {
+      if (card.example2) {
+        box2.style.display = "block";
+        if (playerEx2En) playerEx2En.textContent = card.example2;
+        if (playerEx2Zh) playerEx2Zh.textContent = card.example2_zh || "-";
+      } else {
+        box2.style.display = "none";
+      }
     }
   }
 
   function openPlayerModal() {
-    modalFlashcardPlayer.classList.remove("hidden");
+    if (modalFlashcardPlayer) modalFlashcardPlayer.classList.remove("hidden");
     renderPlayerCard();
   }
 
-  btnCloseFcPlayer.addEventListener("click", () => modalFlashcardPlayer.classList.add("hidden"));
-  playerCardBox.addEventListener("click", () => playerCardBox.classList.toggle("flipped"));
+  if (btnCloseFcPlayer) {
+    btnCloseFcPlayer.addEventListener("click", () => {
+      if (modalFlashcardPlayer) modalFlashcardPlayer.classList.add("hidden");
+    });
+  }
 
-  btnPlayerSpeakFront.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = activePlayerDeck[state.currentStudyIndex];
-    if (card) speakEnglish(card.word);
-  });
+  if (playerCardBox) {
+    playerCardBox.addEventListener("click", () => playerCardBox.classList.toggle("flipped"));
+  }
 
-  btnPlayerSpeakSlow.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const card = activePlayerDeck[state.currentStudyIndex];
-    if (card) speakEnglish(card.word, 0.75);
-  });
+  if (btnPlayerSpeakFront) {
+    btnPlayerSpeakFront.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const card = activePlayerDeck[state.currentStudyIndex];
+      if (card) speakEnglish(card.word);
+    });
+  }
+
+  if (btnPlayerSpeakSlow) {
+    btnPlayerSpeakSlow.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const card = activePlayerDeck[state.currentStudyIndex];
+      if (card) speakEnglish(card.word, 0.75);
+    });
+  }
 
   function advancePlayerCard(status) {
     const card = activePlayerDeck[state.currentStudyIndex];
@@ -2394,9 +2496,9 @@
     renderPlayerCard();
   }
 
-  btnFcRate0.addEventListener("click", () => advancePlayerCard(0));
-  btnFcRate1.addEventListener("click", () => advancePlayerCard(1));
-  btnFcRate2.addEventListener("click", () => advancePlayerCard(2));
+  if (btnFcRate0) btnFcRate0.addEventListener("click", () => advancePlayerCard(0));
+  if (btnFcRate1) btnFcRate1.addEventListener("click", () => advancePlayerCard(1));
+  if (btnFcRate2) btnFcRate2.addEventListener("click", () => advancePlayerCard(2));
 
   // 翻譯面板控制與流暢拖曳
   const floatTranslateBubble = document.getElementById("float-translate-bubble");
@@ -2419,13 +2521,15 @@
     hasMovedBubble = false;
     dragStartX = clientX;
     dragStartY = clientY;
-    const rect = floatTranslateBubble.getBoundingClientRect();
-    initialLeft = rect.left;
-    initialTop = rect.top;
+    if (floatTranslateBubble) {
+      const rect = floatTranslateBubble.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+    }
   }
 
   function onDragMove(clientX, clientY) {
-    if (!isDraggingBubble) return;
+    if (!isDraggingBubble || !floatTranslateBubble) return;
     const deltaX = clientX - dragStartX;
     const deltaY = clientY - dragStartY;
     if (Math.hypot(deltaX, deltaY) > 5) {
@@ -2446,77 +2550,83 @@
     isDraggingBubble = false;
   }
 
-  // 滑鼠事件
-  floatTranslateBubble.addEventListener("mousedown", (e) => {
-    onDragStart(e.clientX, e.clientY);
-  });
-  window.addEventListener("mousemove", (e) => {
-    onDragMove(e.clientX, e.clientY);
-  });
-  window.addEventListener("mouseup", onDragEnd);
+  if (floatTranslateBubble) {
+    floatTranslateBubble.addEventListener("mousedown", (e) => onDragStart(e.clientX, e.clientY));
+    window.addEventListener("mousemove", (e) => onDragMove(e.clientX, e.clientY));
+    window.addEventListener("mouseup", onDragEnd);
 
-  // 觸控事件
-  floatTranslateBubble.addEventListener("touchstart", (e) => {
-    const touch = e.touches[0];
-    onDragStart(touch.clientX, touch.clientY);
-  }, { passive: true });
-  window.addEventListener("touchmove", (e) => {
-    if (!isDraggingBubble) return;
-    const touch = e.touches[0];
-    onDragMove(touch.clientX, touch.clientY);
-  }, { passive: true });
-  window.addEventListener("touchend", onDragEnd);
+    floatTranslateBubble.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      onDragStart(touch.clientX, touch.clientY);
+    }, { passive: true });
+    window.addEventListener("touchmove", (e) => {
+      if (!isDraggingBubble) return;
+      const touch = e.touches[0];
+      onDragMove(touch.clientX, touch.clientY);
+    }, { passive: true });
+    window.addEventListener("touchend", onDragEnd);
 
-  // 點擊切換展開（拖曳移動時不觸發）
-  floatTranslateBubble.addEventListener("click", () => {
-    if (hasMovedBubble) return;
-    const isHidden = floatTranslatePanel.classList.toggle("hidden");
-    if (!isHidden) {
-      // 讓展開面板自動靠近懸浮球位置，且不溢出邊界
-      const rect = floatTranslateBubble.getBoundingClientRect();
-      const panelWidth = Math.min(340, window.innerWidth - 30);
-      let targetLeft = rect.left - panelWidth + 20;
-      if (targetLeft < 10) targetLeft = 10;
-      if (targetLeft + panelWidth > window.innerWidth - 10) {
-        targetLeft = window.innerWidth - panelWidth - 10;
+    floatTranslateBubble.addEventListener("click", () => {
+      if (hasMovedBubble || !floatTranslatePanel) return;
+      const isHidden = floatTranslatePanel.classList.toggle("hidden");
+      if (!isHidden) {
+        const rect = floatTranslateBubble.getBoundingClientRect();
+        const panelWidth = Math.min(340, window.innerWidth - 30);
+        let targetLeft = rect.left - panelWidth + 20;
+        if (targetLeft < 10) targetLeft = 10;
+        if (targetLeft + panelWidth > window.innerWidth - 10) {
+          targetLeft = window.innerWidth - panelWidth - 10;
+        }
+        let targetTop = rect.top - 200;
+        if (targetTop < 60) targetTop = 60;
+        if (targetTop + 380 > window.innerHeight - 10) {
+          targetTop = window.innerHeight - 390;
+        }
+        floatTranslatePanel.style.left = `${targetLeft}px`;
+        floatTranslatePanel.style.top = `${targetTop}px`;
+        floatTranslatePanel.style.right = 'auto';
+        floatTranslatePanel.style.bottom = 'auto';
+        if (floatInputText) floatInputText.focus();
       }
-      let targetTop = rect.top - 200;
-      if (targetTop < 60) targetTop = 60;
-      if (targetTop + 380 > window.innerHeight - 10) {
-        targetTop = window.innerHeight - 390;
+    });
+  }
+
+  if (btnCloseFloatPanel && floatTranslatePanel) {
+    btnCloseFloatPanel.addEventListener("click", () => floatTranslatePanel.classList.add("hidden"));
+  }
+
+  if (btnExecTranslate) {
+    btnExecTranslate.addEventListener("click", async () => {
+      const text = floatInputText ? floatInputText.value.trim() : "";
+      if (!text) return;
+      try {
+        const ai = getGenAIClient();
+        const res = await ai.models.generateContent({
+          model: FLASH_MODEL,
+          contents: `精確翻譯並給出 1 個道地口語例句：${text}`
+        });
+        if (floatResultText) floatResultText.textContent = res.text.trim();
+        if (floatResultBox) floatResultBox.classList.remove("hidden");
+      } catch (e) {
+        if (floatResultText) floatResultText.textContent = "翻譯失敗";
+        if (floatResultBox) floatResultBox.classList.remove("hidden");
       }
-      floatTranslatePanel.style.left = `${targetLeft}px`;
-      floatTranslatePanel.style.top = `${targetTop}px`;
-      floatTranslatePanel.style.right = 'auto';
-      floatTranslatePanel.style.bottom = 'auto';
-      floatInputText.focus();
-    }
-  });
-  btnCloseFloatPanel.addEventListener("click", () => floatTranslatePanel.classList.add("hidden"));
+    });
+  }
 
-  btnExecTranslate.addEventListener("click", async () => {
-    const text = floatInputText.value.trim();
-    if (!text) return;
-    try {
-      const ai = getGenAIClient();
-      const res = await ai.models.generateContent({
-        model: FLASH_MODEL,
-        contents: `精確翻譯並給出 1 個道地口語例句：${text}`
-      });
-      floatResultText.textContent = res.text.trim();
-      floatResultBox.classList.remove("hidden");
-    } catch (e) {
-      floatResultText.textContent = "翻譯失敗";
-      floatResultBox.classList.remove("hidden");
-    }
-  });
+  const btnSpeakInputNatural = document.getElementById("btn-speak-input-natural");
+  if (btnSpeakInputNatural) {
+    btnSpeakInputNatural.addEventListener("click", () => {
+      if (floatInputText) speakSingleSentence(floatInputText.value.trim());
+    });
+  }
 
-  document.getElementById("btn-speak-input-natural").addEventListener("click", () => {
-    speakSingleSentence(floatInputText.value.trim());
-  });
-  document.getElementById("btn-speak-result-natural").addEventListener("click", () => {
-    speakSingleSentence(floatResultText.textContent.trim());
-  });
+  const btnSpeakResultNatural = document.getElementById("btn-speak-result-natural");
+  if (btnSpeakResultNatural) {
+    btnSpeakResultNatural.addEventListener("click", () => {
+      if (floatResultText) speakSingleSentence(floatResultText.textContent.trim());
+    });
+  }
   </script>
 </body>
 </html>
