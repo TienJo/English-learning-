@@ -1932,6 +1932,12 @@
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           speakSingleSentence(pureEn);
+        });
+        li.appendChild(btn);
+      }
+    });
+  }
+
   // 清洗與標準化 Markdown 文字，消除無法正常解析的殘留 ** 符號與彩色 Emoji
   function cleanMarkdownFormatting(rawText) {
     if (!rawText) return "";
