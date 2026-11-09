@@ -1763,19 +1763,63 @@
 
   function enhanceEnglishSentencesWithSpeech(container) {
     if (!container) return;
+
+    // 計算英文單字個數
+    function countEnglishWords(str) {
+      if (!str) return 0;
+      const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
+      return clean.split(/\s+/).filter(Boolean).length;
+    }
+
+    // 計算中文字個數
+    function countChineseChars(str) {
+      if (!str) return 0;
+      const matches = str.match(/[\u4e00-\u9fa5]/g);
+      return matches ? matches.length : 0;
+    }
+
+    // 清除開頭標號與標籤（如 "1.", "Be going to:", "Will:", "例句：" 等）
     function extractPureEnglish(str) {
       if (!str) return "";
       let clean = str.replace(/<[^>]*>/g, '').trim();
       clean = clean.replace(/^[0-9]+[.)]\s*/, '');
-      clean = clean.replace(/^(?:例句|例|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '');
+      clean = clean.replace(/^(?:例句|例|語塊|句型|說明|解析|翻譯|註解)?\s*[:：]\s*/i, '');
+      // 清除開頭單純的文法術語標題（例如 "Be going to:" 或 "Will:"）
+      clean = clean.replace(/^[A-Za-z\s/()_-]+[:：]\s*/i, '');
       clean = clean.replace(/[\u4e00-\u9fa5]/g, '').trim();
       return clean.replace(/^["“]|["”]$/g, '').trim();
     }
 
+    // 檢查是否為「真正可朗讀的完整英文例句」
+    function isValidEnglishSentence(rawText) {
+      if (!rawText) return false;
+
+      const zhCount = countChineseChars(rawText);
+      const pureEn = extractPureEnglish(rawText);
+      const enWordCount = countEnglishWords(pureEn);
+
+      // 1. 若提取出的英文字詞小於 3 個單字（例如僅 "Be going to"、"Will"、"At least" 等片語），不視為完整句子
+      if (enWordCount < 3) return false;
+
+      // 2. 若整行文字幾乎全是中文（中文字數量遠大於英文字數，且無獨立英語子句），不應視為英文句子
+      if (zhCount > 10 && enWordCount < 5) {
+        // 檢查是否有包含在引號內的獨立英文子句，如 "I am going to leave."
+        const quotedEn = rawText.match(/["“]([A-Za-z\s',.!?]{10,})["”]/);
+        if (!quotedEn) return false;
+      }
+
+      // 3. 避免公式代號或文法代稱（如 Subject + verb + object）
+      if (/\b(subject|verb|object|modal|noun|adj|adv)\s*\+/i.test(pureEn)) return false;
+
+      return true;
+    }
+
     container.querySelectorAll("li").forEach(li => {
       if (li.querySelector(".inline-sentence-speaker")) return;
-      const pureEn = extractPureEnglish(li.textContent);
-      if (pureEn && pureEn.split(/\s+/).length >= 3) {
+      const rawText = li.textContent.trim();
+
+      if (isValidEnglishSentence(rawText)) {
+        const pureEn = extractPureEnglish(rawText);
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "inline-sentence-speaker";
