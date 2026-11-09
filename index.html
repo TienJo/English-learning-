@@ -47,6 +47,14 @@
       --lh-title: 1.35;
     }
 
+    #study-day-title {
+      font-size: var(--fs-h1) !important;
+      font-weight: 700 !important;
+      color: var(--c-black);
+      line-height: var(--lh-title);
+      letter-spacing: -0.015em;
+    }
+
     /* ===================================================
        全域滾動條樣式：底色深咖啡色 + 滾鈕粉色
        注意：不使用 scrollbar-color 避免瀏覽器啟用原生系統樣式覆蓋 webkit
@@ -58,8 +66,8 @@
     /* WebKit (Chrome, Edge, Safari, 內嵌 WebView) 強制覆寫滾動條 */
     ::-webkit-scrollbar,
     *::-webkit-scrollbar {
-      width: 8px !important;
-      height: 8px !important;
+      width: 14px !important;
+      height: 14px !important;
       background-color: var(--c-brown) !important;
     }
     
@@ -68,6 +76,7 @@
       background: var(--c-brown) !important;
       background-color: var(--c-brown) !important;
       border-radius: 9999px !important;
+      border: 1px solid var(--c-brown-light) !important;
     }
 
     ::-webkit-scrollbar-thumb,
@@ -75,13 +84,14 @@
       background: var(--c-nude) !important;
       background-color: var(--c-nude) !important;
       border-radius: 9999px !important;
-      border: 1.5px solid var(--c-brown) !important;
+      border: 2.5px solid var(--c-brown) !important;
     }
 
     ::-webkit-scrollbar-thumb:hover,
     *::-webkit-scrollbar-thumb:hover {
       background: var(--c-nude-light) !important;
       background-color: var(--c-nude-light) !important;
+      border-color: var(--c-brown) !important;
     }
 
     ::-webkit-scrollbar-corner,
@@ -861,7 +871,7 @@
               </button>
               <div class="lecture-title-area">
                 <span id="lecture-day-tag" style="font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown);">DAY 1</span>
-                <div id="study-day-title" style="font-size: var(--fs-h2); font-weight: 600; color: var(--c-black); line-height: 1.3;">教材標題</div>
+                <div id="study-day-title" style="font-size: var(--fs-h1); font-weight: 700; color: var(--c-black); line-height: 1.3;">教材標題</div>
               </div>
             </div>
             <div>
@@ -1728,14 +1738,18 @@
     triggerBtn.disabled = true;
     try {
       const ai = getGenAIClient();
-      const prompt = `規劃 ${daysValue} 天的每日英文學習大綱，目標為「${goal}」。每日主題包含核心句構與口語語塊。輸出為純 JSON 字串陣列，例如：["Day 1: 主題名稱", "Day 2: 主題名稱"]。`;
+      const prompt = `規劃 ${daysValue} 天的每日英文學習大綱，目標為「${goal}」。每日主題包含核心句構與口語語塊。
+輸出要求：
+1. 為純 JSON 字串陣列，例如：["主題名稱 (核心句構...)", "主題名稱 (語塊...)"]。
+2. 【特別注意】：陣列內容「嚴禁」包含 "Day 1:", "Day 2:", "第1天:" 等前綴標籤，因為系統介面已自帶天數標籤，請直接輸出純主題內容！`;
       const res = await ai.models.generateContent({
         model: getActiveLectureModel(),
         contents: prompt,
         config: { responseMimeType: "application/json" }
       });
 
-      const plan = JSON.parse(res.text.trim());
+      const rawPlan = JSON.parse(res.text.trim());
+      const plan = rawPlan.map(cleanTitleDayPrefix);
       const newId = "proj_" + Date.now();
       state.appData.projects[newId] = {
         id: newId,
@@ -1814,8 +1828,8 @@
 
     const allCards = getAllProjectFlashcards(currentProj);
     if (badgeProjectTotalVocab) badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
-
-    currentProj.plan.forEach((title, idx) => {
+    currentProj.plan.forEach((rawTitle, idx) => {
+      const title = cleanTitleDayPrefix(rawTitle);
       const isCompleted = history[idx]?.completed;
       if (isCompleted) completedCount++;
       const isCurrent = idx === currentActiveIndex;
@@ -1943,6 +1957,12 @@
     return text;
   }
 
+  // 移除標題開頭重複的 "Day X:" 或 "第X天：" 等前綴
+  function cleanTitleDayPrefix(title) {
+    if (!title) return "";
+    return title.replace(/^(?:Day\s*\d+|第\s*\d+\s*天)\s*[:：\-–—\s]\s*/i, '').trim();
+  }
+
   function renderMarkdownContent(targetElem, text) {
     if (!text) return targetElem.innerHTML = "";
     const cleanedText = cleanMarkdownFormatting(text);
@@ -1967,7 +1987,8 @@
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
     const projectGoal = currentProj.goal || "英文學習";
-    const title = currentProj.plan[dayIdx];
+    const rawTitle = currentProj.plan[dayIdx];
+    const title = cleanTitleDayPrefix(rawTitle);
     studyDayTitle.textContent = title;
     lectureDayTag.textContent = `DAY ${dayIdx + 1}`;
 
