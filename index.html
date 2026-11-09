@@ -548,6 +548,40 @@
     .float-panel-body { padding: 16px; }
     .voice-avatar-badge { background: #fff; color: var(--ink); border: 1.5px solid var(--ink); font-weight: 700; }
     #float-result-box { border-radius: 18px !important; }
+
+    /* ===== 字級階序（講義內容）=====
+       H1 26 / H2 21 / H3 17 / H4 15 / 內文 15.5 / 表格 14 / 註解 13 */
+    .lecture-content { font-size: 15.5px; line-height: 1.85; color: #2a2a28; letter-spacing: 0; }
+    .lecture-content p { margin: 0 0 14px; }
+    .lecture-content h1, .lecture-content h2, .lecture-content h3, .lecture-content h4 { text-transform: none; line-height: 1.4; letter-spacing: -0.01em; color: var(--ink); }
+    .lecture-content h1 { font-size: 26px; font-weight: 900; margin: 28px 0 14px; }
+    .lecture-content h2 { font-size: 21px; font-weight: 900; margin: 36px 0 14px; padding-bottom: 8px; border-bottom: 3px solid var(--ink); }
+    .lecture-content h3 { font-size: 17px; font-weight: 800; margin: 26px 0 10px; padding-left: 10px; border-left: 5px solid var(--yellow); }
+    .lecture-content h4 { font-size: 15px; font-weight: 800; margin: 20px 0 8px; }
+    .lecture-content strong { font-weight: 800; color: var(--ink); }
+    .lecture-content ul, .lecture-content ol { margin: 0 0 16px; padding-left: 24px; }
+    .lecture-content li { margin-bottom: 6px; }
+    .lecture-content table { font-size: 14px; line-height: 1.6; }
+    .lecture-content th { font-size: 13px; font-weight: 800; letter-spacing: .02em; }
+    .lecture-content code { font-size: 13px; }
+    .lecture-content blockquote { font-size: 14px; line-height: 1.7; padding: 14px 20px; }
+    .lecture-content hr { border: none; border-top: 1.5px solid var(--line); margin: 24px 0; }
+
+    /* 頁首：DAY 標籤 → 標題 */
+    .lecture-title-area { gap: 2px; }
+    .lecture-title-area > * { text-transform: none; }
+    .lecture-title-area div:first-child, .lecture-title-area span:first-child { color: var(--mute) !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: .08em; text-transform: uppercase; }
+    .lecture-title-area h2, .lecture-title-area h3, .lecture-title-area div:nth-child(2) { font-size: 18px !important; font-weight: 900 !important; line-height: 1.35; letter-spacing: -0.01em; color: var(--ink) !important; }
+
+    /* 其他卡片標題：中文為主，不強制大寫、縮小字級 */
+    .card-title { font-size: 16px; text-transform: none; line-height: 1.4; }
+    .tab-btn { font-size: 13px; text-transform: none; }
+    .modal-box h3, .empty-state-card h2 { text-transform: none; }
+    .empty-state-card h2 { font-size: 28px; }
+    #section-auth h2 { font-size: 30px; line-height: 1.2; text-transform: none; }
+    .dashboard-header h2 { font-size: 30px; line-height: 1.2; text-transform: none; }
+    .interactive-header { text-transform: none; font-size: 13px; letter-spacing: 0; }
+    .fc-word { text-transform: none; }
   </style>
 </head>
 <body>
