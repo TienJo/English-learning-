@@ -48,39 +48,54 @@
     }
 
     /* ===================================================
-       全域滾動條樣式：底色咖啡色 + 滾鈕粉色
+       全域滾動條樣式：底色深咖啡色 + 滾鈕粉色
+       注意：不使用 scrollbar-color 避免瀏覽器啟用原生系統樣式覆蓋 webkit
        =================================================== */
-    /* Firefox 標準屬性 */
     * {
       box-sizing: border-box;
-      scrollbar-width: thin;
-      scrollbar-color: var(--c-nude) var(--c-brown);
     }
 
-    /* WebKit (Chrome, Edge, Safari) 自訂滾動條 */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+    /* WebKit (Chrome, Edge, Safari, 內嵌 WebView) 強制覆寫滾動條 */
+    ::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      width: 8px !important;
+      height: 8px !important;
+      background-color: var(--c-brown) !important;
     }
-    ::-webkit-scrollbar-track {
-      background: var(--c-brown);
-      border-radius: 9999px;
+    
+    ::-webkit-scrollbar-track,
+    *::-webkit-scrollbar-track {
+      background: var(--c-brown) !important;
+      background-color: var(--c-brown) !important;
+      border-radius: 9999px !important;
     }
-    ::-webkit-scrollbar-thumb {
-      background: var(--c-nude);
-      border-radius: 9999px;
-      border: 1.5px solid var(--c-brown);
+
+    ::-webkit-scrollbar-thumb,
+    *::-webkit-scrollbar-thumb {
+      background: var(--c-nude) !important;
+      background-color: var(--c-nude) !important;
+      border-radius: 9999px !important;
+      border: 1.5px solid var(--c-brown) !important;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--c-nude-light);
+
+    ::-webkit-scrollbar-thumb:hover,
+    *::-webkit-scrollbar-thumb:hover {
+      background: var(--c-nude-light) !important;
+      background-color: var(--c-nude-light) !important;
     }
-    ::-webkit-scrollbar-corner {
-      background: var(--c-brown);
+
+    ::-webkit-scrollbar-corner,
+    *::-webkit-scrollbar-corner {
+      background: var(--c-brown) !important;
     }
-    ::-webkit-scrollbar-button {
-      display: none;
-      width: 0;
-      height: 0;
+
+    /* 徹底隱藏與清除上下的箭頭按鈕 */
+    ::-webkit-scrollbar-button,
+    *::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
     }
 
     html, body { 
