@@ -47,7 +47,42 @@
       --lh-title: 1.35;
     }
 
-    * { box-sizing: border-box; }
+    /* ===================================================
+       全域滾動條樣式：底色咖啡色 + 滾鈕粉色
+       =================================================== */
+    /* Firefox 標準屬性 */
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: var(--c-nude) var(--c-brown);
+    }
+
+    /* WebKit (Chrome, Edge, Safari) 自訂滾動條 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--c-brown);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--c-nude);
+      border-radius: 9999px;
+      border: 1.5px solid var(--c-brown);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--c-nude-light);
+    }
+    ::-webkit-scrollbar-corner {
+      background: var(--c-brown);
+    }
+    ::-webkit-scrollbar-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
     html, body { 
       height: 100vh; 
       max-height: 100vh; 
