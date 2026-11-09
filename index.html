@@ -581,138 +581,72 @@
       flex-direction: column; 
       gap: 12px; 
       background: var(--c-nude-light); 
-      min-height: 0; 
-      height: 100%; 
+      border-color: var(--c-brown); 
+      color: var(--c-brown); 
     }
-    .chat-input-bar { 
-      padding: 14px 18px; 
-      border-top: 1px solid var(--c-line); 
-      background: var(--c-nude); 
-      display: flex; 
-      flex-direction: column; 
-      gap: 10px; 
-      flex-shrink: 0; 
-    }
-
-    .msg { 
-      padding: 12px 16px; 
-      border-radius: 16px; 
-      line-height: var(--lh-text); 
-      max-width: 90%; 
-      font-size: var(--fs-body); 
-      word-break: break-word; 
-    }
-    .msg-bot { 
-      background: var(--c-white); 
-      border: 1px solid var(--c-line); 
-      align-self: flex-start; 
-      color: var(--c-black); 
-    }
-    .msg-user { 
+    .btn-brown { 
       background: var(--c-brown); 
       color: var(--c-white); 
-      align-self: flex-end; 
     }
-    .msg-system { 
-      background: var(--c-nude); 
-      color: var(--c-brown); 
-      border: 1px solid var(--c-line); 
-      align-self: center; 
-      font-size: var(--fs-sm); 
-      padding: 6px 14px; 
-      border-radius: 9999px; 
-      text-align: center; 
+    .btn-brown:hover { 
+      background: var(--c-black); 
+      color: var(--c-white); 
     }
-
-    /* 表單控件 */
-    input:not([type=checkbox]):not([type=range]), textarea, select { 
-      border: 1px solid var(--c-line); 
-      border-radius: 12px; 
+    .btn-outline { 
       background: var(--c-white); 
       color: var(--c-black); 
-      font-family: inherit; 
-      font-size: var(--fs-body);
-      padding: 10px 14px;
-      transition: border-color 0.15s ease;
-    }
-    input:focus, textarea:focus, select:focus { 
-      outline: none; 
-      border-color: var(--c-black); 
-    }
-
-    /* 單字卡片 */
-    .flashcards-toolbar { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 16px; 
-      flex-wrap: wrap; 
-      gap: 8px; 
-    }
-    .flashcards-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-      gap: 14px; 
-    }
-    .flip-card { background: transparent; perspective: 1000px; height: 220px; cursor: pointer; }
-    .flip-card-inner { 
-      position: relative; 
-      width: 100%; 
-      height: 100%; 
-      text-align: left; 
-      transition: transform 0.4s ease; 
-      transform-style: preserve-3d; 
-      border-radius: 16px; 
-    }
-    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-    
-    .flip-card-front, .flip-card-back { 
-      position: absolute; 
-      width: 100%; 
-      height: 100%; 
-      -webkit-backface-visibility: hidden; 
-      backface-visibility: hidden; 
-      border-radius: 16px; 
-      padding: 16px; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: space-between; 
       border: 1px solid var(--c-line); 
     }
-    .flip-card-front { background: var(--c-white); }
-    .flip-card-back { background: var(--c-nude); transform: rotateY(180deg); }
+    .btn-outline:hover { 
+      background: var(--c-nude); 
+      color: var(--c-black); 
+    }
 
-    .fc-word { font-size: var(--fs-h2); font-weight: 600; color: var(--c-black); margin-top: 6px; }
-    .fc-phonetic { font-size: var(--fs-sm); color: var(--c-brown); margin-top: 2px; }
-    .fc-pos { font-size: var(--fs-sm); background: var(--c-nude); color: var(--c-brown); padding: 2px 8px; border-radius: 9999px; align-self: flex-start; margin-top: 6px; }
-    .fc-chunks { font-size: var(--fs-sm); color: var(--c-black); background: var(--c-white); border: 1px solid var(--c-line); padding: 4px 8px; border-radius: 8px; margin-top: 6px; }
-    .fc-meaning { font-size: var(--fs-body); font-weight: 600; color: var(--c-black); margin-bottom: 6px; }
-    .fc-example-box { background: var(--c-white); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--c-line); margin-top: 6px; font-size: var(--fs-sm); line-height: 1.5; }
-    .fc-example-box .ex-en { font-weight: 600; color: var(--c-black); }
-    .fc-example-box .ex-zh { color: #666; margin-top: 2px; }
-    
-    .fc-status-badge { font-size: var(--fs-sm); font-weight: 500; padding: 2px 8px; border-radius: 9999px; }
-    .fc-status-0 { background: var(--c-line); color: var(--c-black); }
-    .fc-status-1 { background: var(--c-nude); color: var(--c-brown); border: 1px solid var(--c-line); }
-    .fc-status-2 { background: var(--c-brown); color: var(--c-white); }
+    /* 講義內文圖示標籤（取代彩色 Emoji，嚴格遵循深咖/淡紫粉 4 色體系） */
+    .doc-icon-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .doc-tag-cross {
+      background: var(--c-brown);
+      color: var(--c-white);
+    }
+    .doc-tag-check {
+      background: var(--c-brown);
+      color: var(--c-nude);
+      border: 1px solid var(--c-line);
+    }
+    .doc-tag-tip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      color: var(--c-brown);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .doc-tag-tip svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: var(--c-brown);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-    /* 刷卡模態 */
-    .study-card-box { width: 500px; max-width: 95%; height: 350px; perspective: 1200px; cursor: pointer; }
-    .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s ease; transform-style: preserve-3d; border-radius: 24px; }
-    .study-card-box.flipped .study-card-inner { transform: rotateY(180deg); }
-    .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid var(--c-line); }
-    .study-card-front { background: var(--c-nude-light); }
-    .study-card-back { background: var(--c-nude); transform: rotateY(180deg); }
-
-    /* 懸浮球與面板 */
-    #float-translate-bubble {
-      position: fixed;
-      right: 18px;
-      top: 62%;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--c-nude);
+    .btn-quiz-compact {
+      background: var(--c-white);
       color: var(--c-black);
       border: 1px solid var(--c-line);
       box-shadow: 0 4px 16px rgba(0,0,0,0.2);
@@ -1924,11 +1858,11 @@
     if (!container) return;
 
     // 計算英文單字個數
-    function countEnglishWords(str) {
-      if (!str) return 0;
-      const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
-      return clean.split(/\s+/).filter(Boolean).length;
-    }
+  function countEnglishWords(str) {
+    if (!str) return 0;
+    const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
+    return clean.split(/\s+/).filter(Boolean).length;
+  }
 
     // 計算中文字個數
     function countChineseChars(str) {
@@ -1998,26 +1932,26 @@
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           speakSingleSentence(pureEn);
-        });
-        li.appendChild(btn);
-      }
-    });
-  }
-
-  // 清洗與標準化 Markdown 文字，消除無法正常解析的殘留 ** 符號
+  // 清洗與標準化 Markdown 文字，消除無法正常解析的殘留 ** 符號與彩色 Emoji
   function cleanMarkdownFormatting(rawText) {
     if (!rawText) return "";
     let text = rawText;
 
-    // 1. 全域消除或替換彩色 Emoji（將 ❌、✅ 轉為極簡文字標記，其餘 Emoji 一律拔除）
-    text = text.replace(/❌/g, '[✕]');
-    text = text.replace(/✅/g, '[✓]');
-    text = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D💡✔✖⚠️✓🎯🎭⚡🎴⚙️🎙️🔊🐢🌐]/gu, '');
+    // 1. 先處理容易殘留的空括號或之前的殘留標記
+    text = text.replace(/\[\s*\]/g, '');
 
-    // 2. 修復星號與全形引號/括號間的空隙，例如 **「意圖的起源」** 或 ** 「內容」 **
+    // 2. 將 ❌、✅、💡 替換為符合 4 色系統的精緻深咖色標籤與向量圖示，不再留下空括號
+    text = text.replace(/❌/g, '<span class="doc-icon-tag doc-tag-cross">✕</span>');
+    text = text.replace(/✅/g, '<span class="doc-icon-tag doc-tag-check">✓</span>');
+    text = text.replace(/(?:💡|🔔|📌)/g, '<span class="doc-tag-tip"><svg viewBox="0 0 24 24"><path d="M9 18h6m-4 4h2M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/></svg></span>');
+
+    // 3. 移除其他不可控的彩色 Emoji，保留文字純淨
+    text = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D🎯🎭⚡🎴⚙️🎙️🔊🐢🌐]/gu, '');
+
+    // 4. 修復星號與全形引號/括號間的空隙，例如 **「意圖的起源」** 或 ** 「內容」 **
     text = text.replace(/\*\*\s*([^\n*]+?)\s*\*\*/g, '<strong>$1</strong>');
 
-    // 3. 修復單邊孤立或異常留空的 ** 符號，直接移除避免污染版面
+    // 5. 修復單邊孤立或異常留空的 ** 符號，直接移除避免污染版面
     text = text.replace(/\*\*/g, '');
 
     return text;
