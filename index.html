@@ -245,41 +245,59 @@
       border-color: var(--c-brown);
     }
 
-    /* 自訂滑桿：高反差深咖軌道 + 明確外框滑塊，確保清晰明顯 */
+    /* 自訂滑桿：軌道加長、行程寬裕、滑塊能確實滑到兩端 */
     input[type=range] {
       -webkit-appearance: none;
       appearance: none;
-      background: rgba(54, 42, 36, 0.35);
-      height: 8px;
+      background: var(--c-white);
+      height: 14px;
       border-radius: 9999px;
       outline: none;
-      border: 1.5px solid var(--c-brown);
+      border: 1px solid var(--c-line);
       cursor: pointer;
+      width: 76px !important;
+      padding: 0;
+      margin: 0;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 14px;
+      border-radius: 9999px;
+      background: var(--c-white);
+      border: none;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: var(--c-brown);
       cursor: pointer;
-      border: 2px solid var(--c-white);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-      transition: transform 0.15s ease, background 0.15s ease;
+      border: 1px solid var(--c-white);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      margin-top: 0;
+      transition: transform 0.12s ease, background 0.12s ease;
     }
     input[type=range]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
+      transform: scale(1.15);
       background: var(--c-black);
     }
+    input[type=range]::-moz-range-track {
+      height: 14px;
+      border-radius: 9999px;
+      background: var(--c-white);
+      border: none;
+    }
     input[type=range]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: var(--c-brown);
       cursor: pointer;
-      border: 2px solid var(--c-white);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      border: 1px solid var(--c-white);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
     }
 
     .btn-hamburger { 
@@ -766,6 +784,50 @@
       border: 1px solid #333;
     }
 
+    /* 講義內文專屬圖示與對錯標籤樣式（限制尺寸避免巨大化） */
+    .doc-tag-tip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      margin-right: 4px;
+      line-height: 1;
+    }
+    .doc-tag-tip svg {
+      width: 15px !important;
+      height: 15px !important;
+      max-width: 15px !important;
+      max-height: 15px !important;
+      stroke: var(--c-brown);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      display: inline-block;
+    }
+    .doc-icon-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-right: 6px;
+      line-height: 1;
+    }
+    .doc-tag-cross {
+      background: var(--c-brown);
+      color: var(--c-white);
+    }
+    .doc-tag-check {
+      background: var(--c-white);
+      color: var(--c-brown);
+      border: 1px solid var(--c-brown);
+    }
+
     /* 懸浮球中的向量地球圖示樣式 */
     .globe-icon {
       width: 22px;
@@ -954,10 +1016,10 @@
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">10+1 測驗</button>
-              <div style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-sm); color: #666;">
+              <div style="display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: #666;">
                 <span>詳盡:</span>
-                <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 50px;">
-                <span id="badge-detail-level" style="font-weight: 600; color: var(--c-brown);">適中</span>
+                <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2">
+                <span id="badge-detail-level" style="font-weight: 600; color: var(--c-brown); min-width: 28px;">適中</span>
               </div>
             </div>
           </div>
@@ -1990,9 +2052,17 @@
     }
 
     container.querySelectorAll("li").forEach(li => {
+      // 1. 若此 li 已有發音按鈕，略過
       if (li.querySelector(".inline-sentence-speaker")) return;
-      const rawText = li.textContent.trim();
 
+      // 2. 關鍵修復：若 li 內部包含子清單 (ul 或 ol)，說明它只是父級分組項目，絕不為其生成額外按鈕
+      if (li.querySelector("ul, ol")) return;
+
+      // 3. 若純粹是中文翻譯括號項目（例如：(它將複雜精緻的節奏...)），直接略過
+      const rawText = li.textContent.trim();
+      if (/^[（(][^()（）]*[\u4e00-\u9fa5]+[^()（）]*[)）]$/.test(rawText)) return;
+
+      // 4. 僅針對終端真正的英文句子生成單一發音按鈕
       if (isValidEnglishSentence(rawText)) {
         const pureEn = extractPureEnglish(rawText);
         if (!pureEn) return;
