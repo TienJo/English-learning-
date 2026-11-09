@@ -143,6 +143,16 @@
       background: var(--c-brown); 
       color: var(--c-white); 
     }
+    .btn-soft-pink {
+      background: #f7f0f3;
+      color: var(--c-black);
+      border: 1px solid var(--c-line);
+    }
+    .btn-soft-pink:hover {
+      background: var(--c-white);
+      border-color: var(--c-brown);
+      color: var(--c-brown);
+    }
     .btn-brown { 
       background: var(--c-brown); 
       color: var(--c-white); 
@@ -856,8 +866,8 @@
           <div class="chat-input-bar">
             <!-- 捷徑列 -->
             <div style="display: flex; gap: 6px;">
-              <button id="btn-trigger-roleplay" class="btn-nude" style="flex: 1; font-size: var(--fs-sm); padding: 6px;">🎭 5 句情境口說 (Roleplay)</button>
-              <button id="btn-trigger-speaking-drill" class="btn-nude" style="flex: 1; font-size: var(--fs-sm); padding: 6px;">⚡ 直覺反射造句訓練</button>
+              <button id="btn-trigger-roleplay" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">🎭 5 句情境口說 (Roleplay)</button>
+              <button id="btn-trigger-speaking-drill" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">⚡ 直覺反射造句訓練</button>
             </div>
             <div id="recording-active-bar" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 8px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-sm); color: var(--c-brown);">
               <span>持續錄音中... 說完請點擊停止</span>
