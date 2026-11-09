@@ -1222,7 +1222,14 @@
       return;
     }
     window.speechSynthesis.cancel();
-    const cleanText = cleanMarkdownForSpeech(sentenceText).replace(/^[0-9]+[.)]\s*/, '').replace(/^"|"$/g, '').trim();
+    let cleanText = cleanMarkdownForSpeech(sentenceText)
+      .replace(/^[0-9]+[.)]\s*/, '')
+      // 過濾常見中文前綴標籤如 "例句："、"例："、"【例句】" 等，避免唸出中文
+      .replace(/^(?:例句|例|例\s*子|【例句】|【例】|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '')
+      .replace(/[\u4e00-\u9fa5]+/g, ' ') // 清除句子中殘留的中文字
+      .replace(/^"|"$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (!cleanText) return;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -1992,36 +1999,52 @@
         while ((match = quoteRegex.exec(text)) !== null) {
           const targetSentence = match[1].trim();
           span.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+    // 精確為 Markdown 渲染後文字中的每一句獨立英文綁定單句點擊發音按鈕
+  function enhanceEnglishSentencesWithSpeech(container) {
+    if (!container) return;
 
-          if (countEnglishWords(targetSentence) >= 3) {
-            const quoteWrapper = document.createElement("span");
-            quoteWrapper.className = "clickable-sentence";
-            quoteWrapper.textContent = `"${match[1]}"`;
-            quoteWrapper.title = "點擊朗讀此句英文";
-            quoteWrapper.addEventListener("click", (e) => {
-              e.stopPropagation();
-              speakSingleSentence(targetSentence);
-            });
+    function countEnglishWords(str) {
+      if (!str) return 0;
+      const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
+      const tokens = clean.split(/\s+/).filter(Boolean);
+      return tokens.length;
+    }
 
-            span.appendChild(quoteWrapper);
-            span.appendChild(createSpeakerBtn(targetSentence));
-          } else {
-            span.appendChild(document.createTextNode(`"${match[1]}"`));
-          }
+    // 清洗並提取純英文字句（自動剔除「例句：」、「例：」等中文字）
+    function extractPureEnglishSentence(str) {
+      if (!str) return "";
+      let clean = str.replace(/<[^>]*>/g, '').trim();
+      clean = clean.replace(/^[0-9]+[.)]\s*/, '');
+      clean = clean.replace(/^(?:例句|例|例\s*子|【例句】|【例】|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '');
+      clean = clean.replace(/[\u4e00-\u9fa5]/g, '').trim();
+      return cleanMarkdownForSpeech(clean).replace(/^["“]|["”]$/g, '').trim();
+    }
 
-          lastIndex = quoteRegex.lastIndex;
-        }
+    function isEnglishSentence(str) {
+      if (!str) return false;
+      const cleanEn = extractPureEnglishSentence(str);
+      const enWords = countEnglishWords(cleanEn);
+      return enWords >= 3 && /[A-Za-z]/.test(cleanEn);
+    }
 
-        span.appendChild(document.createTextNode(text.substring(lastIndex)));
-        if (node.parentNode) {
-          node.parentNode.replaceChild(span, node);
-        }
-      }
-    });
+    function createSpeakerBtn(textToSpeak) {
+      const spkBtn = document.createElement("button");
+      spkBtn.type = "button";
+      spkBtn.className = "inline-sentence-speaker";
+      spkBtn.textContent = "🔊";
+      spkBtn.title = "朗讀此句英文（純英發音）";
+      spkBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        speakSingleSentence(textToSpeak);
+      });
+      return spkBtn;
+    }
 
+    // 1. 針對清單項目 <li> (例如：例句：I've been so busy... going to get around to answering...)
     container.querySelectorAll("li").forEach(li => {
       if (li.querySelector(".inline-sentence-speaker")) return;
 
+      // 若有子清單，只取主層文字判定
       let mainText = "";
       const childUl = li.querySelector("ul, ol");
       if (childUl) {
@@ -2033,22 +2056,11 @@
         mainText = li.textContent.trim();
       }
 
-      mainText = mainText.replace(/^[0-9]+[.)]\s*/, '').trim();
-
-      if (isEnglishSentence(mainText)) {
-        const cleanEn = cleanMarkdownForSpeech(mainText).replace(/^["“]|["”]$/g, '').trim();
-        const spkBtn = createSpeakerBtn(cleanEn);
-
-        const strong = li.querySelector("strong");
-        if (strong && isEnglishSentence(strong.textContent)) {
-          strong.classList.add("clickable-sentence");
-          strong.title = "點擊朗讀此句英文";
-          strong.addEventListener("click", (e) => {
-            e.stopPropagation();
-            speakSingleSentence(cleanEn);
-          });
-          strong.after(spkBtn);
-        } else if (childUl) {
+      const pureEn = extractPureEnglishSentence(mainText);
+      if (pureEn && countEnglishWords(pureEn) >= 3) {
+        const spkBtn = createSpeakerBtn(pureEn);
+        // 統一放到該行末端（若有子列表則放在子列表前，保證位於本句末尾）
+        if (childUl) {
           childUl.before(spkBtn);
         } else {
           li.appendChild(spkBtn);
@@ -2056,21 +2068,16 @@
       }
     });
 
+    // 2. 針對段落 <p>
     container.querySelectorAll("p").forEach(p => {
       if (p.querySelector(".inline-sentence-speaker")) return;
       if (p.closest("li")) return;
 
       const rawText = p.textContent.trim();
-      const labelMatch = rawText.match(/(?:【[^】]+】|「[^」]+」|:\s*|：\s*)([A-Za-z0-9\s,'’.\-!?]{10,})/i);
-      if (labelMatch && isEnglishSentence(labelMatch[1])) {
-        const enSentence = labelMatch[1].trim();
-        const spkBtn = createSpeakerBtn(enSentence);
-        p.appendChild(spkBtn);
-        return;
-      }
+      const pureEn = extractPureEnglishSentence(rawText);
 
-      if (isEnglishSentence(rawText) && !rawText.startsWith("💡") && !rawText.startsWith("提示")) {
-        const spkBtn = createSpeakerBtn(cleanMarkdownForSpeech(rawText));
+      if (pureEn && countEnglishWords(pureEn) >= 3 && !rawText.startsWith("💡") && !rawText.startsWith("提示")) {
+        const spkBtn = createSpeakerBtn(pureEn);
         p.appendChild(spkBtn);
       }
     });
