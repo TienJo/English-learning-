@@ -245,38 +245,41 @@
       border-color: var(--c-brown);
     }
 
-    /* 自訂滑桿：消除瀏覽器預設亮藍色 */
+    /* 自訂滑桿：高反差深咖軌道 + 明確外框滑塊，確保清晰明顯 */
     input[type=range] {
       -webkit-appearance: none;
       appearance: none;
-      background: var(--c-nude);
-      height: 6px;
+      background: rgba(54, 42, 36, 0.35);
+      height: 8px;
       border-radius: 9999px;
       outline: none;
-      border: 1px solid var(--c-line);
+      border: 1.5px solid var(--c-brown);
+      cursor: pointer;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: var(--c-brown);
       cursor: pointer;
-      border: 2px solid var(--c-nude-light);
-      transition: transform 0.15s ease;
+      border: 2px solid var(--c-white);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      transition: transform 0.15s ease, background 0.15s ease;
     }
     input[type=range]::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
+      transform: scale(1.2);
       background: var(--c-black);
     }
     input[type=range]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: var(--c-brown);
       cursor: pointer;
-      border: 2px solid var(--c-nude-light);
+      border: 2px solid var(--c-white);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     }
 
     .btn-hamburger { 
@@ -2006,10 +2009,15 @@
     if (!rawText) return "";
     let text = rawText;
 
-    // 1. 修復星號與全形引號/括號間的空隙，例如 **「意圖的起源」** 或 ** 「內容」 **
+    // 1. 全域消除或替換彩色 Emoji（將 ❌、✅ 轉為極簡文字標記，其餘 Emoji 一律拔除）
+    text = text.replace(/❌/g, '[✕]');
+    text = text.replace(/✅/g, '[✓]');
+    text = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D💡✔✖⚠️✓🎯🎭⚡🎴⚙️🎙️🔊🐢🌐]/gu, '');
+
+    // 2. 修復星號與全形引號/括號間的空隙，例如 **「意圖的起源」** 或 ** 「內容」 **
     text = text.replace(/\*\*\s*([^\n*]+?)\s*\*\*/g, '<strong>$1</strong>');
 
-    // 2. 修復單邊孤立或異常留空的 ** 符號，直接移除避免污染版面
+    // 3. 修復單邊孤立或異常留空的 ** 符號，直接移除避免污染版面
     text = text.replace(/\*\*/g, '');
 
     return text;
@@ -2071,6 +2079,7 @@
 
 【格式排版特別要求】：
 - 嚴格使用乾淨規範的 Markdown 語法。
+- 【嚴格禁令】：嚴禁使用任何 Emoji 表情符號（如 💡、❌、✅ 等），錯誤對照請直接以「錯誤說法：」、「道地說法：」純文字呈現。
 - 嚴禁在中文標點符號、括號（如「」、（））邊緣產生不合規的 ** 星號加粗符號，請保持文字乾淨清爽。`;
 
       try {
