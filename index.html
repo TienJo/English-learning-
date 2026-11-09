@@ -1858,9 +1858,24 @@
     });
   }
 
+  // 清洗與標準化 Markdown 文字，消除無法正常解析的殘留 ** 符號
+  function cleanMarkdownFormatting(rawText) {
+    if (!rawText) return "";
+    let text = rawText;
+
+    // 1. 修復星號與全形引號/括號間的空隙，例如 **「意圖的起源」** 或 ** 「內容」 **
+    text = text.replace(/\*\*\s*([^\n*]+?)\s*\*\*/g, '<strong>$1</strong>');
+
+    // 2. 修復單邊孤立或異常留空的 ** 符號，直接移除避免污染版面
+    text = text.replace(/\*\*/g, '');
+
+    return text;
+  }
+
   function renderMarkdownContent(targetElem, text) {
     if (!text) return targetElem.innerHTML = "";
-    targetElem.innerHTML = marked.parse(text);
+    const cleanedText = cleanMarkdownFormatting(text);
+    targetElem.innerHTML = marked.parse(cleanedText);
     enhanceEnglishSentencesWithSpeech(targetElem);
   }
 
@@ -1903,7 +1918,10 @@
 2. 5~7 個日常高頻口語搭配詞（Collocations），每個皆附英文例句與翻譯
 3. 2~3 組中式英文（Chinglish）避坑對照
 4. 實用日常跟讀對話與金句庫
-格式使用乾淨清晰的標準 Markdown。`;
+
+【格式排版特別要求】：
+- 嚴格使用乾淨規範的 Markdown 語法。
+- 嚴禁在中文標點符號、括號（如「」、（））邊緣產生不合規的 ** 星號加粗符號，請保持文字乾淨清爽。`;
 
       try {
         const ai = getGenAIClient();
