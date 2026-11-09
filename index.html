@@ -245,6 +245,40 @@
       border-color: var(--c-brown);
     }
 
+    /* 自訂滑桿：消除瀏覽器預設亮藍色 */
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--c-nude);
+      height: 6px;
+      border-radius: 9999px;
+      outline: none;
+      border: 1px solid var(--c-line);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--c-brown);
+      cursor: pointer;
+      border: 2px solid var(--c-nude-light);
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: var(--c-black);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--c-brown);
+      cursor: pointer;
+      border: 2px solid var(--c-nude-light);
+    }
+
     .btn-hamburger { 
       background: var(--c-nude); 
       border: none; 
@@ -258,7 +292,7 @@
     }
     body.in-study-mode .btn-hamburger { display: inline-flex; }
 
-    /* 單句發音按鈕：極簡低干擾標籤 */
+    /* 單句發音按鈕：極簡低干擾標籤，純單色深咖向量圖示 */
     .inline-sentence-speaker {
       display: inline-flex;
       align-items: center;
@@ -273,11 +307,17 @@
       margin-left: 8px;
       vertical-align: middle;
       line-height: 1;
+      gap: 3px;
       transition: all 0.15s ease;
     }
     .inline-sentence-speaker:hover {
       background: var(--c-brown);
       color: var(--c-white);
+    }
+    .inline-sentence-speaker svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
     }
 
     /* 側邊欄 */
@@ -747,6 +787,18 @@
       border: 1px solid #333;
     }
 
+    /* 懸浮球中的向量地球圖示樣式 */
+    .globe-icon {
+      width: 22px;
+      height: 22px;
+      stroke: var(--c-brown);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      display: block;
+    }
+
     .typing-indicator span { 
       width: 5px; 
       height: 5px; 
@@ -767,7 +819,7 @@
     </div>
     <div id="header-right" class="hidden" style="display: flex; align-items: center; gap: 10px;">
       <span class="status-badge" id="cloud-status">Google Drive 已連線</span>
-      <button id="btn-open-settings-modal" class="btn-nude" title="偏好設定">⚙️ 設定</button>
+      <button id="btn-open-settings-modal" class="btn-nude" title="偏好設定">設定</button>
     </div>
   </header>
 
@@ -782,7 +834,7 @@
 
     <!-- 方案一：免登入 -->
     <div style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 16px; padding: 20px; margin-bottom: 16px;">
-      <div style="font-weight: 600; color: var(--c-black); font-size: var(--fs-body); margin-bottom: 4px;">⚡ 免登入直接學習（推薦）</div>
+      <div style="font-weight: 600; color: var(--c-black); font-size: var(--fs-body); margin-bottom: 4px;">免登入直接學習（推薦）</div>
       <p style="font-size: var(--fs-sm); color: var(--c-brown); margin: 0 0 14px 0;">
         立即規劃客製計畫、生成道地例句講義、刷單字卡與 AI 口說實戰。
       </p>
@@ -791,7 +843,7 @@
 
     <!-- 方案二：Google Drive 連線 -->
     <div style="border-top: 1px solid var(--c-line); padding-top: 16px;">
-      <div style="font-weight: 600; color: var(--c-black); font-size: var(--fs-sm); margin-bottom: 4px;">☁️ 連線 Google 雲端硬碟同步</div>
+      <div style="font-weight: 600; color: var(--c-black); font-size: var(--fs-sm); margin-bottom: 4px;">連線 Google 雲端硬碟同步</div>
       <p style="font-size: var(--fs-sm); color: #666; margin-bottom: 12px;">
         跨裝置保存您的學習紀錄與客製單字庫。
       </p>
@@ -852,7 +904,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <button id="btn-project-flashcard-draw" class="btn-nude" title="隨機抽取本計畫所有單元累積的單字進行總複習">
-              <span>🎴 全計畫抽卡複習</span>
+              <span>全計畫抽卡複習</span>
               <span id="badge-project-total-vocab" style="background: var(--c-brown); color: var(--c-white); padding: 1px 6px; border-radius: 9999px; font-size: var(--fs-sm);">0 字</span>
             </button>
           </div>
@@ -875,7 +927,7 @@
               </div>
             </div>
             <div>
-              <button id="btn-start-flashcard-mode" class="btn-brown" style="font-size: var(--fs-sm); padding: 6px 14px;">🎴 刷卡模式</button>
+              <button id="btn-start-flashcard-mode" class="btn-brown" style="font-size: var(--fs-sm); padding: 6px 14px;">刷卡模式</button>
             </div>
           </div>
 
@@ -888,7 +940,7 @@
           <!-- 分頁 1：深度講義 -->
           <div id="tab-pane-lecture" class="tab-content active">
             <div style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">每句英文後方皆附 🔊 單句發音，點選即可跟讀。</span>
+              <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">每句英文後方皆附單句發音標籤，點選即可跟讀。</span>
               <div style="display: flex; gap: 6px; align-items: center;">
                 <span style="font-size: var(--fs-sm); color: var(--c-brown);">語速：</span>
                 <button id="btn-speed-slow" class="btn-outline" style="padding: 2px 8px; font-size: var(--fs-sm);">0.8x 慢速</button>
@@ -904,7 +956,7 @@
           <div id="tab-pane-vocab" class="tab-content">
             <div class="flashcards-toolbar">
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button id="btn-ai-gen-vocab" class="btn-brown" style="font-size: var(--fs-sm);">✨ AI 提煉搭配詞語塊</button>
+                <button id="btn-ai-gen-vocab" class="btn-brown" style="font-size: var(--fs-sm);">AI 提煉搭配詞語塊</button>
                 <button id="btn-add-custom-vocab" class="btn-outline" style="font-size: var(--fs-sm);">+ 手動增卡</button>
               </div>
               <div style="font-size: var(--fs-sm); color: var(--c-brown);">
@@ -922,7 +974,7 @@
               <span>口說助教 & 隨堂練習</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">📝 10+1 測驗</button>
+              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">10+1 測驗</button>
               <div style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-sm); color: #666;">
                 <span>詳盡:</span>
                 <input type="range" id="slider-detail-level" min="1" max="3" step="1" value="2" style="width: 50px;">
@@ -934,16 +986,18 @@
           <div class="chat-input-bar">
             <!-- 捷徑列 -->
             <div style="display: flex; gap: 6px;">
-              <button id="btn-trigger-roleplay" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">🎭 5 句情境口說 (Roleplay)</button>
-              <button id="btn-trigger-speaking-drill" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">⚡ 直覺反射造句訓練</button>
+              <button id="btn-trigger-roleplay" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">5 句情境口說 (Roleplay)</button>
+              <button id="btn-trigger-speaking-drill" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">直覺反射造句訓練</button>
             </div>
             <div id="recording-active-bar" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 8px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-sm); color: var(--c-brown);">
               <span>持續錄音中... 說完請點擊停止</span>
-              <button id="btn-stop-recording-banner" class="btn-brown" style="padding: 2px 8px; font-size: var(--fs-sm);">⏹️ 停止錄音</button>
+              <button id="btn-stop-recording-banner" class="btn-brown" style="padding: 2px 8px; font-size: var(--fs-sm);">停止錄音</button>
             </div>
             <!-- 輸入列 -->
             <div style="display: flex; gap: 6px; align-items: flex-end;">
-              <button id="btn-voice-input" class="btn-soft-pink" title="持續語音輸入" style="height: 38px; width: 42px; padding: 0;">🎙️</button>
+              <button id="btn-voice-input" class="btn-soft-pink" title="持續語音輸入" style="height: 38px; width: 42px; padding: 0;">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+              </button>
               <textarea id="input-message" rows="1" placeholder="問文法、答題後按「發送」、或用語音練習... (Enter 換行)" style="flex: 1; padding: 8px 12px; font-size: var(--fs-body); resize: vertical; min-height: 38px;"></textarea>
               <button id="btn-send-message" class="btn-brown" style="height: 38px; min-width: 68px;">發送</button>
             </div>
@@ -973,8 +1027,8 @@
               語塊載入中...
             </div>
             <div style="display: flex; gap: 8px; margin-top: 16px;">
-              <button id="btn-player-speak-slow" class="btn-outline" style="font-size: var(--fs-sm); padding: 4px 12px;">🐢 慢速</button>
-              <button id="btn-player-speak-front" class="btn-brown" style="font-size: var(--fs-sm); padding: 4px 14px;">🔊 發音</button>
+              <button id="btn-player-speak-slow" class="btn-outline" style="font-size: var(--fs-sm); padding: 4px 12px;">慢速</button>
+              <button id="btn-player-speak-front" class="btn-brown" style="font-size: var(--fs-sm); padding: 4px 14px;">發音</button>
             </div>
           </div>
           <div class="study-card-back">
@@ -985,7 +1039,7 @@
               <div id="player-box-ex1" style="background: var(--c-white); padding: 10px; border-radius: 10px; text-align: left; border: 1px solid var(--c-line);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
                   <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">例句 1</span>
-                  <button id="btn-player-speak-ex1" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">🔊</button>
+                  <button id="btn-player-speak-ex1" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 8px;">發音</button>
                 </div>
                 <div id="player-ex1-en" style="font-size: var(--fs-sm); color: var(--c-black); font-weight: 500; margin-top: 4px;">-</div>
                 <div id="player-ex1-zh" style="font-size: var(--fs-sm); color: #666; margin-top: 2px;">-</div>
@@ -994,14 +1048,14 @@
               <div id="player-box-ex2" style="background: var(--c-white); padding: 10px; border-radius: 10px; text-align: left; border: 1px solid var(--c-line);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
                   <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">例句 2</span>
-                  <button id="btn-player-speak-ex2" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">🔊</button>
+                  <button id="btn-player-speak-ex2" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 8px;">發音</button>
                 </div>
                 <div id="player-ex2-en" style="font-size: var(--fs-sm); color: var(--c-black); font-weight: 500; margin-top: 4px;">-</div>
                 <div id="player-ex2-zh" style="font-size: var(--fs-sm); color: #666; margin-top: 2px;">-</div>
               </div>
             </div>
 
-            <button id="btn-player-speak-all-ex" class="btn-outline" style="margin-top: 10px; font-size: var(--fs-sm); padding: 4px 10px;">🔊 連續跟讀所有例句</button>
+            <button id="btn-player-speak-all-ex" class="btn-outline" style="margin-top: 10px; font-size: var(--fs-sm); padding: 4px 10px;">連續跟讀所有例句</button>
           </div>
         </div>
       </div>
@@ -1028,7 +1082,7 @@
       <div style="display: flex; gap: 6px; margin-top: 4px;">
         <input type="text" id="input-new-word" placeholder="例如：procrastinate" style="flex: 1;">
         <button id="btn-ai-fill-single-vocab" type="button" class="btn-brown" style="white-space: nowrap; font-size: var(--fs-sm);">
-          ✨ AI 補全
+          AI 補全
         </button>
       </div>
 
@@ -1148,12 +1202,15 @@
 
   <!-- 翻譯懸浮球與展開面板 -->
   <div id="float-translate-bubble" title="即時翻譯（可拖曳）">
-    <span>🌐</span>
+    <svg viewBox="0 0 24 24" style="width: 22px; height: 22px; fill: none; stroke: var(--c-brown); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
   </div>
 
   <div id="float-translate-panel" class="hidden">
     <div class="float-panel-header">
-      <h4>🌐 即時翻譯</h4>
+      <h4 style="display: flex; align-items: center; gap: 6px;">
+        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: var(--c-brown); stroke-width: 2;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        即時翻譯
+      </h4>
       <button id="btn-close-float-panel" class="btn-nude" style="padding: 2px 6px;">✕</button>
     </div>
     <div class="float-panel-body">
@@ -1165,13 +1222,13 @@
 
       <div style="display: flex; gap: 6px;">
         <button id="btn-exec-translate" class="btn-brown" style="flex: 1; padding: 6px;">翻譯</button>
-        <button id="btn-speak-input-natural" class="btn-outline" style="padding: 6px 10px;">🔊 朗讀</button>
+        <button id="btn-speak-input-natural" class="btn-outline" style="padding: 6px 10px;">朗讀</button>
       </div>
 
       <div id="float-result-box" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px; margin-top: 4px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
           <span style="font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown);">解析結果</span>
-          <button id="btn-speak-result-natural" class="btn-nude" style="font-size: var(--fs-sm); padding: 2px 6px;">🔊 朗讀</button>
+          <button id="btn-speak-result-natural" class="btn-nude" style="font-size: var(--fs-sm); padding: 2px 6px;">朗讀</button>
         </div>
         <div id="float-result-text" style="font-size: var(--fs-body); color: var(--c-black); line-height: 1.5; white-space: pre-wrap;"></div>
       </div>
@@ -1929,10 +1986,11 @@
 
       if (isValidEnglishSentence(rawText)) {
         const pureEn = extractPureEnglish(rawText);
+        if (!pureEn) return;
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "inline-sentence-speaker";
-        btn.textContent = "🔊";
+        btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg><span>讀</span>`;
         btn.title = "朗讀此句英文";
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -2100,7 +2158,7 @@
         const btnRow = document.createElement("div");
         btnRow.style.cssText = "display: flex; gap: 6px; margin-top: 6px;";
         const enBtn = document.createElement("button");
-        enBtn.textContent = "🔊 朗讀英文";
+        enBtn.textContent = "朗讀英文";
         enBtn.className = "btn-outline";
         enBtn.style.padding = "2px 8px";
         enBtn.style.fontSize = "var(--fs-sm)";
@@ -2227,7 +2285,7 @@
           <div class="flip-card-front">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
               <span class="fc-status-badge fc-status-${card.status || 0}">${['生疏', '模糊', '熟練'][card.status || 0]}</span>
-              <button class="btn-speak-item btn-nude" style="padding: 2px 6px;">🔊</button>
+              <button class="btn-speak-item btn-nude" style="padding: 2px 8px; font-size: var(--fs-sm);">讀</button>
             </div>
             <div>
               <div class="fc-word">${card.word}</div>
