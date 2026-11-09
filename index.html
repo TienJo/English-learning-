@@ -1953,63 +1953,6 @@
       return tokens.length;
     }
 
-    function isEnglishSentence(str) {
-      if (!str) return false;
-      const clean = str.replace(/<[^>]*>/g, '').trim();
-      const cjkCount = (clean.match(/[\u4e00-\u9fa5]/g) || []).length;
-      if (cjkCount > 3) return false;
-      const enWords = countEnglishWords(clean);
-      return enWords >= 3 && /[A-Za-z]/.test(clean);
-    }
-
-    function createSpeakerBtn(textToSpeak) {
-      const spkBtn = document.createElement("button");
-      spkBtn.type = "button";
-      spkBtn.className = "inline-sentence-speaker";
-      spkBtn.textContent = "🔊";
-      spkBtn.title = "朗讀此句英文";
-      spkBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        speakSingleSentence(textToSpeak);
-      });
-      return spkBtn;
-    }
-
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-    const textNodes = [];
-    while (walker.nextNode()) {
-      const node = walker.currentNode;
-      if (node.parentElement && !['SCRIPT', 'STYLE', 'BUTTON', 'CODE', 'PRE'].includes(node.parentElement.tagName)) {
-        if (node.parentElement.closest('button')) continue;
-        textNodes.push(node);
-      }
-    }
-
-    textNodes.forEach(node => {
-      const text = node.nodeValue;
-      if (!text || text.trim().length === 0) return;
-
-      const quoteRegex = /["“]([A-Za-z0-9\s,'’.\-!?]{8,})["”]/g;
-      if (quoteRegex.test(text)) {
-        const span = document.createElement("span");
-        let lastIndex = 0;
-        let match;
-        quoteRegex.lastIndex = 0;
-
-        while ((match = quoteRegex.exec(text)) !== null) {
-          const targetSentence = match[1].trim();
-          span.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
-    // 精確為 Markdown 渲染後文字中的每一句獨立英文綁定單句點擊發音按鈕
-  function enhanceEnglishSentencesWithSpeech(container) {
-    if (!container) return;
-
-    function countEnglishWords(str) {
-      if (!str) return 0;
-      const clean = str.replace(/<[^>]*>/g, ' ').replace(/[^a-zA-Z']/g, ' ').trim();
-      const tokens = clean.split(/\s+/).filter(Boolean);
-      return tokens.length;
-    }
-
     // 清洗並提取純英文字句（自動剔除「例句：」、「例：」等中文字）
     function extractPureEnglishSentence(str) {
       if (!str) return "";
