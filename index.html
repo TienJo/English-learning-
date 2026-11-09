@@ -1252,7 +1252,10 @@
       <div id="float-result-box" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px; margin-top: 4px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
           <span style="font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown);">解析結果</span>
-          <button id="btn-speak-result-natural" class="btn-nude" style="font-size: var(--fs-sm); padding: 2px 6px;">朗讀</button>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <button id="btn-add-float-to-vocab" class="btn-brown" style="font-size: var(--fs-sm); padding: 2px 8px;" title="將此翻譯加入今日單字庫">+ 加入單字卡</button>
+            <button id="btn-speak-result-natural" class="btn-nude" style="font-size: var(--fs-sm); padding: 2px 6px;">朗讀</button>
+          </div>
         </div>
         <div id="float-result-text" style="font-size: var(--fs-body); color: var(--c-black); line-height: 1.5; white-space: pre-wrap;"></div>
       </div>
@@ -2612,6 +2615,7 @@
   const btnExecTranslate = document.getElementById("btn-exec-translate");
   const floatResultBox = document.getElementById("float-result-box");
   const floatResultText = document.getElementById("float-result-text");
+  const btnAddFloatToVocab = document.getElementById("btn-add-float-to-vocab");
 
   let isDraggingBubble = false;
   let hasMovedBubble = false;
@@ -2706,14 +2710,92 @@
       try {
         const ai = getGenAIClient();
         const res = await ai.models.generateContent({
-          model: FLASH_MODEL,
+          model: "gemini-3.1-flash-lite",
           contents: `精確翻譯並給出 1 個道地口語例句：${text}`
         });
-        if (floatResultText) floatResultText.textContent = res.text.trim();
+        if (floatResultText) renderMarkdownContent(floatResultText, res.text.trim());
         if (floatResultBox) floatResultBox.classList.remove("hidden");
       } catch (e) {
         if (floatResultText) floatResultText.textContent = "翻譯失敗";
         if (floatResultBox) floatResultBox.classList.remove("hidden");
+      }
+    });
+  }
+
+  if (btnAddFloatToVocab) {
+    btnAddFloatToVocab.addEventListener("click", async () => {
+      const queryText = floatInputText ? floatInputText.value.trim() : "";
+      if (!queryText) {
+        showToast("請先輸入欲加入單字卡的內容", "error");
+        return;
+      }
+
+      const currentProj = state.appData.projects[state.appData.activeProjectId];
+      if (!currentProj) {
+        showToast("請先選擇或建立一個英文計畫", "error");
+        return;
+      }
+
+      if (state.activeDayIndex === null) {
+        state.activeDayIndex = currentProj.currentDayIndex || 0;
+      }
+
+      if (!currentProj.history[state.activeDayIndex]) {
+        currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+      }
+      if (!currentProj.history[state.activeDayIndex].flashcards) {
+        currentProj.history[state.activeDayIndex].flashcards = [];
+      }
+
+      const origText = btnAddFloatToVocab.textContent;
+      btnAddFloatToVocab.disabled = true;
+      btnAddFloatToVocab.textContent = "加入中...";
+
+      try {
+        let cardMeaning = floatResultText ? floatResultText.textContent.trim().replace(/\s+/g, ' ').slice(0, 100) : "翻譯字詞";
+        let cardWord = queryText;
+        let cardExample = "";
+        let cardExampleZh = "";
+
+        // 若輸入的是英文，嘗試提取例句
+        if (/^[a-zA-Z\s'-]+$/.test(queryText)) {
+          try {
+            const ai = getGenAIClient();
+            const res = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite",
+              contents: `為英文單字或片語「${queryText}」生成簡潔單字卡，輸出 JSON: {"meaning":"繁體中文釋義","example":"英文例句","example_zh":"例句中文翻譯","pos":"詞性","phonetic":"音標"}`,
+              config: { responseMimeType: "application/json" }
+            });
+            const data = JSON.parse(res.text.trim());
+            cardMeaning = data.meaning || cardMeaning;
+            cardExample = data.example || "";
+            cardExampleZh = data.example_zh || "";
+          } catch (err) {}
+        }
+
+        currentProj.history[state.activeDayIndex].flashcards.push({
+          id: "card_" + Date.now(),
+          word: cardWord,
+          phonetic: "",
+          pos: "",
+          collocations: "",
+          meaning: cardMeaning,
+          example: cardExample,
+          example_zh: cardExampleZh,
+          example2: "",
+          example2_zh: "",
+          status: 0
+        });
+
+        await saveProgressToDrive();
+        updateVocabBadgeCount();
+        renderFlashcardsList();
+        showToast(`已成功將「${cardWord}」加入單字卡庫！`, "success");
+      } catch (e) {
+        showToast("加入單字卡失敗：" + e.message, "error");
+      } finally {
+        btnAddFloatToVocab.disabled = false;
+        btnAddFloatToVocab.textContent = origText;
       }
     });
   }
@@ -2728,7 +2810,7 @@
   const btnSpeakResultNatural = document.getElementById("btn-speak-result-natural");
   if (btnSpeakResultNatural) {
     btnSpeakResultNatural.addEventListener("click", () => {
-      if (floatResultText) speakSingleSentence(floatResultText.textContent.trim());
+      if (floatResultText) speakSingleSentence(floatResultText.innerText || floatResultText.textContent);
     });
   }
   </script>
