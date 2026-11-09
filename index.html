@@ -1335,8 +1335,12 @@
     window.speechSynthesis.cancel();
     let cleanText = sentenceText
       .replace(/<[^>]*>/g, '')
+      // 過濾所有常見 Emoji 與特殊符號（避免朗讀出 "cross mark"、"check mark" 等）
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D❌✅💡✔✖⚠️✓]/gu, ' ')
+      // 過濾中英文括號內的補充說明，例如 "(有人敲門)" 或 "（有人敲門）"
+      .replace(/[(（][^()（）]*[\u4e00-\u9fa5]+[^()（）]*[)）]/g, ' ')
       .replace(/^[0-9]+[.)]\s*/, '')
-      .replace(/^(?:例句|例|語塊|句型|說明|解析|翻譯)?\s*[:：]\s*/i, '')
+      .replace(/^(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[/／、]?\s*(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[:：]\s*/i, '')
       .replace(/[\u4e00-\u9fa5]+/g, ' ')
       .replace(/^["“]|["”]$/g, '')
       .replace(/\s+/g, ' ')
@@ -1792,8 +1796,13 @@
     function extractPureEnglish(str) {
       if (!str) return "";
       let clean = str.replace(/<[^>]*>/g, '').trim();
+      // 移除 Emoji 與符號（如 ❌, ✅, 💡）
+      clean = clean.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F\u200D❌✅💡✔✖⚠️✓]/gu, ' ');
+      // 移除帶中文的括號備註，例如 "(有人敲門)"
+      clean = clean.replace(/[(（][^()（）]*[\u4e00-\u9fa5]+[^()（）]*[)）]/g, ' ');
       clean = clean.replace(/^[0-9]+[.)]\s*/, '');
-      clean = clean.replace(/^(?:例句|例|語塊|句型|說明|解析|翻譯|註解)?\s*[:：]\s*/i, '');
+      // 移除「❌ 錯誤/生硬：」、「✅ 道地說法：」、「💡 專家解析：」等前後綴標籤
+      clean = clean.replace(/^(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[/／、]?\s*(?:錯誤|生硬|正確|道地說法|道地|例句|例|語塊|句型|說明|解析|專家解析|翻譯|註解|提示)?\s*[:：]\s*/i, '');
       // 清除開頭單純的文法術語標題（例如 "Be going to:" 或 "Will:"）
       clean = clean.replace(/^[A-Za-z\s/()_-]+[:：]\s*/i, '');
       clean = clean.replace(/[\u4e00-\u9fa5]/g, '').trim();
@@ -1803,6 +1812,11 @@
     // 檢查是否為「真正可朗讀的完整英文例句」
     function isValidEnglishSentence(rawText) {
       if (!rawText) return false;
+
+      // 若該行帶有「解析」、「說明」、「提示」等字眼，純粹為語法解釋，不論是否夾帶英文都不附加喇叭
+      if (/(?:專家解析|解析|說明|註解|提示|概念)/i.test(rawText)) {
+        return false;
+      }
 
       const zhCount = countChineseChars(rawText);
       const pureEn = extractPureEnglish(rawText);
