@@ -297,6 +297,93 @@
     @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
 
     #input-message { font-family: inherit; resize: vertical; min-height: 38px; line-height: 1.4; }
+
+    /* 懸浮翻譯球樣式 */
+    #float-translate-bubble {
+      position: fixed;
+      right: 28px;
+      bottom: 84px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: #ffffff;
+      box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: grab;
+      z-index: 90;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    #float-translate-bubble:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 28px rgba(79, 70, 229, 0.55);
+    }
+    #float-translate-bubble:active {
+      cursor: grabbing;
+    }
+
+    /* 懸浮翻譯展開視窗 */
+    #float-translate-panel {
+      position: fixed;
+      right: 28px;
+      bottom: 148px;
+      width: 360px;
+      max-width: calc(100vw - 40px);
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.18);
+      z-index: 95;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: floatPanelIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes floatPanelIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .float-panel-header {
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .float-panel-header h4 {
+      margin: 0;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1e1b4b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .float-panel-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+    .voice-avatar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      background: #fdf2f8;
+      color: #be185d;
+      border: 1px solid #fbcfe8;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -700,6 +787,48 @@
     </div>
   </div>
 
+  <!-- 翻譯懸浮球與展開面板 -->
+  <div id="float-translate-bubble" title="點擊展開即時翻譯與自然女人聲朗讀（可拖曳）">
+    <span>🌐</span>
+  </div>
+
+  <div id="float-translate-panel" class="hidden">
+    <div class="float-panel-header">
+      <h4>
+        <span>🌐 即時翻譯</span>
+        <span class="voice-avatar-badge">👩 自然女人聲 (Aoede/US Female)</span>
+      </h4>
+      <button id="btn-close-float-panel" style="background: transparent; border: none; color: #94a3b8; font-size: 16px; padding: 2px 6px; cursor: pointer;">✕</button>
+    </div>
+    <div class="float-panel-body">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 12px; font-weight: 600; color: #475569;">輸入想翻譯的中/英文或片語：</span>
+        <button id="btn-float-paste" class="btn-outline" style="font-size: 11px; padding: 2px 6px;">📋 貼上選取內容</button>
+      </div>
+      <textarea id="float-input-text" rows="3" placeholder="例如：procrastinate 或 剛才講義裡看不懂的長句..." style="width: 100%; padding: 8px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; resize: vertical;"></textarea>
+
+      <div style="display: flex; gap: 8px;">
+        <button id="btn-exec-translate" class="btn-purple" style="flex: 1; padding: 8px; font-size: 13px;">
+          ✨ 開始翻譯
+        </button>
+        <button id="btn-speak-input-natural" class="btn-outline" style="padding: 8px 12px; font-size: 13px;" title="以自然女人聲朗讀輸入文字">
+          🔊 朗讀原文
+        </button>
+      </div>
+
+      <!-- 翻譯結果區塊 -->
+      <div id="float-result-box" class="hidden" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-top: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 11.5px; font-weight: 700; color: #4338ca;">✨ 翻譯與語意解析</span>
+          <button id="btn-speak-result-natural" class="btn-green" style="font-size: 11.5px; padding: 3px 8px;">
+            👩 朗讀譯文
+          </button>
+        </div>
+        <div id="float-result-text" style="font-size: 13px; color: #0f172a; line-height: 1.5; white-space: pre-wrap;"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container" class="toast-container"></div>
 
   <script type="module">
@@ -920,15 +1049,122 @@
     window.speechSynthesis.onvoiceschanged = updateVoices;
   }
 
-  function getBestVoice(langCode) {
+  // 優先選取真實度高、自然生動的女性語音（避免機械金屬音）
+  function getBestNaturalFemaleVoice(langCode) {
     updateVoices();
     if (!cachedVoices || cachedVoices.length === 0) return null;
+
     if (langCode === "zh") {
-      return cachedVoices.find(v => v.lang === "zh-TW" || v.lang === "zh_TW") ||
+      // 優先繁體中文自然女聲
+      return cachedVoices.find(v => (v.name.includes("HsiaoChen") || v.name.includes("Yating") || v.name.includes("Natural") || v.name.includes("Mei-Jia") || v.name.includes("Female")) && (v.lang === "zh-TW" || v.lang === "zh_TW")) ||
+             cachedVoices.find(v => v.lang === "zh-TW" || v.lang === "zh_TW") ||
              cachedVoices.find(v => v.lang.startsWith("zh")) || null;
     } else {
-      return cachedVoices.find(v => v.lang === "en-US" || v.lang === "en_US") ||
+      // 優先英文高擬真自然女性音色 (Natural, Jenny, Ava, Samantha, Victoria, Google US English 等)
+      return cachedVoices.find(v => (v.name.includes("Jenny") || v.name.includes("Ava") || v.name.includes("Natural") || v.name.includes("Samantha") || v.name.includes("Victoria") || v.name.includes("Zira") || v.name.includes("Female")) && v.lang.startsWith("en")) ||
+             cachedVoices.find(v => v.lang === "en-US" && !v.name.toLowerCase().includes("male")) ||
              cachedVoices.find(v => v.lang.startsWith("en")) || null;
+    }
+  }
+
+  function getBestVoice(langCode) {
+    return getBestNaturalFemaleVoice(langCode);
+  }
+
+  // 將 PCM16 陣列封裝為標準 WAV 格式，供瀏覽器原生極速播放
+  function pcm16ToWavBlob(pcmData, sampleRate = 24000) {
+    const buffer = new ArrayBuffer(44 + pcmData.byteLength);
+    const view = new DataView(buffer);
+
+    function writeString(offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + pcmData.byteLength, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, 1, true); // Mono
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, pcmData.byteLength, true);
+
+    const outBytes = new Uint8Array(buffer, 44);
+    outBytes.set(new Uint8Array(pcmData.buffer, pcmData.byteOffset, pcmData.byteLength));
+    return new Blob([buffer], { type: 'audio/wav' });
+  }
+
+  // 頂級自然女人聲生成器：優先使用 Gemini 2.5 TTS 自然女人聲 (Aoede)，離線自動回退高品質語音
+  async function speakNaturalFemaleVoice(textToSpeak, targetLang = "en") {
+    if (!textToSpeak || !textToSpeak.trim()) return;
+    const cleanText = cleanMarkdownForSpeech(textToSpeak).trim();
+    if (!cleanText) return;
+
+    // 若有 Gemini API Key，直接調用 Gemini 2.5 Flash TTS 的真人女人聲 (Aoede：優雅、自然且極具親和力)
+    if (state.geminiKey) {
+      try {
+        const payload = {
+          contents: [{
+            parts: [{ text: `Say naturally and gently as an experienced female English tutor: ${cleanText}` }]
+          }],
+          generationConfig: {
+            responseModalities: ["AUDIO"],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: "Aoede" } // Aoede: 輕快自然女聲
+              }
+            }
+          }
+        };
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${state.geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          const inlineAudio = result?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+          if (inlineAudio && inlineAudio.data) {
+            const rawBinary = atob(inlineAudio.data);
+            const bytes = new Uint8Array(rawBinary.length);
+            for (let i = 0; i < rawBinary.length; i++) {
+              bytes[i] = rawBinary.charCodeAt(i);
+            }
+            const pcm16 = new Int16Array(bytes.buffer);
+            const sampleRate = 24000;
+            const wavBlob = pcm16ToWavBlob(pcm16, sampleRate);
+            const audioUrl = URL.createObjectURL(wavBlob);
+            const audio = new Audio(audioUrl);
+            audio.onended = () => URL.revokeObjectURL(audioUrl);
+            await audio.play();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Gemini TTS 呼叫失敗，自動降級為瀏覽器自然女聲：", err);
+      }
+    }
+
+    // 瀏覽器端最高等級自然女聲備援
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      const isZh = targetLang === "zh" || /[\u4e00-\u9fa5]/.test(cleanText);
+      utterance.lang = isZh ? "zh-TW" : "en-US";
+      const femaleVoice = getBestNaturalFemaleVoice(isZh ? "zh" : "en");
+      if (femaleVoice) utterance.voice = femaleVoice;
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05; // 稍微調高音調呈現柔和自然女人聲
+      window.speechSynthesis.speak(utterance);
     }
   }
 
@@ -2770,6 +3006,161 @@ ${lessonContent}
   btnFcRate0.addEventListener("click", () => advancePlayerCard(0));
   btnFcRate1.addEventListener("click", () => advancePlayerCard(1));
   btnFcRate2.addEventListener("click", () => advancePlayerCard(2));
+
+  // ==========================================
+  // 翻譯懸浮球與自然女聲邏輯綁定
+  // ==========================================
+  const floatTranslateBubble = document.getElementById("float-translate-bubble");
+  const floatTranslatePanel = document.getElementById("float-translate-panel");
+  const btnCloseFloatPanel = document.getElementById("btn-close-float-panel");
+  const btnFloatPaste = document.getElementById("btn-float-paste");
+  const floatInputText = document.getElementById("float-input-text");
+  const btnExecTranslate = document.getElementById("btn-exec-translate");
+  const btnSpeakInputNatural = document.getElementById("btn-speak-input-natural");
+  const floatResultBox = document.getElementById("float-result-box");
+  const floatResultText = document.getElementById("float-result-text");
+  const btnSpeakResultNatural = document.getElementById("btn-speak-result-natural");
+
+  let isDragging = false;
+  let dragMoved = false;
+  let dragStartX = 0, dragStartY = 0;
+  let elemStartX = 0, elemStartY = 0;
+
+  // 拖曳懸浮球支援 (滑鼠與觸控)
+  function handleDragStart(e) {
+    isDragging = true;
+    dragMoved = false;
+    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+    dragStartX = clientX;
+    dragStartY = clientY;
+    const rect = floatTranslateBubble.getBoundingClientRect();
+    elemStartX = rect.left;
+    elemStartY = rect.top;
+  }
+
+  function handleDragMove(e) {
+    if (!isDragging) return;
+    const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+    const dx = clientX - dragStartX;
+    const dy = clientY - dragStartY;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      dragMoved = true;
+    }
+    const newLeft = Math.max(10, Math.min(window.innerWidth - 62, elemStartX + dx));
+    const newTop = Math.max(60, Math.min(window.innerHeight - 62, elemStartY + dy));
+    floatTranslateBubble.style.left = `${newLeft}px`;
+    floatTranslateBubble.style.top = `${newTop}px`;
+    floatTranslateBubble.style.right = 'auto';
+    floatTranslateBubble.style.bottom = 'auto';
+
+    // 同步面板位置靠近懸浮球
+    floatTranslatePanel.style.left = `${Math.min(window.innerWidth - 380, Math.max(10, newLeft - 300))}px`;
+    floatTranslatePanel.style.top = `${Math.max(70, newTop - 340)}px`;
+    floatTranslatePanel.style.right = 'auto';
+    floatTranslatePanel.style.bottom = 'auto';
+  }
+
+  function handleDragEnd() {
+    isDragging = false;
+  }
+
+  floatTranslateBubble.addEventListener("mousedown", handleDragStart);
+  window.addEventListener("mousemove", handleDragMove);
+  window.addEventListener("mouseup", handleDragEnd);
+
+  floatTranslateBubble.addEventListener("touchstart", handleDragStart, { passive: true });
+  window.addEventListener("touchmove", handleDragMove, { passive: true });
+  window.addEventListener("touchend", handleDragEnd);
+
+  // 點擊懸浮球切換展開/關閉
+  floatTranslateBubble.addEventListener("click", () => {
+    if (dragMoved) return; // 拖曳中不觸發開關
+    const isHidden = floatTranslatePanel.classList.toggle("hidden");
+    if (!isHidden) {
+      floatInputText.focus();
+      // 若頁面當前有反白選取的文字，自動填入
+      const selected = window.getSelection()?.toString()?.trim();
+      if (selected && !floatInputText.value) {
+        floatInputText.value = selected;
+      }
+    }
+  });
+
+  btnCloseFloatPanel.addEventListener("click", () => {
+    floatTranslatePanel.classList.add("hidden");
+  });
+
+  // 一鍵貼上反白文字或剪貼簿
+  btnFloatPaste.addEventListener("click", () => {
+    const selected = window.getSelection()?.toString()?.trim();
+    if (selected) {
+      floatInputText.value = selected;
+      showToast("已帶入頁面選取內容", "info");
+      return;
+    }
+    floatInputText.focus();
+    document.execCommand('paste');
+  });
+
+  // 執行翻譯與深度語意解析
+  btnExecTranslate.addEventListener("click", async () => {
+    const text = floatInputText.value.trim();
+    if (!text) {
+      showToast("請先輸入想翻譯的文字", "error");
+      floatInputText.focus();
+      return;
+    }
+
+    const origText = btnExecTranslate.textContent;
+    btnExecTranslate.disabled = true;
+    btnExecTranslate.textContent = "⏳ 翻譯中...";
+
+    try {
+      const ai = getGenAIClient();
+      const prompt = `你是一位專業中英雙語翻譯名師。請將以下文字進行精確翻譯。
+要求：
+1. 若輸入為英文：請提供繁體中文翻譯，並列出核心口語搭配詞（Collocations）與 1 個道地例句。
+2. 若輸入為中文：請提供 2~3 種道地、自然且母語者常說的英文說法（附場合區分：日常口語 / 正式書信），並為最佳說法附上音標或重音。
+3. 簡潔明瞭、排版清晰，避免多餘套話。
+
+輸入文字：
+${text}`;
+
+      const res = await ai.models.generateContent({
+        model: FLASH_MODEL,
+        contents: prompt
+      });
+
+      floatResultText.textContent = res.text.trim();
+      floatResultBox.classList.remove("hidden");
+      showToast("翻譯完成！可點擊上方按鈕聆聽自然女人聲朗讀", "success");
+    } catch (e) {
+      floatResultText.textContent = "翻譯失敗：" + e.message;
+      floatResultBox.classList.remove("hidden");
+    } finally {
+      btnExecTranslate.disabled = false;
+      btnExecTranslate.textContent = origText;
+    }
+  });
+
+  // 以自然女人聲朗讀原文
+  btnSpeakInputNatural.addEventListener("click", () => {
+    const text = floatInputText.value.trim();
+    if (!text) {
+      showToast("請輸入欲朗讀的文字", "info");
+      return;
+    }
+    speakNaturalFemaleVoice(text, "en");
+  });
+
+  // 以自然女人聲朗讀翻譯結果
+  btnSpeakResultNatural.addEventListener("click", () => {
+    const text = floatResultText.textContent.trim();
+    if (!text) return;
+    speakNaturalFemaleVoice(text, "en");
+  });
   </script>
 </body>
 </html>
