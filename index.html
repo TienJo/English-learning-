@@ -604,24 +604,32 @@
     /* 懸浮球與面板 */
     #float-translate-bubble {
       position: fixed;
-      right: 24px;
-      bottom: 24px;
-      width: 48px;
-      height: 48px;
+      right: 18px;
+      top: 62%;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: var(--c-nude);
       color: var(--c-black);
       border: 1px solid var(--c-line);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: var(--fs-h2);
       cursor: grab;
       z-index: 90;
-      transition: transform 0.15s ease;
+      user-select: none;
+      touch-action: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    #float-translate-bubble:hover { transform: scale(1.05); }
+    #float-translate-bubble:active {
+      cursor: grabbing;
+      transform: scale(0.96);
+    }
+    #float-translate-bubble:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
     
     #float-translate-panel {
       position: fixed;
@@ -875,7 +883,7 @@
             </div>
             <!-- 輸入列 -->
             <div style="display: flex; gap: 6px; align-items: flex-end;">
-              <button id="btn-voice-input" class="btn-outline" title="持續語音輸入" style="height: 38px; width: 42px; padding: 0;">🎙️</button>
+              <button id="btn-voice-input" class="btn-soft-pink" title="持續語音輸入" style="height: 38px; width: 42px; padding: 0;">🎙️</button>
               <textarea id="input-message" rows="1" placeholder="問文法、答題後按「發送」、或用語音練習... (Enter 換行)" style="flex: 1; padding: 8px 12px; font-size: var(--fs-body); resize: vertical; min-height: 38px;"></textarea>
               <button id="btn-send-message" class="btn-brown" style="height: 38px; min-width: 68px;">發送</button>
             </div>
@@ -1395,6 +1403,7 @@
     state.recognition.onstart = () => {
       state.isRecording = true;
       manualStopRequested = false;
+      btnVoiceInput.classList.remove("btn-soft-pink");
       btnVoiceInput.classList.add("btn-brown");
       btnVoiceInput.textContent = "⏹";
       if (recordingActiveBar) recordingActiveBar.classList.remove("hidden");
@@ -1419,6 +1428,7 @@
       }
       state.isRecording = false;
       btnVoiceInput.classList.remove("btn-brown");
+      btnVoiceInput.classList.add("btn-soft-pink");
       btnVoiceInput.textContent = "🎙️";
       if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
     };
@@ -1439,6 +1449,7 @@
       try { state.recognition.stop(); } catch (e) {}
     }
     btnVoiceInput.classList.remove("btn-brown");
+    btnVoiceInput.classList.add("btn-soft-pink");
     btnVoiceInput.textContent = "🎙️";
     if (recordingActiveBar) recordingActiveBar.classList.add("hidden");
   }
@@ -2309,7 +2320,7 @@
   btnFcRate1.addEventListener("click", () => advancePlayerCard(1));
   btnFcRate2.addEventListener("click", () => advancePlayerCard(2));
 
-  // 翻譯面板控制
+  // 翻譯面板控制與流暢拖曳
   const floatTranslateBubble = document.getElementById("float-translate-bubble");
   const floatTranslatePanel = document.getElementById("float-translate-panel");
   const btnCloseFloatPanel = document.getElementById("btn-close-float-panel");
@@ -2318,9 +2329,90 @@
   const floatResultBox = document.getElementById("float-result-box");
   const floatResultText = document.getElementById("float-result-text");
 
+  let isDraggingBubble = false;
+  let hasMovedBubble = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+
+  function onDragStart(clientX, clientY) {
+    isDraggingBubble = true;
+    hasMovedBubble = false;
+    dragStartX = clientX;
+    dragStartY = clientY;
+    const rect = floatTranslateBubble.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+  }
+
+  function onDragMove(clientX, clientY) {
+    if (!isDraggingBubble) return;
+    const deltaX = clientX - dragStartX;
+    const deltaY = clientY - dragStartY;
+    if (Math.hypot(deltaX, deltaY) > 5) {
+      hasMovedBubble = true;
+    }
+    const maxLeft = window.innerWidth - floatTranslateBubble.offsetWidth - 8;
+    const maxTop = window.innerHeight - floatTranslateBubble.offsetHeight - 8;
+    const nextLeft = Math.min(Math.max(8, initialLeft + deltaX), maxLeft);
+    const nextTop = Math.min(Math.max(60, initialTop + deltaY), maxTop);
+
+    floatTranslateBubble.style.left = `${nextLeft}px`;
+    floatTranslateBubble.style.top = `${nextTop}px`;
+    floatTranslateBubble.style.right = 'auto';
+    floatTranslateBubble.style.bottom = 'auto';
+  }
+
+  function onDragEnd() {
+    isDraggingBubble = false;
+  }
+
+  // 滑鼠事件
+  floatTranslateBubble.addEventListener("mousedown", (e) => {
+    onDragStart(e.clientX, e.clientY);
+  });
+  window.addEventListener("mousemove", (e) => {
+    onDragMove(e.clientX, e.clientY);
+  });
+  window.addEventListener("mouseup", onDragEnd);
+
+  // 觸控事件
+  floatTranslateBubble.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    onDragStart(touch.clientX, touch.clientY);
+  }, { passive: true });
+  window.addEventListener("touchmove", (e) => {
+    if (!isDraggingBubble) return;
+    const touch = e.touches[0];
+    onDragMove(touch.clientX, touch.clientY);
+  }, { passive: true });
+  window.addEventListener("touchend", onDragEnd);
+
+  // 點擊切換展開（拖曳移動時不觸發）
   floatTranslateBubble.addEventListener("click", () => {
-    floatTranslatePanel.classList.toggle("hidden");
-    floatInputText.focus();
+    if (hasMovedBubble) return;
+    const isHidden = floatTranslatePanel.classList.toggle("hidden");
+    if (!isHidden) {
+      // 讓展開面板自動靠近懸浮球位置，且不溢出邊界
+      const rect = floatTranslateBubble.getBoundingClientRect();
+      const panelWidth = Math.min(340, window.innerWidth - 30);
+      let targetLeft = rect.left - panelWidth + 20;
+      if (targetLeft < 10) targetLeft = 10;
+      if (targetLeft + panelWidth > window.innerWidth - 10) {
+        targetLeft = window.innerWidth - panelWidth - 10;
+      }
+      let targetTop = rect.top - 200;
+      if (targetTop < 60) targetTop = 60;
+      if (targetTop + 380 > window.innerHeight - 10) {
+        targetTop = window.innerHeight - 390;
+      }
+      floatTranslatePanel.style.left = `${targetLeft}px`;
+      floatTranslatePanel.style.top = `${targetTop}px`;
+      floatTranslatePanel.style.right = 'auto';
+      floatTranslatePanel.style.bottom = 'auto';
+      floatInputText.focus();
+    }
   });
   btnCloseFloatPanel.addEventListener("click", () => floatTranslatePanel.classList.add("hidden"));
 
