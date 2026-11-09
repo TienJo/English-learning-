@@ -734,6 +734,17 @@
     .float-panel-header h4 { margin: 0; font-size: var(--fs-body); font-weight: 600; color: var(--c-black); }
     .float-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto; }
 
+    #float-input-text {
+      min-height: 72px !important;
+      max-height: 160px;
+      line-height: 1.5 !important;
+      flex-shrink: 0 !important;
+      width: 100% !important;
+      box-sizing: border-box;
+      resize: vertical;
+      font-size: var(--fs-body) !important;
+    }
+
     .modal-overlay { 
       position: fixed; 
       inset: 0; 
@@ -1242,9 +1253,9 @@
         <span style="font-size: var(--fs-sm); color: var(--c-brown);">輸入想查詢的中/英文：</span>
         <button id="btn-float-paste" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">貼上選取</button>
       </div>
-      <textarea id="float-input-text" rows="3" placeholder="例如：procrastinate..." style="width: 100%;"></textarea>
+      <textarea id="float-input-text" rows="3" placeholder="例如：procrastinate..."></textarea>
 
-      <div style="display: flex; gap: 6px;">
+      <div style="display: flex; gap: 6px; flex-shrink: 0;">
         <button id="btn-exec-translate" class="btn-brown" style="flex: 1; padding: 6px;">翻譯</button>
         <button id="btn-speak-input-natural" class="btn-outline" style="padding: 6px 10px;">朗讀</button>
       </div>
