@@ -17,9 +17,9 @@
     /* ===================================================
        設計系統：極簡 4 色 + 精確 4 種文字大小（雜誌編輯排版質感）
        4 色：
-         1. 黑 (深黑底/文字): #121212
-         2. 白 (面板/卡片底): #ffffff
-         3. 膚色 (溫潤米膚/弱對比區塊): #f5ede3 / #eae1d6
+         1. 黑 (深黑底/主文字): #121212
+         2. 白 (高光/少數精選卡片底): #ffffff (降低大面積佔比)
+         3. 淡紫粉 (PANTONE 13-2803TCX Pale Lilac): #dfc8d1 / #f0e3e8
          4. 深咖 (次級強調/按鈕邊線): #362a24 / #4a3b33
        4 種字級：
          1. H1 / 標題: 20px
@@ -31,11 +31,12 @@
       --c-black: #121212;
       --c-black-surface: #1e1e1e;
       --c-white: #ffffff;
-      --c-nude: #f5ede3;
-      --c-nude-dark: #e8dfd4;
+      --c-nude: #dfc8d1;          /* PANTONE 13-2803TCX Pale Lilac */
+      --c-nude-light: #ede0e5;    /* 淺版 Pale Lilac (大幅減少白底刺眼感) */
+      --c-nude-dark: #caaeb9;     /* 邊界與深色淡紫 */
       --c-brown: #362a24;
       --c-brown-light: #4e3e36;
-      --c-line: #e5dcd1;
+      --c-line: #cbb4be;
 
       --fs-h1: 20px;
       --fs-h2: 16px;
@@ -213,7 +214,8 @@
     aside#main-sidebar {
       width: 280px;
       min-width: 280px;
-      background: var(--c-white);
+      background: var(--c-nude-light);
+      border: 1px solid var(--c-line);
       border-radius: 20px;
       display: flex;
       flex-direction: column;
@@ -247,6 +249,7 @@
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
+      background: var(--c-nude);
     }
     .sidebar-header h2 { margin: 0; font-size: var(--fs-body); font-weight: 600; color: var(--c-black); }
     .project-list { flex: 1; overflow-y: auto; list-style: none; margin: 0; padding: 10px; }
@@ -262,7 +265,7 @@
       transition: all 0.15s ease;
     }
     .project-item:hover { background: var(--c-nude); }
-    .project-item.active { background: var(--c-nude); border-color: var(--c-line); }
+    .project-item.active { background: var(--c-nude); border-color: var(--c-line); font-weight: 600; }
     .project-title { font-size: var(--fs-body); font-weight: 600; color: var(--c-black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
     .project-meta { font-size: var(--fs-sm); color: var(--c-brown); margin-top: 2px; }
     .btn-del-project { background: transparent; color: #999; padding: 2px 6px; font-size: var(--fs-sm); border-radius: 4px; }
@@ -275,7 +278,8 @@
     .empty-state-card { 
       max-width: 580px; 
       margin: 40px auto; 
-      background: var(--c-white); 
+      background: var(--c-nude-light); 
+      border: 1px solid var(--c-line);
       border-radius: 24px; 
       padding: 36px; 
     }
@@ -285,9 +289,9 @@
     .dashboard-header h2 { margin: 0; font-size: var(--fs-h1); color: var(--c-white); font-weight: 600; }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
     
-    /* 每日卡片系統 */
+    /* 每日卡片系統 (全面採用 Pale Lilac 減少純白刺眼面積) */
     .day-card { 
-      background: var(--c-white); 
+      background: var(--c-nude-light); 
       border-radius: 20px; 
       padding: 20px; 
       display: flex; 
@@ -295,7 +299,7 @@
       justify-content: space-between; 
       min-height: 160px; 
       transition: transform 0.15s ease; 
-      border: 1px solid transparent;
+      border: 1px solid var(--c-line);
     }
     .day-card:hover { transform: translateY(-2px); }
     .card-day-tag { font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown); margin-bottom: 6px; letter-spacing: 0.04em; }
@@ -303,13 +307,13 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     
     .day-card.completed { background: var(--c-nude); border-color: var(--c-line); }
-    .day-card.current { background: var(--c-white); border: 1.5px solid var(--c-brown); }
+    .day-card.current { background: var(--c-nude-light); border: 2px solid var(--c-brown); }
     .day-card.locked { background: var(--c-black-surface); border: 1px solid #2a2a2a; }
     .day-card.locked:hover { transform: none; }
     .day-card.locked .card-day-tag, .day-card.locked .card-title { color: #666; }
     .day-card.locked button { background: #333; color: #888; }
 
-    /* 研讀主畫面：雙欄雜誌風格卡片 */
+    /* 研讀主畫面：改以溫和淡紫粉底作為主面板，大幅收斂白色 */
     .study-layout { 
       display: flex; 
       flex: 1; 
@@ -322,7 +326,8 @@
       min-width: 0;
     }
     .lecture-panel, .interactive-panel { 
-      background: var(--c-white); 
+      background: var(--c-nude-light); 
+      border: 1px solid var(--c-line);
       border-radius: 24px; 
       display: flex; 
       flex-direction: column; 
@@ -343,6 +348,7 @@
       align-items: center; 
       gap: 14px; 
       flex-shrink: 0; 
+      background: var(--c-nude);
     }
     .lecture-title-area { display: flex; flex-direction: column; }
     .tab-nav { 
@@ -354,7 +360,7 @@
       flex-shrink: 0; 
     }
     .tab-btn { 
-      background: var(--c-white); 
+      background: var(--c-nude-light); 
       color: var(--c-black); 
       border: 1px solid var(--c-line); 
       border-radius: 9999px; 
@@ -376,6 +382,7 @@
       display: none; 
       min-height: 0; 
       height: 100%; 
+      background: var(--c-nude-light);
     }
     .tab-content.active { display: block; }
     
@@ -415,6 +422,7 @@
       border: 1px solid var(--c-line);
       border-radius: 8px;
       overflow: hidden;
+      background: var(--c-white);
     }
     .lecture-content th, .lecture-content td { 
       border: 1px solid var(--c-line); 
@@ -450,6 +458,7 @@
       justify-content: space-between; 
       align-items: center; 
       flex-shrink: 0; 
+      background: var(--c-nude);
     }
     .chat-scroll-area { 
       flex: 1; 
@@ -458,14 +467,14 @@
       display: flex; 
       flex-direction: column; 
       gap: 12px; 
-      background: var(--c-nude); 
+      background: var(--c-nude-light); 
       min-height: 0; 
       height: 100%; 
     }
     .chat-input-bar { 
       padding: 14px 18px; 
       border-top: 1px solid var(--c-line); 
-      background: var(--c-white); 
+      background: var(--c-nude); 
       display: flex; 
       flex-direction: column; 
       gap: 10px; 
@@ -492,7 +501,7 @@
       align-self: flex-end; 
     }
     .msg-system { 
-      background: var(--c-white); 
+      background: var(--c-nude); 
       color: var(--c-brown); 
       border: 1px solid var(--c-line); 
       align-self: center; 
@@ -579,7 +588,7 @@
     .study-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s ease; transform-style: preserve-3d; border-radius: 24px; }
     .study-card-box.flipped .study-card-inner { transform: rotateY(180deg); }
     .study-card-front, .study-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 24px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid var(--c-line); }
-    .study-card-front { background: var(--c-white); }
+    .study-card-front { background: var(--c-nude-light); }
     .study-card-back { background: var(--c-nude); transform: rotateY(180deg); }
 
     /* 懸浮球與面板 */
@@ -590,7 +599,7 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: var(--c-white);
+      background: var(--c-nude);
       color: var(--c-black);
       border: 1px solid var(--c-line);
       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
@@ -610,7 +619,7 @@
       bottom: 84px;
       width: 340px;
       max-width: calc(100vw - 40px);
-      background: var(--c-white);
+      background: var(--c-nude-light);
       border-radius: 20px;
       border: 1px solid var(--c-line);
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
@@ -640,7 +649,8 @@
       z-index: 50; 
     }
     .modal-box { 
-      background: var(--c-white); 
+      background: var(--c-nude-light); 
+      border: 1px solid var(--c-line);
       padding: 28px; 
       border-radius: 20px; 
       width: 440px; 
@@ -686,7 +696,7 @@
   <div id="sidebar-overlay"></div>
 
   <!-- 初始連線卡片 -->
-  <div id="section-auth" style="max-width: 480px; margin: 40px auto; background: var(--c-white); padding: 32px; border-radius: 24px;">
+  <div id="section-auth" style="max-width: 480px; margin: 40px auto; background: var(--c-nude-light); border: 1px solid var(--c-line); padding: 32px; border-radius: 24px;">
     <h2 style="font-size: var(--fs-h1); margin-top: 0; margin-bottom: 8px;">開始你的英文工作台</h2>
     <p style="font-size: var(--fs-body); color: #555; margin-bottom: 24px;">
       選擇免登入直接使用（進度儲存於瀏覽器），或連線 Google Drive 同步。
