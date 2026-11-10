@@ -2334,8 +2334,8 @@
       const res = await state.chatInstance.sendMessage({ message: `請針對「${title}」出 10 題文法與語塊測驗 + 1 題 Bonus 困難題。先列題目，不給答案。` });
       appendChatMessage("bot", res.text, true);
       if (inputMessage) {
-        inputMessage.rows = 6;
-        inputMessage.value = "1. \n2. \n3. \n4. \n5. \n";
+        inputMessage.rows = 11;
+        inputMessage.value = "1. \n2. \n3. \n4. \n5. \n6. \n7. \n8. \n9. \n10. \nBonus: ";
       }
       state.isQuizInProgress = true;
     } catch (e) {
