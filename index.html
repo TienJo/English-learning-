@@ -7,7 +7,6 @@
   <link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23dfc8d1' d='M16 2 L19.5 12.5 L30 16 L19.5 19.5 L16 30 L12.5 19.5 L2 16 L12.5 12.5 Z'/%3E%3C/svg%3E">
   <link rel="shortcut icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23dfc8d1' d='M16 2 L19.5 12.5 L30 16 L19.5 19.5 L16 30 L12.5 19.5 L2 16 L12.5 12.5 Z'/%3E%3C/svg%3E">
   <script>
-    // 強制動態繪製 Canvas 生成 PNG Favicon，解決 Chrome 快取預設地球圖示的問題
     (function setStarFavicon() {
       try {
         const canvas = document.createElement('canvas');
@@ -17,7 +16,6 @@
         if (ctx) {
           ctx.fillStyle = '#dfc8d1';
           ctx.beginPath();
-          // 繪製高雅的四芒立體星
           ctx.moveTo(32, 4);
           ctx.quadraticCurveTo(32, 32, 60, 32);
           ctx.quadraticCurveTo(32, 32, 32, 60);
@@ -46,26 +44,13 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <style>
-    /* ===================================================
-       設計系統：極簡 4 色 + 精確 4 種文字大小（雜誌編輯排版質感）
-       4 色：
-         1. 黑 (深黑底/主文字): #121212
-         2. 霧粉白 (COLORO 149-90-01 替代純白): #ebe5e8
-         3. 淡紫粉 (PANTONE 13-2803TCX Pale Lilac): #dfc8d1 / #ede0e5
-         4. 深咖 (次級強調/按鈕邊線): #362a24 / #4e3e36
-       4 種字級：
-         1. H1 / 標題: 20px
-         2. H2 / 次標: 16px
-         3. 內文 (Body): 14px (行距 1.75，確保舒適閱讀)
-         4. 標籤與輔助字 (Caption): 12px
-       =================================================== */
     :root {
       --c-black: #121212;
       --c-black-surface: #1e1e1e;
-      --c-white: #ebe5e8;          /* COLORO 149-90-01 柔霧淡藕粉白，全面取代純白 */
-      --c-nude: #dfc8d1;          /* PANTONE 13-2803TCX Pale Lilac */
-      --c-nude-light: #ede0e5;    /* 淺版 Pale Lilac */
-      --c-nude-dark: #caaeb9;     /* 邊界與深色淡紫 */
+      --c-white: #ebe5e8;
+      --c-nude: #dfc8d1;
+      --c-nude-light: #ede0e5;
+      --c-nude-dark: #caaeb9;
       --c-brown: #362a24;
       --c-brown-light: #4e3e36;
       --c-line: #cbb4be;
@@ -87,15 +72,10 @@
       letter-spacing: -0.015em;
     }
 
-    /* ===================================================
-       全域滾動條樣式：底色深咖啡色 + 滾鈕粉色
-       注意：不使用 scrollbar-color 避免瀏覽器啟用原生系統樣式覆蓋 webkit
-       =================================================== */
     * {
       box-sizing: border-box;
     }
 
-    /* WebKit (Chrome, Edge, Safari, 內嵌 WebView) 強制覆寫滾動條 */
     ::-webkit-scrollbar,
     *::-webkit-scrollbar {
       width: 14px !important;
@@ -131,7 +111,6 @@
       background: var(--c-brown) !important;
     }
 
-    /* 徹底隱藏與清除上下的箭頭按鈕 */
     ::-webkit-scrollbar-button,
     *::-webkit-scrollbar-button {
       display: none !important;
@@ -154,7 +133,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 頂部導航列 */
     header { 
       background: var(--c-black); 
       padding: 0 20px; 
@@ -198,7 +176,6 @@
     }
     .hidden { display: none !important; }
 
-    /* 通用按鈕：膠囊式、低飽和乾淨輪廓 */
     button { 
       background: var(--c-black); 
       color: var(--c-white); 
@@ -277,7 +254,6 @@
       border-color: var(--c-brown);
     }
 
-    /* 三段式膠囊控制器：長度適中、圓球能真正貼實兩端 */
     .slider-segmented-pill {
       position: relative;
       width: 60px;
@@ -325,7 +301,6 @@
     }
     body.in-study-mode .btn-hamburger { display: inline-flex; }
 
-    /* 單句發音按鈕：極簡低干擾標籤，純單色深咖向量圖示 */
     .inline-sentence-speaker {
       display: inline-flex;
       align-items: center;
@@ -353,7 +328,6 @@
       fill: currentColor;
     }
 
-    /* 側邊欄 */
     aside#main-sidebar {
       width: 280px;
       min-width: 280px;
@@ -414,7 +388,6 @@
     .btn-del-project { background: transparent; color: #999; padding: 2px 6px; font-size: var(--fs-sm); border-radius: 4px; }
     .btn-del-project:hover { background: var(--c-brown); color: var(--c-white); }
 
-    /* 主內容區 */
     main { flex: 1; height: 100%; max-height: 100%; overflow: hidden; display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; min-height: 0; }
     .content-container { max-width: 1160px; width: 100%; margin: 0 auto; padding: 16px 8px 24px; overflow-y: auto; flex: 1; min-height: 0; }
 
@@ -432,7 +405,6 @@
     .dashboard-header h2 { margin: 0; font-size: var(--fs-h1); color: var(--c-white); font-weight: 600; }
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
     
-    /* 每日卡片系統 (全面採用 Pale Lilac 減少純白刺眼面積) */
     .day-card { 
       background: var(--c-nude-light); 
       border-radius: 20px; 
@@ -441,7 +413,7 @@
       flex-direction: column; 
       justify-content: space-between; 
       min-height: 160px; 
-      transition: transform 0.15s ease; 
+      transition: transform 0.15s ease, box-shadow 0.15s ease; 
       border: 1px solid var(--c-line);
     }
     .day-card:hover { transform: translateY(-2px); }
@@ -450,18 +422,23 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     
     .day-card.completed { background: var(--c-nude); border-color: var(--c-line); }
-    .day-card.perfect-completed { 
-      background: #f3e6ec; 
-      border: 1.5px solid var(--c-brown); 
-      box-shadow: 0 4px 12px rgba(54, 42, 36, 0.08); 
-    }
     .day-card.current { background: var(--c-nude-light); border: 2px solid var(--c-brown); }
     .day-card.locked { background: var(--c-black-surface); border: 1px solid #2a2a2a; }
     .day-card.locked:hover { transform: none; }
     .day-card.locked .card-day-tag, .day-card.locked .card-title { color: #666; }
     .day-card.locked button { background: #333; color: #888; }
 
-    /* 研讀主畫面：改以溫和淡紫粉底作為主面板，大幅收斂白色 */
+    /* 完美通關專屬高質感樣式 */
+    .day-card.perfect-clear {
+      background: #dfc1cd !important;
+      border: 2px solid #b87c93 !important;
+      box-shadow: 0 4px 18px rgba(184, 124, 147, 0.25) !important;
+    }
+    .day-card.perfect-clear .card-day-tag {
+      color: #5c273a !important;
+      font-weight: 700 !important;
+    }
+
     .study-layout { 
       display: flex; 
       flex: 1; 
@@ -534,7 +511,6 @@
     }
     .tab-content.active { display: block; }
     
-    /* 講義排版：高閱讀性、自然段落、階層克制 */
     .lecture-content { 
       font-size: var(--fs-body); 
       line-height: var(--lh-text); 
@@ -596,7 +572,6 @@
       font-size: var(--fs-sm); 
     }
 
-    /* 助教對話面板 */
     .interactive-header { 
       padding: 14px 18px; 
       border-bottom: 1px solid var(--c-line); 
@@ -657,7 +632,6 @@
       border: 1px solid var(--c-line); 
     }
 
-    /* 單字卡 */
     .flashcards-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
     .flashcards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
     
@@ -812,7 +786,6 @@
       border: 1px solid #333;
     }
 
-    /* 講義內文專屬圖示與對錯標籤樣式（限制尺寸避免巨大化） */
     .doc-tag-tip {
       display: inline-flex;
       align-items: center;
@@ -856,18 +829,6 @@
       border: 1px solid var(--c-brown);
     }
 
-    /* 懸浮球中的向量地球圖示樣式 */
-    .globe-icon {
-      width: 22px;
-      height: 22px;
-      stroke: var(--c-brown);
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      display: block;
-    }
-
     .typing-indicator span { 
       width: 5px; 
       height: 5px; 
@@ -883,8 +844,13 @@
 
   <header>
     <div class="header-left">
-      <button id="btn-toggle-sidebar" class="btn-hamburger" title="切換學習專案">☰</button>
+      <button id="btn-toggle-sidebar" class="btn-hamburger" title="切換側邊清單">☰</button>
       <h1>Learn to speak</h1>
+      <!-- 主功能分頁切換 -->
+      <div id="nav-mode-switcher" class="hidden" style="display: inline-flex; background: #222; padding: 3px; border-radius: 9999px; margin-left: 12px; border: 1px solid #333;">
+        <button id="nav-btn-courses" class="btn-nude" style="padding: 4px 14px; font-size: var(--fs-sm); border: none;">系統課程</button>
+        <button id="nav-btn-subscriptions" style="background: transparent; color: #bbb; padding: 4px 14px; font-size: var(--fs-sm); border: none; border-radius: 9999px;">文章訂閱</button>
+      </div>
     </div>
     <div id="header-right" class="hidden" style="display: flex; align-items: center; gap: 10px;">
       <span class="status-badge" id="cloud-status">Google Drive 已連線</span>
@@ -894,7 +860,7 @@
 
   <div id="sidebar-overlay"></div>
 
-  <!-- 初始連線卡片：簡化為快速試用與 Google 登入 -->
+  <!-- 初始連線卡片 -->
   <div id="section-auth" style="max-width: 380px; margin: 80px auto; background: var(--c-nude-light); border: 1px solid var(--c-line); padding: 36px 28px; border-radius: 24px; text-align: center; display: flex; flex-direction: column; align-items: center;">
     <h2 style="font-size: var(--fs-h1); margin: 0 0 10px 0; color: var(--c-black); font-weight: 700;">Learn to speak</h2>
     <p style="font-size: var(--fs-body); color: var(--c-brown); margin: 0 0 28px 0; line-height: 1.5;">
@@ -916,7 +882,7 @@
     <!-- 左側專案清單 -->
     <aside id="main-sidebar">
       <div class="sidebar-header">
-        <h2>學習計畫清單</h2>
+        <h2 id="sidebar-title">學習計畫清單</h2>
         <button id="btn-open-new-project-modal" class="btn-nude" style="padding: 4px 10px; font-size: var(--fs-sm);">+ 新增</button>
       </div>
       <ul id="project-list" class="project-list"></ul>
@@ -924,7 +890,7 @@
 
     <!-- 右側主要操作區 -->
     <main>
-      <!-- 視圖 0: 空專案新建表單 -->
+      <!-- 視圖 0: 空專案新建表單 (課程模式) -->
       <section id="view-empty-create" class="content-container hidden">
         <div class="empty-state-card">
           <h2>建立第一個英文學習計畫</h2>
@@ -942,7 +908,41 @@
         </div>
       </section>
 
-      <!-- 視圖 A: 專案日卡看板 -->
+      <!-- 視圖 0-Sub: 空專案新建表單 (訂閱模式) -->
+      <section id="view-empty-sub-create" class="content-container hidden">
+        <div class="empty-state-card">
+          <h2>訂閱感興趣的英文主題文章</h2>
+          <p style="font-size: var(--fs-body); color: #555; margin-bottom: 20px;">
+            輸入您想關注的任何領域（例如：人工智慧趨勢、精品咖啡學、NBA 最新戰況、心靈哲學、海外旅遊），AI 每日將為您搜尋並生成專屬的英文文章與字卡！
+          </p>
+
+          <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-bottom: 6px;">訂閱主題 (Topic)：</label>
+          <input type="text" id="input-empty-sub-topic" placeholder="例如：AI 科技與前沿應用、世界各國咖啡文化" style="width: 100%; margin-bottom: 24px;">
+
+          <button id="btn-empty-sub-create" class="btn-brown" style="width: 100%; padding: 12px; font-size: var(--fs-body);">建立並開始訂閱</button>
+        </div>
+      </section>
+
+      <!-- 視圖 Sub-Dashboard: 訂閱主題歷史文章看板 -->
+      <section id="view-sub-dashboard" class="content-container hidden">
+        <div class="dashboard-header" style="flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: var(--fs-sm); background: var(--c-nude); color: var(--c-brown); padding: 2px 8px; border-radius: 9999px; font-weight: 600;">專題訂閱</span>
+              <h2 id="view-sub-title" style="margin: 0; font-size: var(--fs-h1); color: var(--c-white);">主題名稱</h2>
+            </div>
+            <span id="view-sub-summary" style="font-size: var(--fs-sm); color: var(--c-nude); margin-top: 4px; display: block;">已累積 0 篇專欄文章</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button id="btn-fetch-today-article" class="btn-nude" style="padding: 8px 16px; font-weight: 600;">
+              <span>📬 收取今日文章</span>
+            </button>
+          </div>
+        </div>
+        <div id="sub-articles-grid" class="cards-grid"></div>
+      </section>
+
+      <!-- 視圖 A: 專案日卡看板 (課程模式) -->
       <section id="view-dashboard" class="content-container hidden">
         <div class="dashboard-header" style="flex-wrap: wrap; gap: 12px;">
           <div>
@@ -959,13 +959,12 @@
         <div id="day-cards-grid" class="cards-grid"></div>
       </section>
 
-      <!-- 視圖 B: 雙欄深度研讀與單字卡工作區 -->
+      <!-- 視圖 B: 雙欄深度研讀與單字卡工作區 (支援課程講義與訂閱文章) -->
       <section id="view-study" class="study-layout hidden">
-        <!-- 左欄：教材與單字卡 -->
         <div class="lecture-panel">
           <div class="lecture-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <button id="btn-back-cards-left" class="btn-nude" style="padding: 4px 10px;" title="返回日程看板">
+              <button id="btn-back-cards-left" class="btn-nude" style="padding: 4px 10px;" title="返回看板">
                 <span>← 返回</span>
               </button>
               <div class="lecture-title-area">
@@ -978,13 +977,11 @@
             </div>
           </div>
 
-          <!-- 分頁頁籤 -->
           <div class="tab-nav">
             <button id="tab-btn-lecture" class="tab-btn active">核心解析講義</button>
             <button id="tab-btn-vocab" class="tab-btn">高頻單字與語塊 (<span id="vocab-count-badge">0</span>)</button>
           </div>
 
-          <!-- 分頁 1：深度講義 -->
           <div id="tab-pane-lecture" class="tab-content active">
             <div style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
               <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">每句英文後方皆附單句發音標籤，點選即可跟讀。</span>
@@ -999,7 +996,6 @@
             </div>
           </div>
 
-          <!-- 分頁 2：單字卡庫 -->
           <div id="tab-pane-vocab" class="tab-content">
             <div class="flashcards-toolbar">
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -1014,14 +1010,13 @@
           </div>
         </div>
 
-        <!-- 右欄：AI 助教問答與口說實戰 -->
         <div class="interactive-panel">
           <div class="interactive-header">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span>口說助教 & 隨堂練習</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成今日 10+1 題隨堂測驗">10+1 測驗</button>
+              <button id="btn-trigger-quiz" class="btn-quiz-compact" title="點擊生成 10+1 題隨堂測驗">10+1 測驗</button>
               <div style="display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: #666;">
                 <span>詳盡:</span>
                 <div id="slider-detail-pill" class="slider-segmented-pill" data-val="2" title="點擊或滑動切換：簡答 / 適中 / 詳盡">
@@ -1034,7 +1029,6 @@
           </div>
           <div id="chat-box" class="chat-scroll-area"></div>
           <div class="chat-input-bar">
-            <!-- 捷徑列 -->
             <div style="display: flex; gap: 6px;">
               <button id="btn-trigger-roleplay" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">5 句情境口說 (Roleplay)</button>
               <button id="btn-trigger-speaking-drill" class="btn-soft-pink" style="flex: 1; font-size: var(--fs-sm); padding: 7px 10px;">直覺反射造句訓練</button>
@@ -1043,7 +1037,6 @@
               <span>持續錄音中... 說完請點擊停止</span>
               <button id="btn-stop-recording-banner" class="btn-brown" style="padding: 2px 8px; font-size: var(--fs-sm);">停止錄音</button>
             </div>
-            <!-- 輸入列 -->
             <div style="display: flex; gap: 6px; align-items: flex-end;">
               <button id="btn-voice-input" class="btn-soft-pink" title="持續語音輸入" style="height: 38px; width: 42px; padding: 0;">
                 <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
@@ -1057,6 +1050,23 @@
     </main>
   </div>
 
+  <!-- 新增訂閱主題彈窗 -->
+  <div id="modal-new-sub" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>新增訂閱主題 (Topic)</h3>
+      <p style="font-size: var(--fs-sm); color: #666; margin-bottom: 12px;">
+        您可以訂閱多個不同主題，每日進入後點擊收取今日由 AI 生成的客製英文文章。
+      </p>
+      <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 10px;">主題關鍵字 / 領域：</label>
+      <input type="text" id="input-new-sub-topic" placeholder="例如：影視美劇評論、矽谷創業圈動態" style="width: 100%; margin-top: 4px;">
+
+      <div class="modal-actions">
+        <button id="btn-cancel-new-sub" class="btn-nude">取消</button>
+        <button id="btn-confirm-create-sub" class="btn-brown">確認訂閱</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 刷單字卡沉浸式視窗 -->
   <div id="modal-flashcard-player" class="modal-overlay hidden">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%;">
@@ -1065,7 +1075,6 @@
         <button id="btn-close-fc-player" class="btn-nude" style="padding: 2px 10px; font-size: var(--fs-sm);">✕ 關閉</button>
       </div>
 
-      <!-- 沉浸式卡片 -->
       <div id="player-card-box" class="study-card-box">
         <div class="study-card-inner">
           <div class="study-card-front">
@@ -1221,7 +1230,7 @@
     </div>
   </div>
 
-  <!-- 新增專案彈窗 -->
+  <!-- 新增專案彈窗 (課程模式) -->
   <div id="modal-new-project" class="modal-overlay hidden">
     <div class="modal-box">
       <h3>新增學習計畫</h3>
@@ -1297,11 +1306,6 @@
   const DEFAULT_LECTURE_MODEL = FLASH_MODEL;
   const DEFAULT_CHAT_MODEL = FLASH_MODEL;
 
-  const MODEL_DISPLAY_NAMES = {
-    "gemini-3-flash-preview": "Gemini 3 Flash",
-    "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite"
-  };
-  
   const DEFAULT_CLIENT_ID = "865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com";
   const DRIVE_FILE_NAME = "english_learning_master_projects.json";
   const LOCAL_STORAGE_KEY = "english_learning_master_data";
@@ -1312,15 +1316,20 @@
     accessToken: null,
     driveFileId: null,
     isLocalMode: false,
+    activeAppMode: "courses", // 'courses' | 'subscriptions'
+    activeSubId: null,
+    activeArticleDate: null,
     appData: {
       geminiKey: "",
       activeProjectId: null,
+      activeSubId: null,
       settings: {
         lectureModel: DEFAULT_LECTURE_MODEL,
         chatModel: DEFAULT_CHAT_MODEL,
         detailLevel: 2
       },
-      projects: {}
+      projects: {},
+      subscriptions: {} // { [subId]: { id, topic, createdAt, articles: { [dateStr]: { title, summary, content, flashcards: [], chatHistory: [] } } } }
     },
     activeDayIndex: null,
     chatInstance: null,
@@ -1338,6 +1347,14 @@
     });
   }
 
+  function getTodayDateStr() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
   // DOM 參照
   const sectionAuth = document.getElementById("section-auth");
   const appLayout = document.getElementById("app-layout");
@@ -1353,9 +1370,24 @@
   const selectLectureModel = document.getElementById("select-lecture-model");
   const selectChatModel = document.getElementById("select-chat-model");
   const btnLogin = document.getElementById("btn-login");
-  const chkCustomClientId = document.getElementById("chk-custom-client-id");
-  const boxCustomClientId = document.getElementById("box-custom-client-id");
-  const inputClientId = document.getElementById("input-client-id");
+
+  // 分頁切換與訂閱專用 DOM
+  const navModeSwitcher = document.getElementById("nav-mode-switcher");
+  const navBtnCourses = document.getElementById("nav-btn-courses");
+  const navBtnSubscriptions = document.getElementById("nav-btn-subscriptions");
+  const sidebarTitle = document.getElementById("sidebar-title");
+  const viewEmptySubCreate = document.getElementById("view-empty-sub-create");
+  const inputEmptySubTopic = document.getElementById("input-empty-sub-topic");
+  const btnEmptySubCreate = document.getElementById("btn-empty-sub-create");
+  const viewSubDashboard = document.getElementById("view-sub-dashboard");
+  const viewSubTitle = document.getElementById("view-sub-title");
+  const viewSubSummary = document.getElementById("view-sub-summary");
+  const subArticlesGrid = document.getElementById("sub-articles-grid");
+  const btnFetchTodayArticle = document.getElementById("btn-fetch-today-article");
+  const modalNewSub = document.getElementById("modal-new-sub");
+  const inputNewSubTopic = document.getElementById("input-new-sub-topic");
+  const btnCancelNewSub = document.getElementById("btn-cancel-new-sub");
+  const btnConfirmCreateSub = document.getElementById("btn-confirm-create-sub");
 
   const modalKeySetup = document.getElementById("modal-key-setup");
   const inputGeminiKey = document.getElementById("input-gemini-key");
@@ -1654,21 +1686,64 @@
   if (btnTriggerRoleplay) btnTriggerRoleplay.addEventListener("click", handleStartRoleplay);
   if (btnTriggerSpeakingDrill) btnTriggerSpeakingDrill.addEventListener("click", handleStartOralReflexDrill);
 
-  if (chkCustomClientId) {
-    chkCustomClientId.addEventListener("change", (e) => {
-      if (boxCustomClientId) boxCustomClientId.classList.toggle("hidden", !e.target.checked);
-    });
-  }
-
-  // 核心登入與免登入按鈕綁定（確保完整有效）
   if (btnLogin) btnLogin.addEventListener("click", handleGoogleAuth);
   if (btnUseLocal) btnUseLocal.addEventListener("click", handleUseLocalMode);
   if (btnSaveKey) btnSaveKey.addEventListener("click", handleSaveApiKey);
 
+  // 頂部導航分頁切換
+  if (navBtnCourses) {
+    navBtnCourses.addEventListener("click", () => switchAppMode("courses"));
+  }
+  if (navBtnSubscriptions) {
+    navBtnSubscriptions.addEventListener("click", () => switchAppMode("subscriptions"));
+  }
+
+  function switchAppMode(mode) {
+    state.activeAppMode = mode;
+    if (mode === "courses") {
+      navBtnCourses.className = "btn-nude";
+      navBtnCourses.style.background = "var(--c-nude)";
+      navBtnCourses.style.color = "var(--c-brown)";
+      navBtnSubscriptions.style.background = "transparent";
+      navBtnSubscriptions.style.color = "#bbb";
+      if (sidebarTitle) sidebarTitle.textContent = "學習計畫清單";
+    } else {
+      navBtnSubscriptions.className = "btn-nude";
+      navBtnSubscriptions.style.background = "var(--c-nude)";
+      navBtnSubscriptions.style.color = "var(--c-brown)";
+      navBtnCourses.style.background = "transparent";
+      navBtnCourses.style.color = "#bbb";
+      if (sidebarTitle) sidebarTitle.textContent = "訂閱專題清單";
+    }
+    initAppFlow();
+  }
+
   if (btnOpenNewProject) {
     btnOpenNewProject.addEventListener("click", () => {
       closeSidebarDrawer();
-      if (modalNewProject) modalNewProject.classList.remove("hidden");
+      if (state.activeAppMode === "subscriptions") {
+        if (inputNewSubTopic) inputNewSubTopic.value = "";
+        if (modalNewSub) modalNewSub.classList.remove("hidden");
+      } else {
+        if (modalNewProject) modalNewProject.classList.remove("hidden");
+      }
+    });
+  }
+  if (btnCancelNewSub) {
+    btnCancelNewSub.addEventListener("click", () => {
+      if (modalNewSub) modalNewSub.classList.add("hidden");
+    });
+  }
+  if (btnConfirmCreateSub) {
+    btnConfirmCreateSub.addEventListener("click", () => {
+      const topic = inputNewSubTopic ? inputNewSubTopic.value.trim() : "";
+      executeCreateSubscription(topic, btnConfirmCreateSub, modalNewSub);
+    });
+  }
+  if (btnEmptySubCreate) {
+    btnEmptySubCreate.addEventListener("click", () => {
+      const topic = inputEmptySubTopic ? inputEmptySubTopic.value.trim() : "";
+      executeCreateSubscription(topic, btnEmptySubCreate, null);
     });
   }
   if (btnCancelNewProject) {
@@ -1682,7 +1757,15 @@
   if (btnEmptyCreate) {
     btnEmptyCreate.addEventListener("click", () => executeCreateProject(inputEmptyGoal ? inputEmptyGoal.value : "", inputEmptyDays ? inputEmptyDays.value : 14, btnEmptyCreate, null));
   }
-  if (btnBackCardsLeft) btnBackCardsLeft.addEventListener("click", showCardsDashboard);
+  if (btnBackCardsLeft) {
+    btnBackCardsLeft.addEventListener("click", () => {
+      if (state.activeAppMode === "subscriptions") {
+        showSubDashboard();
+      } else {
+        showCardsDashboard();
+      }
+    });
+  }
 
   if (btnSendMessage) btnSendMessage.addEventListener("click", handleSendMessage);
   if (btnTriggerQuiz) btnTriggerQuiz.addEventListener("click", handleStartInChatQuiz);
@@ -1740,7 +1823,6 @@
       setDetailValue(nextVal);
     });
 
-    // 支援拖曳切換
     let isDraggingPill = false;
     const handlePillMove = (clientX) => {
       const rect = sliderDetailPill.getBoundingClientRect();
@@ -1812,7 +1894,6 @@
   }
 
   function handleGoogleAuth() {
-    const clientId = inputClientId ? inputClientId.value.trim() : DEFAULT_CLIENT_ID;
     if (typeof google === "undefined" || !google.accounts) {
       showToast("Google 模組載入中，請點擊「免登入直接學習」", "error");
       return;
@@ -1820,7 +1901,7 @@
 
     try {
       const client = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
+        client_id: DEFAULT_CLIENT_ID,
         scope: SCOPES,
         callback: async (resp) => {
           if (resp.error) return showToast("授權失敗", "error");
@@ -1845,6 +1926,7 @@
     if (sectionAuth) sectionAuth.classList.add("hidden");
     if (headerRight) headerRight.classList.remove("hidden");
     if (appLayout) appLayout.classList.remove("hidden");
+    if (navModeSwitcher) navModeSwitcher.classList.remove("hidden");
 
     if (cloudStatus) cloudStatus.textContent = "本機模式";
     if (state.appData.geminiKey) {
@@ -1874,6 +1956,7 @@
       if (sectionAuth) sectionAuth.classList.add("hidden");
       if (headerRight) headerRight.classList.remove("hidden");
       if (appLayout) appLayout.classList.remove("hidden");
+      if (navModeSwitcher) navModeSwitcher.classList.remove("hidden");
 
       if (state.appData.geminiKey) {
         state.geminiKey = state.appData.geminiKey;
@@ -1916,24 +1999,51 @@
   }
 
   function initAppFlow() {
-    const projectKeys = Object.keys(state.appData.projects || {});
-    renderSidebar();
+    if (!state.appData.subscriptions) state.appData.subscriptions = {};
+    if (!state.appData.projects) state.appData.projects = {};
 
-    if (projectKeys.length === 0) {
-      document.body.classList.remove("in-study-mode", "drawer-open");
-      if (viewStudy) viewStudy.classList.add("hidden");
-      if (viewDashboard) viewDashboard.classList.add("hidden");
-      if (viewEmptyCreate) viewEmptyCreate.classList.remove("hidden");
-    } else {
-      if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
-      if (!state.appData.activeProjectId || !state.appData.projects[state.appData.activeProjectId]) {
-        state.appData.activeProjectId = projectKeys[0];
+    document.body.classList.remove("in-study-mode", "drawer-open");
+    if (viewStudy) viewStudy.classList.add("hidden");
+
+    if (state.activeAppMode === "subscriptions") {
+      renderSidebarSubscriptions();
+      const subKeys = Object.keys(state.appData.subscriptions);
+      if (subKeys.length === 0) {
+        if (viewDashboard) viewDashboard.classList.add("hidden");
+        if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
+        if (viewSubDashboard) viewSubDashboard.classList.add("hidden");
+        if (viewEmptySubCreate) viewEmptySubCreate.classList.remove("hidden");
+      } else {
+        if (viewEmptySubCreate) viewEmptySubCreate.classList.add("hidden");
+        if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
+        if (viewDashboard) viewDashboard.classList.add("hidden");
+        if (!state.appData.activeSubId || !state.appData.subscriptions[state.appData.activeSubId]) {
+          state.appData.activeSubId = subKeys[0];
+        }
+        showSubDashboard();
       }
+    } else {
+      const projectKeys = Object.keys(state.appData.projects);
       renderSidebar();
-      showCardsDashboard();
+      if (viewEmptySubCreate) viewEmptySubCreate.classList.add("hidden");
+      if (viewSubDashboard) viewSubDashboard.classList.add("hidden");
+
+      if (projectKeys.length === 0) {
+        if (viewStudy) viewStudy.classList.add("hidden");
+        if (viewDashboard) viewDashboard.classList.add("hidden");
+        if (viewEmptyCreate) viewEmptyCreate.classList.remove("hidden");
+      } else {
+        if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
+        if (!state.appData.activeProjectId || !state.appData.projects[state.appData.activeProjectId]) {
+          state.appData.activeProjectId = projectKeys[0];
+        }
+        renderSidebar();
+        showCardsDashboard();
+      }
     }
   }
 
+  // 課程大綱生成
   async function executeCreateProject(goalText, daysValue, triggerBtn, modalToHide) {
     const goal = (goalText || "").trim();
     if (!goal) return showToast("請填寫專案目標", "error");
@@ -1974,6 +2084,34 @@
     }
   }
 
+  // 訂閱主題新增
+  async function executeCreateSubscription(topicText, triggerBtn, modalToHide) {
+    const topic = (topicText || "").trim();
+    if (!topic) return showToast("請填寫訂閱主題", "error");
+
+    if (triggerBtn) triggerBtn.disabled = true;
+    try {
+      const newId = "sub_" + Date.now();
+      state.appData.subscriptions[newId] = {
+        id: newId,
+        topic: topic,
+        createdAt: getTodayDateStr(),
+        articles: {}
+      };
+      state.appData.activeSubId = newId;
+      await saveProgressToDrive();
+
+      if (modalToHide) modalToHide.classList.add("hidden");
+      showToast(`已成功訂閱「${topic}」！`, "success");
+      initAppFlow();
+    } catch (e) {
+      showToast("訂閱失敗：" + e.message, "error");
+    } finally {
+      if (triggerBtn) triggerBtn.disabled = false;
+    }
+  }
+
+  // 渲染課程側邊欄
   function renderSidebar() {
     if (!projectListElem) return;
     projectListElem.innerHTML = "";
@@ -2017,10 +2155,57 @@
     });
   }
 
+  // 渲染訂閱側邊欄
+  function renderSidebarSubscriptions() {
+    if (!projectListElem) return;
+    projectListElem.innerHTML = "";
+    const subs = state.appData.subscriptions || {};
+
+    Object.values(subs).forEach((sub) => {
+      const li = document.createElement("li");
+      li.className = `project-item ${sub.id === state.appData.activeSubId ? 'active' : ''}`;
+      const articleCount = Object.keys(sub.articles || {}).length;
+
+      li.innerHTML = `
+        <div>
+          <div class="project-title" title="${sub.topic}">${sub.topic}</div>
+          <div class="project-meta">已收錄 ${articleCount} 篇專欄</div>
+        </div>
+        <button class="btn-del-project" title="取消訂閱">✕</button>
+      `;
+
+      li.addEventListener("click", () => {
+        state.appData.activeSubId = sub.id;
+        saveProgressToDrive();
+        renderSidebarSubscriptions();
+        closeSidebarDrawer();
+        showSubDashboard();
+      });
+
+      const delBtn = li.querySelector(".btn-del-project");
+      if (delBtn) {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showConfirm("取消訂閱確認", `確定刪除主題「${sub.topic}」及其所有文章紀錄嗎？`, async () => {
+            delete state.appData.subscriptions[sub.id];
+            const remaining = Object.keys(state.appData.subscriptions);
+            state.appData.activeSubId = remaining.length > 0 ? remaining[0] : null;
+            await saveProgressToDrive();
+            initAppFlow();
+          });
+        });
+      }
+      projectListElem.appendChild(li);
+    });
+  }
+
+  // 顯示課程看板
   function showCardsDashboard() {
     document.body.classList.remove("in-study-mode", "drawer-open");
     if (viewStudy) viewStudy.classList.add("hidden");
     if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
+    if (viewEmptySubCreate) viewEmptySubCreate.classList.add("hidden");
+    if (viewSubDashboard) viewSubDashboard.classList.add("hidden");
     if (viewDashboard) viewDashboard.classList.remove("hidden");
 
     const currentProj = state.appData.projects[state.appData.activeProjectId];
@@ -2037,38 +2222,37 @@
     if (badgeProjectTotalVocab) badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
     currentProj.plan.forEach((rawTitle, idx) => {
       const title = cleanTitleDayPrefix(rawTitle);
-      const dayHist = history[idx] || {};
-      const isCompleted = dayHist.completed;
+      const histItem = history[idx] || {};
+      const isCompleted = histItem.completed;
       if (isCompleted) completedCount++;
-
-      // 檢查是否達成完美通關（測驗、Roleplay、造句訓練皆完成）
-      const isPerfect = isCompleted && dayHist.roleplayCompleted && dayHist.drillCompleted;
 
       const isCurrent = idx === currentActiveIndex;
       const isLocked = idx > currentActiveIndex && !isCompleted;
-      const vocabCount = (dayHist.flashcards || []).length;
+      const vocabCount = (histItem.flashcards || []).length;
+
+      const isPerfect = isCompleted && histItem.quizCompleted && histItem.roleplayCompleted && histItem.drillCompleted;
 
       const card = document.createElement("div");
-      card.className = `day-card ${isPerfect ? 'perfect-completed' : (isCompleted ? 'completed' : '')} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
+      card.className = `day-card ${isPerfect ? 'perfect-clear' : (isCompleted ? 'completed' : '')} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
 
       let statusBadgeText = isLocked ? '未解鎖' : (isCurrent ? '進行中' : '未完成');
       if (isPerfect) {
         statusBadgeText = '🌟 完美通關';
       } else if (isCompleted) {
-        statusBadgeText = '✓ 已通關';
+        statusBadgeText = '✓ 通關';
       }
 
       card.innerHTML = `
         <div>
           <div class="card-day-tag" style="display: flex; justify-content: space-between; align-items: center;">
             <span>DAY ${idx + 1}</span>
-            <span style="font-weight: 700; color: ${isPerfect ? '#82485c' : 'var(--c-brown)'};">${isPerfect ? '★ 完美通關' : (isCompleted ? '✓ 通關' : '')}</span>
+            <span style="font-weight: 600;">${statusBadgeText}</span>
           </div>
           <div class="card-title">${title}</div>
           <div style="font-size: var(--fs-sm); color: #777;">🗂️ ${vocabCount} 個語塊卡</div>
         </div>
         <div class="card-footer">
-          <span style="font-size: var(--fs-sm); font-weight: 500; color: ${isPerfect ? '#82485c' : '#777'};">${statusBadgeText}</span>
+          <span style="font-size: var(--fs-sm); color: #777;">${isPerfect ? '完美掌握' : (isCompleted ? '已通關' : (isCurrent ? '進行中' : (isLocked ? '未解鎖' : '未完成')))}</span>
           <button type="button" class="${isCompleted ? 'btn-nude' : 'btn-brown'}" id="btn-card-action-${idx}">
             ${isCompleted ? '複習' : (isLocked ? '解鎖' : '開始')}
           </button>
@@ -2083,6 +2267,210 @@
     });
 
     if (viewProjectProgress) viewProjectProgress.textContent = `進度：${completedCount} / ${currentProj.plan.length} 天`;
+  }
+
+  // 顯示訂閱主題文章看板
+  function showSubDashboard() {
+    document.body.classList.remove("in-study-mode", "drawer-open");
+    if (viewStudy) viewStudy.classList.add("hidden");
+    if (viewEmptyCreate) viewEmptyCreate.classList.add("hidden");
+    if (viewEmptySubCreate) viewEmptySubCreate.classList.add("hidden");
+    if (viewDashboard) viewDashboard.classList.add("hidden");
+    if (viewSubDashboard) viewSubDashboard.classList.remove("hidden");
+
+    const currentSub = state.appData.subscriptions[state.appData.activeSubId];
+    if (!currentSub) return initAppFlow();
+
+    if (viewSubTitle) viewSubTitle.textContent = currentSub.topic;
+    const articles = currentSub.articles || {};
+    const dates = Object.keys(articles).sort().reverse();
+
+    if (viewSubSummary) viewSubSummary.textContent = `已收錄 ${dates.length} 篇專欄文章`;
+    if (subArticlesGrid) subArticlesGrid.innerHTML = "";
+
+    const todayStr = getTodayDateStr();
+    const hasToday = !!articles[todayStr];
+
+    if (btnFetchTodayArticle) {
+      if (hasToday) {
+        btnFetchTodayArticle.innerHTML = `<span>✓ 今日已收取</span>`;
+        btnFetchTodayArticle.className = "btn-outline";
+      } else {
+        btnFetchTodayArticle.innerHTML = `<span>📬 收取今日文章 (${todayStr})</span>`;
+        btnFetchTodayArticle.className = "btn-nude";
+      }
+      btnFetchTodayArticle.onclick = () => {
+        if (hasToday) {
+          startArticleStudy(todayStr);
+        } else {
+          fetchTodayArticleAction(currentSub, todayStr);
+        }
+      };
+    }
+
+    if (dates.length === 0) {
+      subArticlesGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: var(--c-nude-light); border-radius: 20px; border: 1px dashed var(--c-line);">
+          <h3 style="margin-top:0; color: var(--c-black);">今日專欄尚未收取</h3>
+          <p style="color: var(--c-brown); font-size: var(--fs-body); margin-bottom: 20px;">
+            點擊上方「📬 收取今日文章」，AI 將為您依據「${currentSub.topic}」主題搜尋最新脈動並生成專屬英文文章與字卡！
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    dates.forEach(dateKey => {
+      const item = articles[dateKey];
+      const card = document.createElement("div");
+      card.className = "day-card completed";
+      const isToday = dateKey === todayStr;
+
+      card.innerHTML = `
+        <div>
+          <div class="card-day-tag" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${dateKey} ${isToday ? '(今日專欄)' : ''}</span>
+            <span style="font-weight: 600; color: var(--c-brown);">🗂️ ${(item.flashcards || []).length} 字卡</span>
+          </div>
+          <div class="card-title">${item.title || "今日專屬文章"}</div>
+          <div style="font-size: var(--fs-sm); color: #666; line-height: 1.5; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            ${item.summary || "點選進入閱讀文章與練習語塊。"}
+          </div>
+        </div>
+        <div class="card-footer">
+          <span style="font-size: var(--fs-sm); color: #777;">已永久存於雲端</span>
+          <button type="button" class="btn-brown" id="btn-read-article-${dateKey}">閱讀與研讀</button>
+        </div>
+      `;
+
+      const btn = card.querySelector(`#btn-read-article-${dateKey}`);
+      if (btn) btn.addEventListener("click", () => startArticleStudy(dateKey));
+      subArticlesGrid.appendChild(card);
+    });
+  }
+
+  // 執行今日文章生成與字卡提煉
+  async function fetchTodayArticleAction(sub, todayStr) {
+    if (!btnFetchTodayArticle) return;
+    const origHTML = btnFetchTodayArticle.innerHTML;
+    btnFetchTodayArticle.disabled = true;
+    btnFetchTodayArticle.innerHTML = `<span>⚡ 正在搜尋與撰寫今日專欄...</span>`;
+
+    try {
+      const ai = getGenAIClient();
+      const prompt = `你是一位權威的英文專題專欄作家。
+當前訂閱主題是：【${sub.topic}】。
+請運用 Google 搜尋工具了解該領域最新動態或經典話題，撰寫一篇深入且實用的每日英文專欄文章。
+包含：
+1. 吸引人的專題文章標題 (Title)
+2. 50 字左右的繁體中文導讀簡介 (Summary)
+3. 英文正文（約 250~350 字，結構分段良好，用詞道地自然）
+4. 4~6 個值得學習的關鍵單字或高頻口語搭配詞（Collocations），每個附例句與中文翻譯
+5. 2 組中式英文對照或口語替換短評
+
+輸出要求：純 JSON 格式，具有以下欄位：
+{
+  "title": "英文標題",
+  "summary": "中文導讀摘要",
+  "contentMarkdown": "完整的 Markdown 格式文章教學講義（包含正文、中文翻譯、詞彙拆解、中式英文對話避坑）",
+  "flashcards": [
+    {
+      "word": "單字或搭配詞",
+      "phonetic": "音標",
+      "pos": "詞性",
+      "collocations": "常用語塊",
+      "meaning": "繁體中文釋義",
+      "example": "英文例句",
+      "example_zh": "例句中文翻譯"
+    }
+  ]
+}
+【嚴格要求】：嚴禁使用任何 Emoji 表情符號；保持 Markdown 純淨乾淨。`;
+
+      const res = await ai.models.generateContent({
+        model: getActiveLectureModel(),
+        contents: prompt,
+        tools: [{ googleSearch: {} }],
+        config: { responseMimeType: "application/json" }
+      });
+
+      const parsed = JSON.parse(res.text.trim());
+      if (!sub.articles) sub.articles = {};
+
+      const cards = (parsed.flashcards || []).map(item => ({
+        id: "sub_card_" + Date.now() + Math.random(),
+        word: item.word,
+        phonetic: item.phonetic || "",
+        pos: item.pos || "",
+        collocations: item.collocations || "",
+        meaning: item.meaning || "專欄單字",
+        example: item.example || "",
+        example_zh: item.example_zh || "",
+        status: 0
+      }));
+
+      sub.articles[todayStr] = {
+        title: parsed.title || `${sub.topic} 專欄`,
+        summary: parsed.summary || "",
+        content: parsed.contentMarkdown || "",
+        flashcards: cards,
+        chatHistory: []
+      };
+
+      await saveProgressToDrive();
+      showToast(`🎉 今日「${sub.topic}」文章已生成並提取 ${cards.length} 張字卡！`, "success");
+      showSubDashboard();
+      startArticleStudy(todayStr);
+    } catch (err) {
+      showToast("文章收取失敗：" + err.message, "error");
+    } finally {
+      if (btnFetchTodayArticle) {
+        btnFetchTodayArticle.disabled = false;
+        btnFetchTodayArticle.innerHTML = origHTML;
+      }
+    }
+  }
+
+  // 進入訂閱文章研讀畫面
+  async function startArticleStudy(dateKey) {
+    state.activeArticleDate = dateKey;
+    state.isQuizInProgress = false;
+    if (btnTriggerQuiz) btnTriggerQuiz.disabled = false;
+
+    document.body.classList.add("in-study-mode");
+    closeSidebarDrawer();
+
+    if (viewSubDashboard) viewSubDashboard.classList.add("hidden");
+    if (viewStudy) viewStudy.classList.remove("hidden");
+    if (tabBtnLecture) tabBtnLecture.click();
+
+    if (chatBox) chatBox.innerHTML = "";
+    if (inputMessage) inputMessage.value = "";
+
+    const currentSub = state.appData.subscriptions[state.appData.activeSubId];
+    const article = currentSub.articles[dateKey];
+
+    if (studyDayTitle) studyDayTitle.textContent = article.title;
+    if (lectureDayTag) lectureDayTag.textContent = `${dateKey} 專欄`;
+
+    if (lectureContentBox) renderMarkdownContent(lectureContentBox, article.content);
+    if (vocabCountBadge) vocabCountBadge.textContent = (article.flashcards || []).length;
+    renderFlashcardsList();
+
+    const savedChat = article.chatHistory || [];
+    if (savedChat.length === 0) {
+      appendChatMessage("system", `已為您載入【${article.title}】。您可以隨時朗讀跟讀內文，或讓 AI 助教為您出題測試閱讀理解！`, true);
+    } else {
+      savedChat.forEach(msg => appendChatMessage(msg.type, msg.content, false));
+    }
+
+    const ai = getGenAIClient();
+    state.chatInstance = ai.chats.create({
+      model: getActiveChatModel(),
+      config: {
+        systemInstruction: `你是專欄英語助教。當前訂閱主題是【${currentSub.topic}】，專欄標題是【${article.title}】。請針對這篇文章的文法、內涵、用詞提供解答與問答練習。`
+      }
+    });
   }
 
   function enhanceEnglishSentencesWithSpeech(container) {
@@ -2130,17 +2518,12 @@
     }
 
     container.querySelectorAll("li").forEach(li => {
-      // 1. 若此 li 已有發音按鈕，略過
       if (li.querySelector(".inline-sentence-speaker")) return;
-
-      // 2. 關鍵修復：若 li 內部包含子清單 (ul 或 ol)，說明它只是父級分組項目，絕不為其生成額外按鈕
       if (li.querySelector("ul, ol")) return;
 
-      // 3. 若純粹是中文翻譯括號項目（例如：(它將複雜精緻的節奏...)），直接略過
       const rawText = li.textContent.trim();
       if (/^[（(][^()（）]*[\u4e00-\u9fa5]+[^()（）]*[)）]$/.test(rawText)) return;
 
-      // 4. 僅針對終端真正的英文句子生成單一發音按鈕
       if (isValidEnglishSentence(rawText)) {
         const pureEn = extractPureEnglish(rawText);
         if (!pureEn) return;
@@ -2187,6 +2570,37 @@
     enhanceEnglishSentencesWithSpeech(targetElem);
   }
 
+  // 課程通關判定與推進解鎖下一天
+  async function checkAndMarkDayCompletion(triggerToast = false) {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    if (!currentProj || state.activeDayIndex === null) return;
+
+    if (!currentProj.history[state.activeDayIndex]) {
+      currentProj.history[state.activeDayIndex] = {};
+    }
+    const dayHist = currentProj.history[state.activeDayIndex];
+    dayHist.quizCompleted = true;
+    dayHist.completed = true;
+
+    // 若當前進度恰好是這一天，自動推進解鎖下一天
+    if (currentProj.currentDayIndex <= state.activeDayIndex) {
+      currentProj.currentDayIndex = state.activeDayIndex + 1;
+    }
+
+    await saveProgressToDrive();
+
+    const isPerfect = dayHist.quizCompleted && dayHist.roleplayCompleted && dayHist.drillCompleted;
+    if (triggerToast) {
+      if (isPerfect) {
+        showToast(`🎉 恭喜！DAY ${state.activeDayIndex + 1} 完美通關（全練習達成）！`, "success");
+        appendChatMessage("system", `恭喜您！今日測驗、情境口說與造句訓練已全數達成，榮獲【🌟 完美通關】！下一課已為您自動解鎖！`, true);
+      } else {
+        showToast(`🎉 DAY ${state.activeDayIndex + 1} 測驗完成，已成功通關！`, "success");
+        appendChatMessage("system", `10+1 測驗已完成，DAY ${state.activeDayIndex + 1} 已通關！下一天課程已自動解鎖。完成情境口說與造句訓練可達成「完美通關」！`, true);
+      }
+    }
+  }
+
   async function startDayStudy(dayIdx) {
     state.activeDayIndex = dayIdx;
     state.isQuizInProgress = false;
@@ -2210,7 +2624,15 @@
     if (lectureDayTag) lectureDayTag.textContent = `DAY ${dayIdx + 1}`;
 
     if (!currentProj.history[dayIdx]) {
-      currentProj.history[dayIdx] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+      currentProj.history[dayIdx] = { 
+        lessonContent: "", 
+        completed: false, 
+        quizCompleted: false,
+        roleplayCompleted: false,
+        drillCompleted: false,
+        chatHistory: [], 
+        flashcards: [] 
+      };
     }
 
     updateVocabBadgeCount();
@@ -2290,8 +2712,8 @@
       typingDiv.remove();
       appendChatMessage("bot", res.text, true);
 
-      // 如果當前是在進行 10+1 測驗，學生答覆並取得批改後自動觸發通關與解鎖
-      if (state.isQuizInProgress && state.activeDayIndex !== null) {
+      // 如果當前是在進行 10+1 測驗，學生答覆並取得批改後自動觸發通關與解鎖 (課程模式)
+      if (state.activeAppMode === "courses" && state.isQuizInProgress && state.activeDayIndex !== null) {
         state.isQuizInProgress = false;
         if (btnTriggerQuiz) btnTriggerQuiz.disabled = false;
         await checkAndMarkDayCompletion(true);
@@ -2302,84 +2724,48 @@
     }
   }
 
-  // 通關檢查與推進函式
-  async function checkAndMarkDayCompletion(fromQuiz = false) {
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    if (!currentProj || state.activeDayIndex === null) return;
-    const dayIdx = state.activeDayIndex;
-    if (!currentProj.history[dayIdx]) {
-      currentProj.history[dayIdx] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
-    }
-    const dayHist = currentProj.history[dayIdx];
-
-    if (fromQuiz) {
-      dayHist.quizCompleted = true;
-      dayHist.completed = true; // 10+1 測驗作完即算通關
-    }
-
-    // 自動解鎖下一天（若尚未解鎖）
-    if (dayIdx + 1 > (currentProj.currentDayIndex || 0) && dayIdx + 1 < currentProj.plan.length) {
-      currentProj.currentDayIndex = dayIdx + 1;
-    }
-
-    const isPerfect = dayHist.completed && dayHist.roleplayCompleted && dayHist.drillCompleted;
-
-    if (fromQuiz) {
-      if (isPerfect) {
-        showToast(`🎉 恭喜達成 DAY ${dayIdx + 1} 完美通關！下一課已解鎖！`, "success");
-        appendChatMessage("system", `🌟 太棒了！您已完成「10+1 測驗」、「情境口說」與「直覺造句」，已達成【完美通關】！DAY ${dayIdx + 2 <= currentProj.plan.length ? dayIdx + 2 : dayIdx + 1} 已為您解鎖！`, true);
-      } else {
-        showToast(`🎉 測驗完成！已通關並解鎖 DAY ${dayIdx + 2 <= currentProj.plan.length ? dayIdx + 2 : dayIdx + 1}！`, "success");
-        appendChatMessage("system", `✅ 恭喜完成 10+1 測驗並通關！下一單元已解鎖。若再完成「5 句情境口說」與「直覺反射造句訓練」，看板將點亮【🌟 完美通關】榮譽徽章！`, true);
-      }
-    } else if (isPerfect) {
-      showToast(`🌟 恭喜達成 DAY ${dayIdx + 1} 完美通關！`, "success");
-      appendChatMessage("system", `🌟 恭喜！您已補齊所有訓練，本課已升級為【完美通關】！`, true);
-    }
-
-    await saveProgressToDrive();
-  }
-
   async function handleStartRoleplay() {
     if (!state.chatInstance) return;
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const title = currentProj?.plan[state.activeDayIndex];
-
-    if (currentProj && state.activeDayIndex !== null) {
-      if (!currentProj.history[state.activeDayIndex]) {
-        currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+    let title = "";
+    if (state.activeAppMode === "subscriptions") {
+      const art = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate];
+      title = art?.title || "今日專欄";
+    } else {
+      title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+      // 標記情境口說達成
+      if (state.activeDayIndex !== null) {
+        const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
+        if (hist) {
+          hist.roleplayCompleted = true;
+          await saveProgressToDrive();
+        }
       }
-      currentProj.history[state.activeDayIndex].roleplayCompleted = true;
-      await saveProgressToDrive();
     }
-
     appendChatMessage("system", "啟動口說情境模擬，請使用麥克風開口回應！", true);
     const res = await state.chatInstance.sendMessage({ message: `啟動「${title}」的口說 Roleplay 對話，拋出第一句情境對話（1~2 句）。` });
     appendChatMessage("bot", res.text, true);
-
-    // 檢查是否剛好湊齊完美通關
-    await checkAndMarkDayCompletion(false);
   }
 
   async function handleStartOralReflexDrill() {
     if (!state.chatInstance) return;
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const title = currentProj?.plan[state.activeDayIndex];
-
-    if (currentProj && state.activeDayIndex !== null) {
-      if (!currentProj.history[state.activeDayIndex]) {
-        currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+    let title = "";
+    if (state.activeAppMode === "subscriptions") {
+      const art = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate];
+      title = art?.title || "今日專欄";
+    } else {
+      title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+      // 標記直覺造句訓練達成
+      if (state.activeDayIndex !== null) {
+        const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
+        if (hist) {
+          hist.drillCompleted = true;
+          await saveProgressToDrive();
+        }
       }
-      currentProj.history[state.activeDayIndex].drillCompleted = true;
-      await saveProgressToDrive();
     }
-
     appendChatMessage("system", "啟動直覺反射造句訓練！請直接用語音回答！", true);
     const res = await state.chatInstance.sendMessage({ message: `針對「${title}」，給出 1 道中文情境句，讓學生在 5 秒內大聲開口說出對應英文。` });
     appendChatMessage("bot", res.text, true);
-
-    // 檢查是否剛好湊齊完美通關
-    await checkAndMarkDayCompletion(false);
   }
 
   function appendChatMessage(type, content, shouldPersist = true) {
@@ -2406,23 +2792,39 @@
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    if (shouldPersist && state.activeDayIndex !== null) {
-      const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
-      if (hist) {
-        if (!hist.chatHistory) hist.chatHistory = [];
-        hist.chatHistory.push({ type, content });
-        saveProgressToDrive();
+    if (shouldPersist) {
+      if (state.activeAppMode === "subscriptions" && state.activeArticleDate) {
+        const sub = state.appData.subscriptions?.[state.appData.activeSubId];
+        const art = sub?.articles?.[state.activeArticleDate];
+        if (art) {
+          if (!art.chatHistory) art.chatHistory = [];
+          art.chatHistory.push({ type, content });
+          saveProgressToDrive();
+        }
+      } else if (state.activeDayIndex !== null) {
+        const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
+        if (hist) {
+          if (!hist.chatHistory) hist.chatHistory = [];
+          hist.chatHistory.push({ type, content });
+          saveProgressToDrive();
+        }
       }
     }
   }
 
   async function handleStartInChatQuiz() {
     if (!state.chatInstance || state.isQuizInProgress) return;
-    const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+    let title = "";
+    if (state.activeAppMode === "subscriptions") {
+      const art = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate];
+      title = art?.title || "今日專欄";
+    } else {
+      title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+    }
     if (btnTriggerQuiz) btnTriggerQuiz.disabled = true;
 
     try {
-      const res = await state.chatInstance.sendMessage({ message: `請針對「${title}」出 10 題文法與語塊測驗 + 1 題 Bonus 困難題。先列題目，不給答案。` });
+      const res = await state.chatInstance.sendMessage({ message: `請針對「${title}」出 10 題閱讀理解、文法與語塊測驗 + 1 題 Bonus 困難題。先列題目，不給答案。` });
       appendChatMessage("bot", res.text, true);
       if (inputMessage) {
         inputMessage.rows = 11;
@@ -2435,9 +2837,14 @@
   }
 
   function updateVocabBadgeCount() {
-    const currentProj = state.appData.projects[state.appData.activeProjectId];
-    const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
-    if (vocabCountBadge) vocabCountBadge.textContent = cards.length;
+    if (state.activeAppMode === "subscriptions") {
+      const art = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate];
+      if (vocabCountBadge) vocabCountBadge.textContent = (art?.flashcards || []).length;
+    } else {
+      const currentProj = state.appData.projects[state.appData.activeProjectId];
+      const cards = currentProj?.history?.[state.activeDayIndex]?.flashcards || [];
+      if (vocabCountBadge) vocabCountBadge.textContent = cards.length;
+    }
   }
 
   function getAllProjectFlashcards(proj) {
@@ -2463,7 +2870,12 @@
 
   if (btnAiGenVocab) {
     btnAiGenVocab.addEventListener("click", () => {
-      const content = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.lessonContent;
+      let content = "";
+      if (state.activeAppMode === "subscriptions") {
+        content = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate]?.content;
+      } else {
+        content = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.lessonContent;
+      }
       if (content) triggerAiExtractVocab(content);
     });
   }
@@ -2472,7 +2884,7 @@
     if (btnAiGenVocab) btnAiGenVocab.disabled = true;
     try {
       const ai = getGenAIClient();
-      const prompt = `從以下英文講義提取 6~8 個關鍵單字或語塊。輸出 JSON 陣列，欄位包含 word, phonetic, pos, collocations, meaning, example, example_zh, example2, example2_zh。\n\n${lessonContent}`;
+      const prompt = `從以下英文教材提取 6~8 個關鍵單字或語塊。輸出 JSON 陣列，欄位包含 word, phonetic, pos, collocations, meaning, example, example_zh, example2, example2_zh。\n\n${lessonContent}`;
       const res = await ai.models.generateContent({
         model: getActiveLectureModel(),
         contents: prompt,
@@ -2480,7 +2892,16 @@
       });
 
       const extracted = JSON.parse(res.text.trim());
-      const existingCards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
+      let existingCards = [];
+
+      if (state.activeAppMode === "subscriptions") {
+        const art = state.appData.subscriptions[state.appData.activeSubId].articles[state.activeArticleDate];
+        if (!art.flashcards) art.flashcards = [];
+        existingCards = art.flashcards;
+      } else {
+        existingCards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
+      }
+
       extracted.forEach(item => {
         existingCards.push({
           id: "card_" + Date.now() + Math.random(),
@@ -2511,7 +2932,13 @@
   function renderFlashcardsList() {
     if (!flashcardsContainer) return;
     flashcardsContainer.innerHTML = "";
-    const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
+    let cards = [];
+    if (state.activeAppMode === "subscriptions") {
+      const art = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate];
+      cards = art?.flashcards || [];
+    } else {
+      cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
+    }
 
     if (cards.length === 0) {
       flashcardsContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #777;">目前尚無單字卡，請點擊上方 AI 提煉。</div>`;
@@ -2610,7 +3037,16 @@
     btnConfirmAddVocab.addEventListener("click", async () => {
       const word = inputNewWord ? inputNewWord.value.trim() : "";
       if (!word) return;
-      const cards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
+
+      let cards = [];
+      if (state.activeAppMode === "subscriptions") {
+        const art = state.appData.subscriptions[state.appData.activeSubId].articles[state.activeArticleDate];
+        if (!art.flashcards) art.flashcards = [];
+        cards = art.flashcards;
+      } else {
+        cards = state.appData.projects[state.appData.activeProjectId].history[state.activeDayIndex].flashcards;
+      }
+
       cards.push({
         id: "card_" + Date.now(),
         word: word,
@@ -2624,6 +3060,7 @@
         example2_zh: inputNewExample2Zh ? inputNewExample2Zh.value.trim() : "",
         status: 0
       });
+
       await saveProgressToDrive();
       updateVocabBadgeCount();
       renderFlashcardsList();
@@ -2633,7 +3070,13 @@
 
   if (btnStartFlashcardMode) {
     btnStartFlashcardMode.addEventListener("click", () => {
-      const cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
+      let cards = [];
+      if (state.activeAppMode === "subscriptions") {
+        const art = state.appData.subscriptions?.[state.appData.activeSubId]?.articles?.[state.activeArticleDate];
+        cards = art?.flashcards || [];
+      } else {
+        cards = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex]?.flashcards || [];
+      }
       if (cards.length === 0) return showToast("目前尚無單字卡", "info");
       activePlayerDeck = [...cards];
       playerMode = "day";
@@ -2842,21 +3285,24 @@
         return;
       }
 
-      const currentProj = state.appData.projects[state.appData.activeProjectId];
-      if (!currentProj) {
-        showToast("請先選擇或建立一個英文計畫", "error");
-        return;
-      }
-
-      if (state.activeDayIndex === null) {
-        state.activeDayIndex = currentProj.currentDayIndex || 0;
-      }
-
-      if (!currentProj.history[state.activeDayIndex]) {
-        currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
-      }
-      if (!currentProj.history[state.activeDayIndex].flashcards) {
-        currentProj.history[state.activeDayIndex].flashcards = [];
+      let cardsTarget = null;
+      if (state.activeAppMode === "subscriptions") {
+        const sub = state.appData.subscriptions?.[state.appData.activeSubId];
+        const art = sub?.articles?.[state.activeArticleDate];
+        if (!art) return showToast("請先進入文章研讀模式", "error");
+        if (!art.flashcards) art.flashcards = [];
+        cardsTarget = art.flashcards;
+      } else {
+        const currentProj = state.appData.projects[state.appData.activeProjectId];
+        if (!currentProj) return showToast("請先選擇或建立一個英文計畫", "error");
+        if (state.activeDayIndex === null) state.activeDayIndex = currentProj.currentDayIndex || 0;
+        if (!currentProj.history[state.activeDayIndex]) {
+          currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+        }
+        if (!currentProj.history[state.activeDayIndex].flashcards) {
+          currentProj.history[state.activeDayIndex].flashcards = [];
+        }
+        cardsTarget = currentProj.history[state.activeDayIndex].flashcards;
       }
 
       const origText = btnAddFloatToVocab.textContent;
@@ -2869,7 +3315,6 @@
         let cardExample = "";
         let cardExampleZh = "";
 
-        // 若輸入的是英文，嘗試提取例句
         if (/^[a-zA-Z\s'-]+$/.test(queryText)) {
           try {
             const ai = getGenAIClient();
@@ -2885,7 +3330,7 @@
           } catch (err) {}
         }
 
-        currentProj.history[state.activeDayIndex].flashcards.push({
+        cardsTarget.push({
           id: "card_" + Date.now(),
           word: cardWord,
           phonetic: "",
