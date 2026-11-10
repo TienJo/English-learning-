@@ -450,6 +450,11 @@
     .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
     
     .day-card.completed { background: var(--c-nude); border-color: var(--c-line); }
+    .day-card.perfect-completed { 
+      background: #f3e6ec; 
+      border: 1.5px solid var(--c-brown); 
+      box-shadow: 0 4px 12px rgba(54, 42, 36, 0.08); 
+    }
     .day-card.current { background: var(--c-nude-light); border: 2px solid var(--c-brown); }
     .day-card.locked { background: var(--c-black-surface); border: 1px solid #2a2a2a; }
     .day-card.locked:hover { transform: none; }
@@ -2032,23 +2037,38 @@
     if (badgeProjectTotalVocab) badgeProjectTotalVocab.textContent = `${allCards.length} 字`;
     currentProj.plan.forEach((rawTitle, idx) => {
       const title = cleanTitleDayPrefix(rawTitle);
-      const isCompleted = history[idx]?.completed;
+      const dayHist = history[idx] || {};
+      const isCompleted = dayHist.completed;
       if (isCompleted) completedCount++;
+
+      // 檢查是否達成完美通關（測驗、Roleplay、造句訓練皆完成）
+      const isPerfect = isCompleted && dayHist.roleplayCompleted && dayHist.drillCompleted;
+
       const isCurrent = idx === currentActiveIndex;
       const isLocked = idx > currentActiveIndex && !isCompleted;
-      const vocabCount = (history[idx]?.flashcards || []).length;
+      const vocabCount = (dayHist.flashcards || []).length;
 
       const card = document.createElement("div");
-      card.className = `day-card ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
+      card.className = `day-card ${isPerfect ? 'perfect-completed' : (isCompleted ? 'completed' : '')} ${isCurrent ? 'current' : ''} ${isLocked ? 'locked' : ''}`;
+
+      let statusBadgeText = isLocked ? '未解鎖' : (isCurrent ? '進行中' : '未完成');
+      if (isPerfect) {
+        statusBadgeText = '🌟 完美通關';
+      } else if (isCompleted) {
+        statusBadgeText = '✓ 已通關';
+      }
 
       card.innerHTML = `
         <div>
-          <div class="card-day-tag">DAY ${idx + 1} ${isCompleted ? '✓' : ''}</div>
+          <div class="card-day-tag" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>DAY ${idx + 1}</span>
+            <span style="font-weight: 700; color: ${isPerfect ? '#82485c' : 'var(--c-brown)'};">${isPerfect ? '★ 完美通關' : (isCompleted ? '✓ 通關' : '')}</span>
+          </div>
           <div class="card-title">${title}</div>
           <div style="font-size: var(--fs-sm); color: #777;">🗂️ ${vocabCount} 個語塊卡</div>
         </div>
         <div class="card-footer">
-          <span style="font-size: var(--fs-sm); color: #777;">${isCompleted ? '已熟練' : (isCurrent ? '進行中' : (isLocked ? '未解鎖' : '未完成'))}</span>
+          <span style="font-size: var(--fs-sm); font-weight: 500; color: ${isPerfect ? '#82485c' : '#777'};">${statusBadgeText}</span>
           <button type="button" class="${isCompleted ? 'btn-nude' : 'btn-brown'}" id="btn-card-action-${idx}">
             ${isCompleted ? '複習' : (isLocked ? '解鎖' : '開始')}
           </button>
@@ -2269,26 +2289,97 @@
       const res = await state.chatInstance.sendMessage({ message: text });
       typingDiv.remove();
       appendChatMessage("bot", res.text, true);
+
+      // 如果當前是在進行 10+1 測驗，學生答覆並取得批改後自動觸發通關與解鎖
+      if (state.isQuizInProgress && state.activeDayIndex !== null) {
+        state.isQuizInProgress = false;
+        if (btnTriggerQuiz) btnTriggerQuiz.disabled = false;
+        await checkAndMarkDayCompletion(true);
+      }
     } catch (err) {
       typingDiv.remove();
       appendChatMessage("system", "回覆取得失敗", true);
     }
   }
 
+  // 通關檢查與推進函式
+  async function checkAndMarkDayCompletion(fromQuiz = false) {
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    if (!currentProj || state.activeDayIndex === null) return;
+    const dayIdx = state.activeDayIndex;
+    if (!currentProj.history[dayIdx]) {
+      currentProj.history[dayIdx] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+    }
+    const dayHist = currentProj.history[dayIdx];
+
+    if (fromQuiz) {
+      dayHist.quizCompleted = true;
+      dayHist.completed = true; // 10+1 測驗作完即算通關
+    }
+
+    // 自動解鎖下一天（若尚未解鎖）
+    if (dayIdx + 1 > (currentProj.currentDayIndex || 0) && dayIdx + 1 < currentProj.plan.length) {
+      currentProj.currentDayIndex = dayIdx + 1;
+    }
+
+    const isPerfect = dayHist.completed && dayHist.roleplayCompleted && dayHist.drillCompleted;
+
+    if (fromQuiz) {
+      if (isPerfect) {
+        showToast(`🎉 恭喜達成 DAY ${dayIdx + 1} 完美通關！下一課已解鎖！`, "success");
+        appendChatMessage("system", `🌟 太棒了！您已完成「10+1 測驗」、「情境口說」與「直覺造句」，已達成【完美通關】！DAY ${dayIdx + 2 <= currentProj.plan.length ? dayIdx + 2 : dayIdx + 1} 已為您解鎖！`, true);
+      } else {
+        showToast(`🎉 測驗完成！已通關並解鎖 DAY ${dayIdx + 2 <= currentProj.plan.length ? dayIdx + 2 : dayIdx + 1}！`, "success");
+        appendChatMessage("system", `✅ 恭喜完成 10+1 測驗並通關！下一單元已解鎖。若再完成「5 句情境口說」與「直覺反射造句訓練」，看板將點亮【🌟 完美通關】榮譽徽章！`, true);
+      }
+    } else if (isPerfect) {
+      showToast(`🌟 恭喜達成 DAY ${dayIdx + 1} 完美通關！`, "success");
+      appendChatMessage("system", `🌟 恭喜！您已補齊所有訓練，本課已升級為【完美通關】！`, true);
+    }
+
+    await saveProgressToDrive();
+  }
+
   async function handleStartRoleplay() {
     if (!state.chatInstance) return;
-    const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const title = currentProj?.plan[state.activeDayIndex];
+
+    if (currentProj && state.activeDayIndex !== null) {
+      if (!currentProj.history[state.activeDayIndex]) {
+        currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+      }
+      currentProj.history[state.activeDayIndex].roleplayCompleted = true;
+      await saveProgressToDrive();
+    }
+
     appendChatMessage("system", "啟動口說情境模擬，請使用麥克風開口回應！", true);
     const res = await state.chatInstance.sendMessage({ message: `啟動「${title}」的口說 Roleplay 對話，拋出第一句情境對話（1~2 句）。` });
     appendChatMessage("bot", res.text, true);
+
+    // 檢查是否剛好湊齊完美通關
+    await checkAndMarkDayCompletion(false);
   }
 
   async function handleStartOralReflexDrill() {
     if (!state.chatInstance) return;
-    const title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
+    const currentProj = state.appData.projects[state.appData.activeProjectId];
+    const title = currentProj?.plan[state.activeDayIndex];
+
+    if (currentProj && state.activeDayIndex !== null) {
+      if (!currentProj.history[state.activeDayIndex]) {
+        currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+      }
+      currentProj.history[state.activeDayIndex].drillCompleted = true;
+      await saveProgressToDrive();
+    }
+
     appendChatMessage("system", "啟動直覺反射造句訓練！請直接用語音回答！", true);
     const res = await state.chatInstance.sendMessage({ message: `針對「${title}」，給出 1 道中文情境句，讓學生在 5 秒內大聲開口說出對應英文。` });
     appendChatMessage("bot", res.text, true);
+
+    // 檢查是否剛好湊齊完美通關
+    await checkAndMarkDayCompletion(false);
   }
 
   function appendChatMessage(type, content, shouldPersist = true) {
