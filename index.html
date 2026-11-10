@@ -3068,6 +3068,62 @@
     });
   }
 
+  // 綁定手動增卡「AI 補全」按鈕事件
+  if (btnAiFillSingleVocab) {
+    btnAiFillSingleVocab.addEventListener("click", async () => {
+      const queryWord = inputNewWord ? inputNewWord.value.trim() : "";
+      if (!queryWord) {
+        showToast("請先輸入英文單字或片語", "error");
+        if (inputNewWord) inputNewWord.focus();
+        return;
+      }
+
+      const origText = btnAiFillSingleVocab.textContent;
+      btnAiFillSingleVocab.disabled = true;
+      btnAiFillSingleVocab.textContent = "補全中...";
+
+      try {
+        const ai = getGenAIClient();
+        const prompt = `針對英文單字或片語「${queryWord}」，生成完整的單字學習卡內容。
+要求輸出純 JSON 格式：
+{
+  "phonetic": "國際音標 (如 /ɪnˈkwaɪəri/)",
+  "pos": "詞性縮寫 (如 n. / v. / adj.)",
+  "collocations": "2~3個最道地的高頻口語搭配詞或片語 (例如 make an inquiry, handle inquiries)",
+  "meaning": "繁體中文核心釋義",
+  "example": "生活或職場實用英文情境例句 1",
+  "example_zh": "例句 1 的繁體中文翻譯",
+  "example2": "進階實用英文情境例句 2",
+  "example2_zh": "例句 2 的繁體中文翻譯"
+}`;
+
+        const res = await ai.models.generateContent({
+          model: "gemini-3.1-flash-lite",
+          contents: prompt,
+          config: { responseMimeType: "application/json" }
+        });
+
+        const data = JSON.parse(res.text.trim());
+
+        if (inputNewPhonetic) inputNewPhonetic.value = data.phonetic || "";
+        if (inputNewPos) inputNewPos.value = data.pos || "";
+        if (inputNewCollocations) inputNewCollocations.value = data.collocations || "";
+        if (inputNewMeaning) inputNewMeaning.value = data.meaning || "";
+        if (inputNewExample) inputNewExample.value = data.example || "";
+        if (inputNewExampleZh) inputNewExampleZh.value = data.example_zh || "";
+        if (inputNewExample2) inputNewExample2.value = data.example2 || "";
+        if (inputNewExample2Zh) inputNewExample2Zh.value = data.example2_zh || "";
+
+        showToast(`已成功為「${queryWord}」自動補全資訊！`, "success");
+      } catch (err) {
+        showToast("AI 補全失敗：" + err.message, "error");
+      } finally {
+        btnAiFillSingleVocab.disabled = false;
+        btnAiFillSingleVocab.textContent = origText;
+      }
+    });
+  }
+
   if (btnStartFlashcardMode) {
     btnStartFlashcardMode.addEventListener("click", () => {
       let cards = [];
