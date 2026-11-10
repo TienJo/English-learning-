@@ -1163,13 +1163,9 @@
         <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">中文釋義：</label>
         <input type="text" id="input-new-meaning" placeholder="拖延、耽擱" style="width: 100%; margin-top: 4px;">
 
-        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">情境例句 1：</label>
+        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">情境例句：</label>
         <input type="text" id="input-new-example" placeholder="英文例句" style="width: 100%; margin-top: 4px;">
         <input type="text" id="input-new-example-zh" placeholder="中文翻譯" style="width: 100%; margin-top: 3px;">
-
-        <label style="font-size: var(--fs-sm); font-weight: 600; display: block; margin-top: 8px;">情境例句 2：</label>
-        <input type="text" id="input-new-example2" placeholder="進階英文例句" style="width: 100%; margin-top: 4px;">
-        <input type="text" id="input-new-example2-zh" placeholder="中文翻譯" style="width: 100%; margin-top: 3px;">
       </div>
 
       <div class="modal-actions">
@@ -1481,8 +1477,6 @@
   const btnPlayerSpeakEx2 = document.getElementById("btn-player-speak-ex2");
   const btnPlayerSpeakAllEx = document.getElementById("btn-player-speak-all-ex");
   const inputNewExampleZh = document.getElementById("input-new-example-zh");
-  const inputNewExample2 = document.getElementById("input-new-example2");
-  const inputNewExample2Zh = document.getElementById("input-new-example2-zh");
   const fcPlayerProgress = document.getElementById("fc-player-progress");
   const btnFcRate0 = document.getElementById("btn-fc-rate-0");
   const btnFcRate1 = document.getElementById("btn-fc-rate-1");
@@ -2358,37 +2352,48 @@
 
     try {
       const ai = getGenAIClient();
-      const prompt = `你是一位權威的英文專題專欄作家。
+      const prompt = `你是一位風格鮮明、文筆生動的熱門英文專欄博主（Blogger）。
 當前訂閱主題是：【${sub.topic}】。
-請運用 Google 搜尋工具了解該領域最新動態或經典話題，撰寫一篇深入且實用的每日英文專欄文章。
-包含：
-1. 吸引人的專題文章標題 (Title)
-2. 50 字左右的繁體中文導讀簡介 (Summary)
-3. 英文正文（約 250~350 字，結構分段良好，用詞道地自然）
-4. 4~6 個值得學習的關鍵單字或高頻口語搭配詞（Collocations），每個附例句與中文翻譯
-5. 2 組中式英文對照或口語替換短評
+請運用 Google 搜尋工具了解該領域最新動態或熱門話題，以博主視角撰寫今日的英文專欄。
+
+【嚴格固定格式要求】：
+生成的 contentMarkdown 必須嚴格固定分為以下兩大部分：
+
+## Part 1: The Story (專題文章)
+- 文筆必須像博主（Blogger）在聊天分享、發表個人觀點，生動自然、富有感染力與節奏感，嚴禁寫成死板冷硬的新聞通訊稿！
+- 英文內文字數【至少 400 個英文單詞 (words)】。
+- 段落之間層次分明，可穿插博主的生動思考與生活提問。
+- 附上 1~2 段精緻的繁體中文全文導讀與背景翻譯。
+
+## Part 2: Key Phrases & Real-Life Examples (常用片語與例句)
+- 提煉 5~7 個文章中出現的高頻實用片語、口語搭配詞（Collocations/Phrases）。
+- 格式統一：
+  ### 1. [片語/語塊] (中文核心意思)
+  - **說明**：使用語境與博主解析
+  - **生活例句**：英文情境例句
+  - **例句翻譯**：繁體中文例句翻譯
 
 輸出要求：純 JSON 格式，具有以下欄位：
 {
-  "title": "英文標題",
-  "summary": "中文導讀摘要",
-  "contentMarkdown": "完整的 Markdown 格式文章教學講義（包含正文、中文翻譯、詞彙拆解、中式英文對話避坑）",
+  "title": "吸引人的博主風英文標題",
+  "summary": "50~80字的中文導讀摘要",
+  "contentMarkdown": "包含 Part 1 與 Part 2 兩大部分的完整 Markdown 講義",
   "flashcards": [
     {
-      "word": "單字或搭配詞",
+      "word": "常用片語或單字",
       "phonetic": "音標",
       "pos": "詞性",
-      "collocations": "常用語塊",
+      "collocations": "口語搭配",
       "meaning": "繁體中文釋義",
-      "example": "英文例句",
+      "example": "生活英文例句",
       "example_zh": "例句中文翻譯"
     }
   ]
 }
-【嚴格要求】：嚴禁使用任何 Emoji 表情符號；保持 Markdown 純淨乾淨。`;
+【特別注意】：嚴禁使用任何 Emoji 表情符號；保持 Markdown 排版純淨。`;
 
       const res = await ai.models.generateContent({
-        model: getActiveLectureModel(),
+        model: "gemini-3.1-flash-lite",
         contents: prompt,
         tools: [{ googleSearch: {} }],
         config: { responseMimeType: "application/json" }
@@ -2403,7 +2408,7 @@
         phonetic: item.phonetic || "",
         pos: item.pos || "",
         collocations: item.collocations || "",
-        meaning: item.meaning || "專欄單字",
+        meaning: item.meaning || "專欄片語",
         example: item.example || "",
         example_zh: item.example_zh || "",
         status: 0
@@ -3056,8 +3061,6 @@
         meaning: (inputNewMeaning && inputNewMeaning.value.trim()) || "自訂字詞",
         example: inputNewExample ? inputNewExample.value.trim() : "",
         example_zh: inputNewExampleZh ? inputNewExampleZh.value.trim() : "",
-        example2: inputNewExample2 ? inputNewExample2.value.trim() : "",
-        example2_zh: inputNewExample2Zh ? inputNewExample2Zh.value.trim() : "",
         status: 0
       });
 
@@ -3091,10 +3094,8 @@
   "pos": "詞性縮寫 (如 n. / v. / adj.)",
   "collocations": "2~3個最道地的高頻口語搭配詞或片語 (例如 make an inquiry, handle inquiries)",
   "meaning": "繁體中文核心釋義",
-  "example": "生活或職場實用英文情境例句 1",
-  "example_zh": "例句 1 的繁體中文翻譯",
-  "example2": "進階實用英文情境例句 2",
-  "example2_zh": "例句 2 的繁體中文翻譯"
+  "example": "生活或職場實用英文情境例句",
+  "example_zh": "例句的繁體中文翻譯"
 }`;
 
         const res = await ai.models.generateContent({
@@ -3111,8 +3112,6 @@
         if (inputNewMeaning) inputNewMeaning.value = data.meaning || "";
         if (inputNewExample) inputNewExample.value = data.example || "";
         if (inputNewExampleZh) inputNewExampleZh.value = data.example_zh || "";
-        if (inputNewExample2) inputNewExample2.value = data.example2 || "";
-        if (inputNewExample2Zh) inputNewExample2Zh.value = data.example2_zh || "";
 
         showToast(`已成功為「${queryWord}」自動補全資訊！`, "success");
       } catch (err) {
