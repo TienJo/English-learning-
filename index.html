@@ -756,6 +756,109 @@
       font-size: var(--fs-body) !important;
     }
 
+    /* ================= 點字懸浮字典字卡 (Click-to-Lookup Popover Card) ================= */
+    #word-lookup-popover {
+      position: fixed;
+      z-index: 9999;
+      width: 280px;
+      max-width: calc(100vw - 24px);
+      background: var(--c-white);
+      border: 1.5px solid var(--c-brown);
+      border-radius: 16px;
+      box-shadow: 0 14px 36px rgba(18, 18, 18, 0.35);
+      padding: 14px 16px;
+      color: var(--c-black);
+      transition: opacity 0.16s ease, transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+      transform-origin: top left;
+    }
+    #word-lookup-popover.hidden {
+      display: none !important;
+    }
+    .wlp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .wlp-word-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--c-black);
+      line-height: 1.25;
+      word-break: break-word;
+    }
+    .wlp-phonetic {
+      font-size: 12px;
+      color: var(--c-brown);
+      font-family: monospace, sans-serif;
+      margin-top: 2px;
+    }
+    .wlp-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .wlp-icon-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 50%;
+      background: var(--c-nude);
+      color: var(--c-brown);
+      border: 1px solid var(--c-line);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .wlp-icon-btn:hover {
+      background: var(--c-brown);
+      color: var(--c-white);
+    }
+    .wlp-pos-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .wlp-pos-tag {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--c-nude);
+      color: var(--c-brown);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      border: 1px solid var(--c-line);
+    }
+    .wlp-meaning-box {
+      background: var(--c-nude-light);
+      border: 1px solid var(--c-line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--c-black);
+      line-height: 1.45;
+    }
+    .wlp-sub-def {
+      font-size: 12px;
+      color: #555;
+      margin-top: 6px;
+      line-height: 1.4;
+      border-top: 1px dashed var(--c-line);
+      padding-top: 5px;
+    }
+    .wlp-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--c-line);
+    }
+
     .modal-overlay { 
       position: fixed; 
       inset: 0; 
@@ -984,7 +1087,7 @@
 
           <div id="tab-pane-lecture" class="tab-content active">
             <div style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">每句英文後方皆附單句發音標籤，點選即可跟讀。</span>
+              <span style="font-size: var(--fs-sm); color: var(--c-brown); font-weight: 500;">💡 提示：點擊畫面上任何英文單字可即時查詞性、翻譯與發音。</span>
               <div style="display: flex; gap: 6px; align-items: center;">
                 <span style="font-size: var(--fs-sm); color: var(--c-brown);">語速：</span>
                 <button id="btn-speed-slow" class="btn-outline" style="padding: 2px 8px; font-size: var(--fs-sm);">0.8x 慢速</button>
@@ -1048,6 +1151,32 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- 點字即時懸浮字典字卡 (Click-to-Lookup Popover Card) -->
+  <div id="word-lookup-popover" class="hidden">
+    <div class="wlp-header">
+      <div>
+        <div id="wlp-word" class="wlp-word-title">word</div>
+        <div id="wlp-phonetic" class="wlp-phonetic">/wɜːd/</div>
+      </div>
+      <div class="wlp-actions">
+        <button type="button" id="wlp-btn-speak-slow" class="wlp-icon-btn" title="慢速發音 (0.75x)" style="font-size: 11px; font-weight: 700;">慢</button>
+        <button type="button" id="wlp-btn-speak" class="wlp-icon-btn" title="標準發音">
+          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        </button>
+        <button type="button" id="wlp-btn-close" class="wlp-icon-btn" title="關閉">✕</button>
+      </div>
+    </div>
+    <div id="wlp-pos-row" class="wlp-pos-row"></div>
+    <div class="wlp-meaning-box">
+      <div id="wlp-meaning">查詢中...</div>
+      <div id="wlp-en-def" class="wlp-sub-def hidden"></div>
+    </div>
+    <div class="wlp-footer">
+      <span style="font-size: 11px; color: #777;">免費字典即時查詢</span>
+      <button type="button" id="wlp-btn-add-card" class="btn-brown" style="padding: 3px 10px; font-size: 11px;">+ 加入單字卡</button>
+    </div>
   </div>
 
   <!-- 新增訂閱主題彈窗 -->
@@ -1325,7 +1454,7 @@
         detailLevel: 2
       },
       projects: {},
-      subscriptions: {} // { [subId]: { id, topic, createdAt, articles: { [dateStr]: { title, summary, content, flashcards: [], chatHistory: [] } } } }
+      subscriptions: {}
     },
     activeDayIndex: null,
     chatInstance: null,
@@ -1576,6 +1705,366 @@
   function speakEnglish(text, rate = state.speechRate) {
     speakSingleSentence(text, rate);
   }
+
+  /* =========================================================================
+     点字懸浮字典字卡 (Click-to-Lookup Popover Card) — 免費 API 串接
+     1. 詞性與音標：Free Dictionary API (https://api.dictionaryapi.dev/api/v2/entries/en/{word})
+     2. 繁體中文翻譯：MyMemory Free Translation API (https://api.mymemory.translated.net/get?q={word}&langpair=en|zh-TW)
+     ========================================================================= */
+  const wordLookupPopover = document.getElementById("word-lookup-popover");
+  const wlpWordEl = document.getElementById("wlp-word");
+  const wlpPhoneticEl = document.getElementById("wlp-phonetic");
+  const wlpPosRowEl = document.getElementById("wlp-pos-row");
+  const wlpMeaningEl = document.getElementById("wlp-meaning");
+  const wlpEnDefEl = document.getElementById("wlp-en-def");
+  const wlpBtnSpeak = document.getElementById("wlp-btn-speak");
+  const wlpBtnSpeakSlow = document.getElementById("wlp-btn-speak-slow");
+  const wlpBtnClose = document.getElementById("wlp-btn-close");
+  const wlpBtnAddCard = document.getElementById("wlp-btn-add-card");
+
+  const lookupCache = new Map();
+  let currentLookupData = null;
+  let lookupRequestId = 0;
+
+  const POS_ZH_MAP = {
+    noun: "n. 名詞",
+    verb: "v. 動詞",
+    adjective: "adj. 形容詞",
+    adverb: "adv. 副詞",
+    pronoun: "pron. 代名詞",
+    preposition: "prep. 介系詞",
+    conjunction: "conj. 連接詞",
+    interjection: "int. 感嘆詞",
+    determiner: "det. 限定詞"
+  };
+
+  function hideWordLookupPopover() {
+    if (wordLookupPopover) {
+      wordLookupPopover.classList.add("hidden");
+    }
+  }
+
+  function positionWordLookupPopover(clientX, clientY) {
+    if (!wordLookupPopover) return;
+    wordLookupPopover.classList.remove("hidden");
+
+    const popW = wordLookupPopover.offsetWidth || 280;
+    const popH = wordLookupPopover.offsetHeight || 190;
+    const margin = 12;
+
+    let left = clientX - 20;
+    let top = clientY + 18;
+
+    // 若右側超出螢幕，往左推
+    if (left + popW > window.innerWidth - margin) {
+      left = window.innerWidth - popW - margin;
+    }
+    if (left < margin) {
+      left = margin;
+    }
+
+    // 若下方超出螢幕，顯示在點擊位置的上方
+    if (top + popH > window.innerHeight - margin) {
+      top = clientY - popH - 14;
+    }
+    if (top < margin) {
+      top = margin;
+    }
+
+    wordLookupPopover.style.left = `${left}px`;
+    wordLookupPopover.style.top = `${top}px`;
+  }
+
+  function extractClickedEnglishWord(e) {
+    // 1. 優先檢查使用者是否剛反白圈選了英文單字或片語 (1~4個英文詞)
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed) {
+      const selectedStr = selection.toString().trim();
+      if (/^[a-zA-Z]+(?:['’-][a-zA-Z]+)*(?:\s+[a-zA-Z]+(?:['’-][a-zA-Z]+)*){0,3}$/.test(selectedStr) && selectedStr.length >= 2 && selectedStr.length <= 45) {
+        return selectedStr;
+      }
+    }
+
+    // 2. 若未反白，則精準偵測游標點擊處的單一英文單字
+    let range = null;
+    if (document.caretRangeFromPoint) {
+      range = document.caretRangeFromPoint(e.clientX, e.clientY);
+    } else if (document.caretPositionFromPoint) {
+      const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+      if (pos) {
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+      }
+    }
+
+    if (!range || !range.startContainer || range.startContainer.nodeType !== Node.TEXT_NODE) {
+      return null;
+    }
+
+    const text = range.startContainer.textContent || "";
+    const offset = range.startOffset;
+
+    const isWordChar = (ch) => /[a-zA-Z'’-]/.test(ch);
+    let start = offset;
+    let end = offset;
+
+    // 檢查游標是否落在單字上或緊鄰單字邊緣
+    if (start > 0 && !isWordChar(text[start]) && isWordChar(text[start - 1])) {
+      start--;
+      end = start;
+    }
+
+    if (start >= text.length || !isWordChar(text[start])) {
+      return null;
+    }
+
+    while (start > 0 && isWordChar(text[start - 1])) {
+      start--;
+    }
+    while (end < text.length && isWordChar(text[end])) {
+      end++;
+    }
+
+    const rawWord = text.slice(start, end).replace(/^['’-]+|['’-]+$/g, "");
+    if (!rawWord || !/^[a-zA-Z][a-zA-Z'’-]*$/.test(rawWord) || rawWord.length < 2) {
+      return null;
+    }
+    return rawWord;
+  }
+
+  async function lookupWordWithFreeApis(word, clientX, clientY) {
+    const cleanWord = word.trim();
+    const lowerKey = cleanWord.toLowerCase();
+    const isSingleWord = !/\s/.test(cleanWord);
+    const reqId = ++lookupRequestId;
+
+    currentLookupData = {
+      word: cleanWord,
+      phonetic: "",
+      posList: [],
+      posRaw: "",
+      meaning: "查詢翻譯與詞性中...",
+      enDef: ""
+    };
+
+    if (wlpWordEl) wlpWordEl.textContent = cleanWord;
+    if (wlpPhoneticEl) wlpPhoneticEl.textContent = "查詢音標中...";
+    if (wlpPosRowEl) wlpPosRowEl.innerHTML = "";
+    if (wlpMeaningEl) wlpMeaningEl.textContent = "查詢中...";
+    if (wlpEnDefEl) {
+      wlpEnDefEl.textContent = "";
+      wlpEnDefEl.classList.add("hidden");
+    }
+
+    positionWordLookupPopover(clientX, clientY);
+    // 點擊時自動朗讀一次發音，強化聽覺記憶
+    speakEnglish(cleanWord);
+
+    if (lookupCache.has(lowerKey)) {
+      const cached = lookupCache.get(lowerKey);
+      currentLookupData = cached;
+      renderLookupPopoverData(cached, clientX, clientY);
+      return;
+    }
+
+    // 平行呼叫兩個免費 API：MyMemory 翻譯 + Free Dictionary 詞性/音標
+    const translatePromise = fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanWord)}&langpair=en|zh-TW`)
+      .then(r => r.json())
+      .catch(() => null);
+
+    const dictPromise = isSingleWord
+      ? fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(lowerKey)}`)
+          .then(r => (r.ok ? r.json() : null))
+          .catch(() => null)
+      : Promise.resolve(null);
+
+    const [transRes, dictRes] = await Promise.all([translatePromise, dictPromise]);
+    if (reqId !== lookupRequestId) return; // 避免舊請求覆蓋新點擊
+
+    let zhMeaning = "";
+    if (transRes && transRes.responseData && transRes.responseData.translatedText) {
+      zhMeaning = transRes.responseData.translatedText.trim();
+      // 若有更精準的 matches 翻譯也可補充
+      if (Array.isArray(transRes.matches)) {
+        const extraMatches = transRes.matches
+          .filter(m => m.translation && m.translation.trim() !== zhMeaning && /[\u4e00-\u9fa5]/.test(m.translation))
+          .map(m => m.translation.trim());
+        const uniqueExtra = [...new Set(extraMatches)].slice(0, 2);
+        if (uniqueExtra.length > 0 && zhMeaning.length < 15) {
+          zhMeaning += `；${uniqueExtra.join("、")}`;
+        }
+      }
+    }
+
+    let phonetic = "";
+    let posSet = new Set();
+    let enDef = "";
+
+    if (Array.isArray(dictRes) && dictRes.length > 0) {
+      const entry = dictRes[0];
+      phonetic = entry.phonetic || (entry.phonetics?.find(p => p.text)?.text) || "";
+      if (Array.isArray(entry.meanings)) {
+        entry.meanings.forEach(m => {
+          if (m.partOfSpeech) {
+            posSet.add(m.partOfSpeech.toLowerCase());
+          }
+          if (!enDef && Array.isArray(m.definitions) && m.definitions[0]?.definition) {
+            enDef = m.definitions[0].definition;
+          }
+        });
+      }
+    }
+
+    const posList = Array.from(posSet);
+    const resultData = {
+      word: cleanWord,
+      phonetic: phonetic || (isSingleWord ? "" : "片語 / 短句"),
+      posList: posList,
+      posRaw: posList.map(p => POS_ZH_MAP[p]?.split(" ")[0] || p).join(" / "),
+      meaning: zhMeaning || "查無中文翻譯",
+      enDef: enDef
+    };
+
+    lookupCache.set(lowerKey, resultData);
+    currentLookupData = resultData;
+    renderLookupPopoverData(resultData, clientX, clientY);
+  }
+
+  function renderLookupPopoverData(data, clientX, clientY) {
+    if (!wordLookupPopover) return;
+    if (wlpWordEl) wlpWordEl.textContent = data.word;
+    if (wlpPhoneticEl) {
+      wlpPhoneticEl.textContent = data.phonetic || "";
+      wlpPhoneticEl.style.display = data.phonetic ? "block" : "none";
+    }
+
+    if (wlpPosRowEl) {
+      wlpPosRowEl.innerHTML = "";
+      if (data.posList && data.posList.length > 0) {
+        data.posList.forEach(pos => {
+          const span = document.createElement("span");
+          span.className = "wlp-pos-tag";
+          span.textContent = POS_ZH_MAP[pos] || pos;
+          wlpPosRowEl.appendChild(span);
+        });
+      } else {
+        const span = document.createElement("span");
+        span.className = "wlp-pos-tag";
+        span.textContent = /\s/.test(data.word) ? "phrase 片語" : "word 詞彙";
+        wlpPosRowEl.appendChild(span);
+      }
+    }
+
+    if (wlpMeaningEl) wlpMeaningEl.textContent = data.meaning;
+    if (wlpEnDefEl) {
+      if (data.enDef) {
+        wlpEnDefEl.textContent = data.enDef;
+        wlpEnDefEl.classList.remove("hidden");
+      } else {
+        wlpEnDefEl.classList.add("hidden");
+      }
+    }
+
+    // 內容更新後重新微調位置避免溢出視窗
+    positionWordLookupPopover(clientX, clientY);
+  }
+
+  // 全域監聽滑鼠點擊，點選任何英文字詞即彈出懸浮字卡
+  document.addEventListener("mouseup", (e) => {
+    // 若點擊在懸浮字卡內部、按鈕、輸入框或互動控制項上，不觸發重新查字
+    if (wordLookupPopover && wordLookupPopover.contains(e.target)) return;
+    if (e.target.closest("button, input, textarea, select, .modal-box, #float-translate-panel, #float-translate-bubble")) {
+      return;
+    }
+
+    const clickedWord = extractClickedEnglishWord(e);
+    if (clickedWord) {
+      lookupWordWithFreeApis(clickedWord, e.clientX, e.clientY);
+    } else {
+      hideWordLookupPopover();
+    }
+  });
+
+  if (wlpBtnClose) {
+    wlpBtnClose.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hideWordLookupPopover();
+    });
+  }
+
+  if (wlpBtnSpeak) {
+    wlpBtnSpeak.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (currentLookupData?.word) speakEnglish(currentLookupData.word, 1.0);
+    });
+  }
+
+  if (wlpBtnSpeakSlow) {
+    wlpBtnSpeakSlow.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (currentLookupData?.word) speakEnglish(currentLookupData.word, 0.75);
+    });
+  }
+
+  if (wlpBtnAddCard) {
+    wlpBtnAddCard.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!currentLookupData || !currentLookupData.word) return;
+
+      let cardsTarget = null;
+      if (state.activeAppMode === "subscriptions") {
+        const sub = state.appData.subscriptions?.[state.appData.activeSubId];
+        const art = sub?.articles?.[state.activeArticleDate];
+        if (!art) return showToast("請先進入文章研讀模式再加入單字卡", "error");
+        if (!art.flashcards) art.flashcards = [];
+        cardsTarget = art.flashcards;
+      } else {
+        const currentProj = state.appData.projects[state.appData.activeProjectId];
+        if (!currentProj) return showToast("請先選擇或建立一個學習計畫", "error");
+        if (state.activeDayIndex === null) state.activeDayIndex = currentProj.currentDayIndex || 0;
+        if (!currentProj.history[state.activeDayIndex]) {
+          currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+        }
+        if (!currentProj.history[state.activeDayIndex].flashcards) {
+          currentProj.history[state.activeDayIndex].flashcards = [];
+        }
+        cardsTarget = currentProj.history[state.activeDayIndex].flashcards;
+      }
+
+      // 避免重複加入相同單字
+      const exists = cardsTarget.some(c => c.word.toLowerCase() === currentLookupData.word.toLowerCase());
+      if (exists) {
+        showToast(`「${currentLookupData.word}」已經在今日單字卡庫中囉！`, "info");
+        return;
+      }
+
+      cardsTarget.push({
+        id: "card_" + Date.now(),
+        word: currentLookupData.word,
+        phonetic: currentLookupData.phonetic || "",
+        pos: currentLookupData.posRaw || "",
+        collocations: "",
+        meaning: currentLookupData.meaning || "",
+        example: currentLookupData.enDef || "",
+        example_zh: "",
+        status: 0
+      });
+
+      await saveProgressToDrive();
+      updateVocabBadgeCount();
+      renderFlashcardsList();
+      showToast(`已將「${currentLookupData.word}」加入單字卡庫！`, "success");
+    });
+  }
+
+  // 捲動講義或聊天室時自動隱藏懸浮字卡避免錯位
+  document.addEventListener("scroll", (e) => {
+    if (wordLookupPopover && !wordLookupPopover.classList.contains("hidden")) {
+      if (!wordLookupPopover.contains(e.target)) {
+        hideWordLookupPopover();
+      }
+    }
+  }, true);
 
   if (btnSpeedSlow) {
     btnSpeedSlow.addEventListener("click", () => {
@@ -2464,7 +2953,7 @@
 
     const savedChat = article.chatHistory || [];
     if (savedChat.length === 0) {
-      appendChatMessage("system", `已為您載入【${article.title}】。您可以隨時朗讀跟讀內文，或讓 AI 助教為您出題測試閱讀理解！`, true);
+      appendChatMessage("system", `已為您載入【${article.title}】。您可以點擊任何英文字詞查看詞性翻譯，或讓 AI 助教為您出題測試！`, true);
     } else {
       savedChat.forEach(msg => appendChatMessage(msg.type, msg.content, false));
     }
@@ -2587,7 +3076,6 @@
     dayHist.quizCompleted = true;
     dayHist.completed = true;
 
-    // 若當前進度恰好是這一天，自動推進解鎖下一天
     if (currentProj.currentDayIndex <= state.activeDayIndex) {
       currentProj.currentDayIndex = state.activeDayIndex + 1;
     }
@@ -2683,7 +3171,7 @@
 
     const savedChat = currentProj.history[dayIdx].chatHistory || [];
     if (savedChat.length === 0) {
-      appendChatMessage("system", `已載入【${title}】講義。點擊 🔊 即可跟讀句子，或透過麥克風與助教對話。`, true);
+      appendChatMessage("system", `已載入【${title}】講義。點擊 🔊 即可跟讀句子，或直接點擊任意英文字詞查看翻譯與詞性。`, true);
     } else {
       savedChat.forEach(msg => appendChatMessage(msg.type, msg.content, false));
     }
@@ -2717,7 +3205,6 @@
       typingDiv.remove();
       appendChatMessage("bot", res.text, true);
 
-      // 如果當前是在進行 10+1 測驗，學生答覆並取得批改後自動觸發通關與解鎖 (課程模式)
       if (state.activeAppMode === "courses" && state.isQuizInProgress && state.activeDayIndex !== null) {
         state.isQuizInProgress = false;
         if (btnTriggerQuiz) btnTriggerQuiz.disabled = false;
@@ -2737,7 +3224,6 @@
       title = art?.title || "今日專欄";
     } else {
       title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
-      // 標記情境口說達成
       if (state.activeDayIndex !== null) {
         const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
         if (hist) {
@@ -2759,7 +3245,6 @@
       title = art?.title || "今日專欄";
     } else {
       title = state.appData.projects[state.appData.activeProjectId]?.plan[state.activeDayIndex];
-      // 標記直覺造句訓練達成
       if (state.activeDayIndex !== null) {
         const hist = state.appData.projects[state.appData.activeProjectId]?.history?.[state.activeDayIndex];
         if (hist) {
@@ -2946,7 +3431,7 @@
     }
 
     if (cards.length === 0) {
-      flashcardsContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #777;">目前尚無單字卡，請點擊上方 AI 提煉。</div>`;
+      flashcardsContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 30px; color: #777;">目前尚無單字卡，請點擊上方 AI 提煉，或在講義中點選任何英文單字加入。</div>`;
       return;
     }
 
