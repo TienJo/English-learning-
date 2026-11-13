@@ -1881,14 +1881,26 @@
     const [transRes, dictRes] = await Promise.all([translatePromise, dictPromise]);
     if (reqId !== lookupRequestId) return; // 避免舊請求覆蓋新點擊
 
+    // 過濾翻譯記憶庫中夾帶的 XML 標籤 (如 <g id="...">...</g>、<x .../> 等) 與異常符號
+    const cleanTranslationText = (raw) => {
+      if (!raw) return "";
+      return raw
+        .replace(/<[^>]+>/g, "") // 移除所有 <g ...>、</g>、<x .../> 等標籤
+        .replace(/&[a-zA-Z0-9#]+;/g, " ") // 移除 HTML 實體編碼
+        .replace(/[\u2190-\u21FF\u25A0-\u25FF]/g, "") // 移除異常箭頭與幾何符號
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
     let zhMeaning = "";
     if (transRes && transRes.responseData && transRes.responseData.translatedText) {
-      zhMeaning = transRes.responseData.translatedText.trim();
-      // 若有更精準的 matches 翻譯也可補充
+      zhMeaning = cleanTranslationText(transRes.responseData.translatedText);
+      // 若有更精準的 matches 翻譯也可補充（排除含 XML 標籤的記憶庫片段）
       if (Array.isArray(transRes.matches)) {
         const extraMatches = transRes.matches
-          .filter(m => m.translation && m.translation.trim() !== zhMeaning && /[\u4e00-\u9fa5]/.test(m.translation))
-          .map(m => m.translation.trim());
+          .filter(m => m.translation && !/<[^>]+>/.test(m.translation))
+          .map(m => cleanTranslationText(m.translation))
+          .filter(t => t && t !== zhMeaning && /^[\u4e00-\u9fa5，、；（）\s]+$/.test(t) && t.length <= 12);
         const uniqueExtra = [...new Set(extraMatches)].slice(0, 2);
         if (uniqueExtra.length > 0 && zhMeaning.length < 15) {
           zhMeaning += `；${uniqueExtra.join("、")}`;
