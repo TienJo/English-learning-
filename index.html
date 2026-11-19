@@ -1994,6 +1994,11 @@
 
   document.addEventListener("mouseup", (e) => {
     if (wordLookupPopover && wordLookupPopover.contains(e.target)) return;
+    // 在字卡列表分頁或沉浸式刷卡視窗內點擊翻卡時，停用即時懸浮字典查詢
+    if (e.target.closest("#tab-pane-vocab, #modal-flashcard-player, .flip-card, .study-card-box")) {
+      hideWordLookupPopover();
+      return;
+    }
     if (e.target.closest("button, input, textarea, select, .modal-box, #float-translate-panel, #float-translate-bubble")) {
       return;
     }
