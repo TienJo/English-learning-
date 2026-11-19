@@ -1382,94 +1382,94 @@
         <button id="btn-confirm-cancel" class="btn-nude">取消</button>
         <button id="btn-confirm-ok" class="btn-brown">確認</button>
       </div>
-    </div>
-  </div>
+  // 將懸浮字卡轉為單字卡：立即存入並提示成功，例句與翻譯在後台背景非同步補全
+  if (wlpBtnAddCard) {
+    wlpBtnAddCard.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (!currentLookupData || !currentLookupData.word) return;
 
-  <!-- 翻譯懸浮球與展開面板 -->
-  <div id="float-translate-bubble" title="即時翻譯（可拖曳）">
-    <svg viewBox="0 0 24 24" style="width: 22px; height: 22px; fill: none; stroke: var(--c-brown); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-  </div>
+      let cardsTarget = null;
+      if (state.activeAppMode === "subscriptions") {
+        const sub = state.appData.subscriptions?.[state.appData.activeSubId];
+        const art = sub?.articles?.[state.activeArticleDate];
+        if (!art) return showToast("請先進入文章研讀模式再加入單字卡", "error");
+        if (!art.flashcards) art.flashcards = [];
+        cardsTarget = art.flashcards;
+      } else {
+        const currentProj = state.appData.projects[state.appData.activeProjectId];
+        if (!currentProj) return showToast("請先選擇或建立一個學習計畫", "error");
+        if (state.activeDayIndex === null) state.activeDayIndex = currentProj.currentDayIndex || 0;
+        if (!currentProj.history[state.activeDayIndex]) {
+          currentProj.history[state.activeDayIndex] = { lessonContent: "", completed: false, chatHistory: [], flashcards: [] };
+        }
+        if (!currentProj.history[state.activeDayIndex].flashcards) {
+          currentProj.history[state.activeDayIndex].flashcards = [];
+        }
+        cardsTarget = currentProj.history[state.activeDayIndex].flashcards;
+      }
 
-  <div id="float-translate-panel" class="hidden">
-    <div class="float-panel-header">
-      <h4 style="display: flex; align-items: center; gap: 6px;">
-        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: var(--c-brown); stroke-width: 2;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        即時翻譯
-      </h4>
-      <button id="btn-close-float-panel" class="btn-nude" style="padding: 2px 6px;">✕</button>
-    </div>
-    <div class="float-panel-body">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: var(--fs-sm); color: var(--c-brown);">輸入想查詢的中/英文：</span>
-        <button id="btn-float-paste" class="btn-outline" style="font-size: var(--fs-sm); padding: 2px 6px;">貼上選取</button>
-      </div>
-      <textarea id="float-input-text" rows="3" placeholder="例如：procrastinate..."></textarea>
+      const exists = cardsTarget.some(c => c.word.toLowerCase() === currentLookupData.word.toLowerCase());
+      if (exists) {
+        showToast(`「${currentLookupData.word}」已經在今日單字卡庫中囉！`, "info");
+        return;
+      }
 
-      <div style="display: flex; gap: 6px; flex-shrink: 0;">
-        <button id="btn-exec-translate" class="btn-brown" style="flex: 1; padding: 6px;">翻譯</button>
-        <button id="btn-speak-input-natural" class="btn-outline" style="padding: 6px 10px;">朗讀</button>
-      </div>
+      // 1. 立即建立單字卡並寫入（零等待）
+      const lookupSnapshot = { ...currentLookupData };
+      const newCard = {
+        id: "card_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        word: lookupSnapshot.word,
+        phonetic: lookupSnapshot.phonetic || "",
+        pos: lookupSnapshot.posRaw || "",
+        collocations: "",
+        meaning: lookupSnapshot.meaning || "",
+        example: lookupSnapshot.example || "",
+        example_zh: lookupSnapshot.example_zh || (lookupSnapshot.example ? "例句翻譯中..." : "例句生成中..."),
+        status: 0
+      };
 
-      <div id="float-result-box" class="hidden" style="background: var(--c-nude); border: 1px solid var(--c-line); border-radius: 12px; padding: 10px; margin-top: 4px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <span style="font-size: var(--fs-sm); font-weight: 600; color: var(--c-brown);">解析結果</span>
-          <div style="display: flex; gap: 4px; align-items: center;">
-            <button id="btn-add-float-to-vocab" class="btn-brown" style="font-size: var(--fs-sm); padding: 2px 8px;" title="將此翻譯加入今日單字庫">+ 加入單字卡</button>
-            <button id="btn-speak-result-natural" class="btn-nude" style="font-size: var(--fs-sm); padding: 2px 6px;">朗讀</button>
-          </div>
-        </div>
-        <div id="float-result-text" style="font-size: var(--fs-body); color: var(--c-black); line-height: 1.5; white-space: pre-wrap;"></div>
-      </div>
-    </div>
-  </div>
+      cardsTarget.push(newCard);
+      saveProgressToDrive();
+      updateVocabBadgeCount();
+      renderFlashcardsList();
+      showToast(`已將「${newCard.word}」加入單字卡庫！`, "success");
 
-  <div id="toast-container" class="toast-container"></div>
+      // 2. 後台背景非同步補齊例句與中文翻譯
+      (async () => {
+        try {
+          let finalExample = newCard.example;
+          let finalExampleZh = lookupSnapshot.example_zh || "";
 
-  <script type="module">
-  import { GoogleGenAI } from "https://esm.run/@google/genai";
+          if (finalExample && !finalExampleZh) {
+            const exTransRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(finalExample)}&langpair=en|zh-TW`)
+              .then(r => r.json())
+              .catch(() => null);
+            if (exTransRes?.responseData?.translatedText) {
+              finalExampleZh = cleanTranslationText(exTransRes.responseData.translatedText);
+            }
+          } else if (!finalExample && state.geminiKey) {
+            const ai = getGenAIClient();
+            const res = await ai.models.generateContent({
+              model: "gemini-3.1-flash-lite",
+              contents: `針對英文單字或片語「${newCard.word}」（中文意思：${newCard.meaning}），造一句自然道地的生活英文例句並附繁體中文翻譯。輸出純 JSON: {"example":"英文例句","example_zh":"繁體中文翻譯"}`,
+              config: { responseMimeType: "application/json" }
+            });
+            const exData = JSON.parse(res.text.trim());
+            finalExample = exData.example || "";
+            finalExampleZh = exData.example_zh || "";
+          }
 
-  const FLASH_MODEL = "gemini-3-flash-preview";
-  const DEFAULT_LECTURE_MODEL = FLASH_MODEL;
-  const DEFAULT_CHAT_MODEL = FLASH_MODEL;
-
-  const DEFAULT_CLIENT_ID = "865993916714-o0h883itsqd3lvgbatmkgqrqqhbrmuhf.apps.googleusercontent.com";
-  const DRIVE_FILE_NAME = "english_learning_master_projects.json";
-  const LOCAL_STORAGE_KEY = "english_learning_master_data";
-  const SCOPES = "https://www.googleapis.com/auth/drive.file";
-
-  const state = {
-    geminiKey: "",
-    accessToken: null,
-    driveFileId: null,
-    isLocalMode: false,
-    activeAppMode: "courses", // 'courses' | 'subscriptions'
-    activeSubId: null,
-    activeArticleDate: null,
-    appData: {
-      geminiKey: "",
-      activeProjectId: null,
-      activeSubId: null,
-      settings: {
-        lectureModel: DEFAULT_LECTURE_MODEL,
-        chatModel: DEFAULT_CHAT_MODEL,
-        detailLevel: 2
-      },
-      projects: {},
-      subscriptions: {}
-    },
-    activeDayIndex: null,
-    chatInstance: null,
-    currentStudyIndex: 0,
-    speechRate: 1.0,
-    isRecording: false,
-    recognition: null,
-    isQuizInProgress: false
-  };
-
-  function getGenAIClient() {
-    return new GoogleGenAI({
-      apiKey: state.geminiKey,
-      apiVersion: "v1beta"
+          newCard.example = finalExample;
+          newCard.example_zh = finalExampleZh;
+          await saveProgressToDrive();
+          if (tabPaneVocab && tabPaneVocab.classList.contains("active")) {
+            renderFlashcardsList();
+          }
+        } catch (err) {
+          newCard.example_zh = "";
+          await saveProgressToDrive();
+        }
+      })();
     });
   }
 
@@ -3939,7 +3939,7 @@
   }
 
   if (btnAddFloatToVocab) {
-    btnAddFloatToVocab.addEventListener("click", async () => {
+    btnAddFloatToVocab.addEventListener("click", () => {
       const queryText = floatInputText ? floatInputText.value.trim() : "";
       if (!queryText) {
         showToast("請先輸入欲加入單字卡的內容", "error");
@@ -3966,17 +3966,31 @@
         cardsTarget = currentProj.history[state.activeDayIndex].flashcards;
       }
 
-      const origText = btnAddFloatToVocab.textContent;
-      btnAddFloatToVocab.disabled = true;
-      btnAddFloatToVocab.textContent = "加入中...";
+      const initialMeaning = floatResultText ? floatResultText.textContent.trim().replace(/\s+/g, ' ').slice(0, 100) : "翻譯字詞";
+      const newCard = {
+        id: "card_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        word: queryText,
+        phonetic: "",
+        pos: "",
+        collocations: "",
+        meaning: initialMeaning,
+        example: "",
+        example_zh: /^[a-zA-Z\s'-]+$/.test(queryText) && state.geminiKey ? "例句生成中..." : "",
+        example2: "",
+        example2_zh: "",
+        status: 0
+      };
 
-      try {
-        let cardMeaning = floatResultText ? floatResultText.textContent.trim().replace(/\s+/g, ' ').slice(0, 100) : "翻譯字詞";
-        let cardWord = queryText;
-        let cardExample = "";
-        let cardExampleZh = "";
+      // 1. 立即加入並通知成功
+      cardsTarget.push(newCard);
+      saveProgressToDrive();
+      updateVocabBadgeCount();
+      renderFlashcardsList();
+      showToast(`已成功將「${queryText}」加入單字卡庫！`, "success");
 
-        if (/^[a-zA-Z\s'-]+$/.test(queryText)) {
+      // 2. 後台背景補全音標、詞性與生活例句
+      if (/^[a-zA-Z\s'-]+$/.test(queryText) && state.geminiKey) {
+        (async () => {
           try {
             const ai = getGenAIClient();
             const res = await ai.models.generateContent({
@@ -3985,35 +3999,21 @@
               config: { responseMimeType: "application/json" }
             });
             const data = JSON.parse(res.text.trim());
-            cardMeaning = data.meaning || cardMeaning;
-            cardExample = data.example || "";
-            cardExampleZh = data.example_zh || "";
-          } catch (err) {}
-        }
+            if (data.meaning) newCard.meaning = data.meaning;
+            newCard.example = data.example || "";
+            newCard.example_zh = data.example_zh || "";
+            if (data.pos) newCard.pos = data.pos;
+            if (data.phonetic) newCard.phonetic = data.phonetic;
 
-        cardsTarget.push({
-          id: "card_" + Date.now(),
-          word: cardWord,
-          phonetic: "",
-          pos: "",
-          collocations: "",
-          meaning: cardMeaning,
-          example: cardExample,
-          example_zh: cardExampleZh,
-          example2: "",
-          example2_zh: "",
-          status: 0
-        });
-
-        await saveProgressToDrive();
-        updateVocabBadgeCount();
-        renderFlashcardsList();
-        showToast(`已成功將「${cardWord}」加入單字卡庫！`, "success");
-      } catch (e) {
-        showToast("加入單字卡失敗：" + e.message, "error");
-      } finally {
-        btnAddFloatToVocab.disabled = false;
-        btnAddFloatToVocab.textContent = origText;
+            await saveProgressToDrive();
+            if (tabPaneVocab && tabPaneVocab.classList.contains("active")) {
+              renderFlashcardsList();
+            }
+          } catch (err) {
+            newCard.example_zh = "";
+            await saveProgressToDrive();
+          }
+        })();
       }
     });
   }
